@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+
+<html class="light" dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>نظام المبيعات - التقارير</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline-variant": "#c3c6d7",
+                      "error": "#ba1a1a",
+                      "on-tertiary-fixed": "#360f00",
+                      "on-primary-fixed": "#00174b",
+                      "surface-tint": "#0053db",
+                      "inverse-primary": "#b4c5ff",
+                      "on-surface": "#111c2d",
+                      "primary": "#004ac6",
+                      "surface-dim": "#cfdaf2",
+                      "surface-container-low": "#f0f3ff",
+                      "on-surface-variant": "#434655",
+                      "on-tertiary-fixed-variant": "#7d2d00",
+                      "secondary-fixed": "#d3e4fe",
+                      "on-error-container": "#93000a",
+                      "secondary-container": "#d0e1fb",
+                      "tertiary-container": "#bc4800",
+                      "surface": "#f9f9ff",
+                      "tertiary": "#943700",
+                      "on-primary": "#ffffff",
+                      "background": "#f9f9ff",
+                      "primary-container": "#2563eb",
+                      "on-error": "#ffffff",
+                      "on-secondary-container": "#54647a",
+                      "secondary-fixed-dim": "#b7c8e1",
+                      "secondary": "#505f76",
+                      "inverse-surface": "#263143",
+                      "on-tertiary": "#ffffff",
+                      "surface-container": "#e7eeff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-background": "#111c2d",
+                      "surface-container-highest": "#d8e3fb",
+                      "outline": "#737686",
+                      "surface-container-high": "#dee8ff",
+                      "on-primary-fixed-variant": "#003ea8",
+                      "on-primary-container": "#eeefff",
+                      "tertiary-fixed-dim": "#ffb596",
+                      "on-tertiary-container": "#ffede6",
+                      "primary-fixed": "#dbe1ff",
+                      "tertiary-fixed": "#ffdbcd",
+                      "surface-variant": "#d8e3fb",
+                      "on-secondary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "on-secondary-fixed-variant": "#38485d",
+                      "primary-fixed-dim": "#b4c5ff",
+                      "inverse-on-surface": "#ecf1ff",
+                      "surface-bright": "#f9f9ff",
+                      "on-secondary-fixed": "#0b1c30"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Manrope", "IBM Plex Sans Arabic"],
+                      "body": ["Inter", "IBM Plex Sans Arabic"],
+                      "label": ["Inter", "IBM Plex Sans Arabic"]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-header { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-30 flex flex-row-reverse justify-between items-center px-8 h-16 w-full pr-72 glass-header shadow-sm font-manrope text-right">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<img alt="المستخدم" class="w-8 h-8 rounded-full object-cover" data-alt="professional headshot of a corporate executive in a modern office setting with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2Wk8b7EGwOx2Gm10kG6KS0qFol2tF-8vFAOqP3XdtT3PYH32buZf5TE2ArptQLh8ZtaMtl9itCZz2Ucyf1K4TkYvVIkvlzFu2-LtUlhWEMdscBpAmA7hZhjcWFie7FvNXdDMmMkt34igzxCz2q8ZRej3a3TahPY5Ow5Aoo7Htv7H8f2rwkA9AAbB95fmVKD8EKGjaDo7Zq4Y1nI_2tepJ4C9fHQa2cYXH-G-eBMx-KAWbbnUDq8-6tepOTmCqntKY0qduihIM_wNg"/>
+</div>
+<div class="hidden md:flex gap-4">
+<a class="text-slate-600 hover:text-[#2563eb] transition-all" href="#">الدعم الفني</a>
+<a class="text-[#004ac6] font-bold" href="#">نظام التقارير</a>
+</div>
+</div>
+<div class="flex-1 max-w-md mx-8">
+<div class="relative flex items-center">
+<input class="w-full bg-surface-container-low border-none rounded-full py-2 px-10 text-sm focus:ring-2 focus:ring-primary/20 text-right" placeholder="البحث في التقارير..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 text-outline">search</span>
+</div>
+</div>
+<div class="text-xl font-black text-slate-900">نظام المبيعات</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed right-0 top-0 h-full w-64 z-40 bg-[#f0f3ff] flex flex-col rtl font-manrope text-right">
+<div class="p-6">
+<div class="text-2xl font-bold text-[#004ac6] mb-8">نظام المبيعات</div>
+<div class="space-y-2">
+<div class="flex flex-row-reverse items-center justify-start text-slate-600 px-4 py-3 hover:bg-[#004ac6]/5 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined ml-3" data-icon="dashboard">dashboard</span>
+<span class="text-sm">لوحة القيادة</span>
+</div>
+<!-- Active Tab: التقارير -->
+<div class="flex flex-row-reverse items-center justify-start bg-[#004ac6]/10 text-[#004ac6] border-r-4 border-[#004ac6] px-4 py-3 scale-[0.98]">
+<span class="material-symbols-outlined ml-3" data-icon="assessment" style="font-variation-settings: 'FILL' 1;">assessment</span>
+<span class="text-sm font-semibold">التقارير</span>
+</div>
+<div class="flex flex-row-reverse items-center justify-start text-slate-600 px-4 py-3 hover:bg-[#004ac6]/5 transition-colors cursor-pointer">
+<span class="material-symbols-outlined ml-3" data-icon="post_add">post_add</span>
+<span class="text-sm">إرسال تقرير</span>
+</div>
+<div class="flex flex-row-reverse items-center justify-start text-slate-600 px-4 py-3 hover:bg-[#004ac6]/5 transition-colors cursor-pointer">
+<span class="material-symbols-outlined ml-3" data-icon="ads_click">ads_click</span>
+<span class="text-sm">تحليل الإعلانات</span>
+</div>
+<div class="flex flex-row-reverse items-center justify-start text-slate-600 px-4 py-3 hover:bg-[#004ac6]/5 transition-colors cursor-pointer">
+<span class="material-symbols-outlined ml-3" data-icon="query_stats">query_stats</span>
+<span class="text-sm">مقاييس متقدمة</span>
+</div>
+<div class="flex flex-row-reverse items-center justify-start text-slate-600 px-4 py-3 hover:bg-[#004ac6]/5 transition-colors cursor-pointer mt-auto">
+<span class="material-symbols-outlined ml-3" data-icon="settings">settings</span>
+<span class="text-sm">الإعدادات</span>
+</div>
+</div>
+</div>
+<div class="mt-auto p-6 bg-surface-container/50">
+<div class="flex items-center gap-3 flex-row-reverse">
+<img alt="صورة الملف الشخصي للمدير التنفيذي" class="w-10 h-10 rounded-xl" data-alt="close-up of a smiling business executive in professional attire, high-end corporate portrait lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMzvW2gn5l0jjIyUxN0o4ozEXmQQdKDcW-3q-cpNdFtcbuiNq9NZ2aQrPEYi6OntnTYRQRseKTdhPoV7mPqqDTbx-FUrXHqcBvhoUyQudJR1_Uo4XY5eUYLIiFkoPhdRY2_mZY9A8RVEslFUA6cSxdwDx7oep5qvrkBGquoEgN-0hYbQ0FvpNdzYKb9fT3Vk2aKsgIVh9pdVeB8KtByjt8kBfP0fBVK_BPyrHwEibc3pKlbGeVoabA6QTCCEIjqhtoB9__44LlCLyg"/>
+<div class="text-right">
+<p class="text-sm font-bold text-on-surface">الإدارة العليا</p>
+<p class="text-xs text-on-surface-variant">مدير النظام</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pr-64 pt-16 min-h-screen bg-background">
+<div class="max-w-7xl mx-auto p-8">
+<!-- Page Header -->
+<div class="flex justify-between items-end mb-8">
+<div>
+<h1 class="text-3xl font-headline font-extrabold text-on-surface mb-2">تقارير المبيعات الشاملة</h1>
+<p class="text-on-surface-variant">مراجعة وتحليل كافة التقارير المقدمة عبر المنصات المختلفة</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-6 py-2.5 bg-surface-container-lowest text-on-surface border border-outline-variant/30 rounded-xl hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined text-lg">file_download</span>
+<span class="font-medium">تصدير CSV</span>
+</button>
+<button class="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-br from-[#004ac6] to-[#2563eb] text-white rounded-xl shadow-lg hover:opacity-90 transition-all">
+<span class="material-symbols-outlined text-lg">add_chart</span>
+<span class="font-medium">إنشاء تقرير مخصص</span>
+</button>
+</div>
+</div>
+<!-- Filters Area -->
+<div class="bg-surface-container-low rounded-2xl p-6 mb-8 flex flex-wrap gap-4 items-end">
+<div class="flex-1 min-w-[200px]">
+<label class="block text-xs font-bold text-on-surface-variant mb-2 mr-1 uppercase tracking-wider">نطاق التاريخ</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 pr-10 text-sm focus:ring-2 focus:ring-primary/20 appearance-none">
+<option>آخر 30 يوم</option>
+<option>الربع الحالي</option>
+<option>السنة الحالية</option>
+<option>مخصص</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-outline pointer-events-none">calendar_month</span>
+</div>
+</div>
+<div class="flex-1 min-w-[200px]">
+<label class="block text-xs font-bold text-on-surface-variant mb-2 mr-1 uppercase tracking-wider">مسؤول المبيعات</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 pr-10 text-sm focus:ring-2 focus:ring-primary/20 appearance-none">
+<option>الكل</option>
+<option>أحمد العتيبي</option>
+<option>سارة القحطاني</option>
+<option>محمد إدريس</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-outline pointer-events-none">person</span>
+</div>
+</div>
+<div class="flex-1 min-w-[200px]">
+<label class="block text-xs font-bold text-on-surface-variant mb-2 mr-1 uppercase tracking-wider">المنصة</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 pr-10 text-sm focus:ring-2 focus:ring-primary/20 appearance-none">
+<option>جميع المنصات</option>
+<option>LinkedIn</option>
+<option>Google Ads</option>
+<option>Facebook</option>
+<option>Direct Sales</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-outline pointer-events-none">hub</span>
+</div>
+</div>
+<button class="bg-primary-container/10 text-primary px-6 py-3 rounded-xl font-bold hover:bg-primary-container/20 transition-all">تطبيق الفلتر</button>
+</div>
+<!-- Reports Table Card -->
+<div class="bg-surface-container-lowest rounded-3xl overflow-hidden shadow-sm">
+<table class="w-full text-right border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-8 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">معرف التقرير</th>
+<th class="px-6 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">تاريخ التقديم</th>
+<th class="px-6 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">مسؤول المبيعات</th>
+<th class="px-6 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">المنصة</th>
+<th class="px-6 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">الحالة</th>
+<th class="px-6 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">القيمة المتوقعة</th>
+<th class="px-8 py-5 text-xs font-bold text-on-surface-variant uppercase tracking-widest">الإجراءات</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="px-8 py-5 font-headline font-bold text-primary">#REP-8832</td>
+<td class="px-6 py-5 text-on-surface-variant text-sm">24 أكتوبر 2023</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2 flex-row-reverse justify-start">
+<div class="w-7 h-7 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary-container">AA</div>
+<span class="text-sm font-medium">أحمد العتيبي</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 bg-surface-container text-xs font-bold rounded-lg text-slate-700">LinkedIn</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5 flex-row-reverse justify-start">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-bold text-emerald-700">مكتمل</span>
+</div>
+</td>
+<td class="px-6 py-5 font-headline font-bold">$12,400</td>
+<td class="px-8 py-5">
+<button class="text-primary hover:underline font-bold text-sm">التفاصيل</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="px-8 py-5 font-headline font-bold text-primary">#REP-8829</td>
+<td class="px-6 py-5 text-on-surface-variant text-sm">23 أكتوبر 2023</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2 flex-row-reverse justify-start">
+<div class="w-7 h-7 rounded-full bg-tertiary-fixed flex items-center justify-center text-[10px] font-bold text-on-tertiary-fixed">SQ</div>
+<span class="text-sm font-medium">سارة القحطاني</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 bg-surface-container text-xs font-bold rounded-lg text-slate-700">Google Ads</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5 flex-row-reverse justify-start">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+<span class="text-xs font-bold text-amber-700">قيد المراجعة</span>
+</div>
+</td>
+<td class="px-6 py-5 font-headline font-bold">$8,150</td>
+<td class="px-8 py-5">
+<button class="text-primary hover:underline font-bold text-sm">التفاصيل</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="px-8 py-5 font-headline font-bold text-primary">#REP-8815</td>
+<td class="px-6 py-5 text-on-surface-variant text-sm">21 أكتوبر 2023</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2 flex-row-reverse justify-start">
+<div class="w-7 h-7 rounded-full bg-primary-fixed flex items-center justify-center text-[10px] font-bold text-on-primary-fixed">MI</div>
+<span class="text-sm font-medium">محمد إدريس</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 bg-surface-container text-xs font-bold rounded-lg text-slate-700">Facebook</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5 flex-row-reverse justify-start">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-bold text-emerald-700">مكتمل</span>
+</div>
+</td>
+<td class="px-6 py-5 font-headline font-bold">$22,000</td>
+<td class="px-8 py-5">
+<button class="text-primary hover:underline font-bold text-sm">التفاصيل</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="px-8 py-5 font-headline font-bold text-primary">#REP-8799</td>
+<td class="px-6 py-5 text-on-surface-variant text-sm">19 أكتوبر 2023</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2 flex-row-reverse justify-start">
+<div class="w-7 h-7 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary-container">AA</div>
+<span class="text-sm font-medium">أحمد العتيبي</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 bg-surface-container text-xs font-bold rounded-lg text-slate-700">Direct Sales</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5 flex-row-reverse justify-start">
+<span class="w-2 h-2 rounded-full bg-red-500"></span>
+<span class="text-xs font-bold text-red-700">مرفوض</span>
+</div>
+</td>
+<td class="px-6 py-5 font-headline font-bold">$4,500</td>
+<td class="px-8 py-5">
+<button class="text-primary hover:underline font-bold text-sm">التفاصيل</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="px-8 py-5 font-headline font-bold text-primary">#REP-8790</td>
+<td class="px-6 py-5 text-on-surface-variant text-sm">18 أكتوبر 2023</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2 flex-row-reverse justify-start">
+<div class="w-7 h-7 rounded-full bg-tertiary-fixed flex items-center justify-center text-[10px] font-bold text-on-tertiary-fixed">SQ</div>
+<span class="text-sm font-medium">سارة القحطاني</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 bg-surface-container text-xs font-bold rounded-lg text-slate-700">LinkedIn</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-1.5 flex-row-reverse justify-start">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-bold text-emerald-700">مكتمل</span>
+</div>
+</td>
+<td class="px-6 py-5 font-headline font-bold">$31,200</td>
+<td class="px-8 py-5">
+<button class="text-primary hover:underline font-bold text-sm">التفاصيل</button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="p-6 bg-surface-container-low/20 flex justify-between items-center">
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-xl flex items-center justify-center bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined rotate-180">chevron_right</span>
+</button>
+<button class="w-10 h-10 rounded-xl flex items-center justify-center bg-primary text-white font-bold">1</button>
+<button class="w-10 h-10 rounded-xl flex items-center justify-center bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant hover:bg-primary hover:text-white transition-all">2</button>
+<button class="w-10 h-10 rounded-xl flex items-center justify-center bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant hover:bg-primary hover:text-white transition-all">3</button>
+<button class="w-10 h-10 rounded-xl flex items-center justify-center bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined rotate-180">chevron_left</span>
+</button>
+</div>
+<p class="text-sm text-on-surface-variant">عرض <span class="font-bold text-on-surface">5</span> من أصل <span class="font-bold text-on-surface">142</span> تقرير</p>
+</div>
+</div>
+<!-- Dashboard Stats Ticker (Editorial style) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+<div class="bg-primary-container p-8 rounded-3xl text-white relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-sm opacity-80 mb-1">إجمالي الإيرادات المتوقعة</p>
+<h3 class="text-3xl font-headline font-extrabold">$142,500</h3>
+<div class="mt-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm bg-white/20 p-1 rounded-full">trending_up</span>
+<span class="text-xs font-bold">+12.5% من الشهر الماضي</span>
+</div>
+</div>
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl opacity-10">payments</span>
+</div>
+<div class="bg-surface-container-low p-8 rounded-3xl border border-outline-variant/20 relative overflow-hidden">
+<p class="text-sm text-on-surface-variant mb-1">التقارير المكتملة</p>
+<h3 class="text-3xl font-headline font-extrabold text-on-surface">1,284</h3>
+<div class="mt-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm bg-emerald-100 text-emerald-600 p-1 rounded-full">done_all</span>
+<span class="text-xs font-bold text-emerald-600">88% معدل الإنجاز</span>
+</div>
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl text-on-surface opacity-[0.03]">verified</span>
+</div>
+<div class="bg-surface-container-low p-8 rounded-3xl border border-outline-variant/20 relative overflow-hidden">
+<p class="text-sm text-on-surface-variant mb-1">المتوسط الزمني للمراجعة</p>
+<h3 class="text-3xl font-headline font-extrabold text-on-surface">4.2 ساعة</h3>
+<div class="mt-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm bg-amber-100 text-amber-600 p-1 rounded-full">schedule</span>
+<span class="text-xs font-bold text-amber-600">أسرع بـ 15 دقيقة</span>
+</div>
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl text-on-surface opacity-[0.03]">speed</span>
+</div>
+</div>
+</div>
+</main>
+</body></html>

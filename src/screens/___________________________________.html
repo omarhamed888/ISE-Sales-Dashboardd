@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed": "#00174b",
+              "primary-fixed-dim": "#b4c5ff",
+              "on-tertiary-container": "#ffede6",
+              "tertiary-container": "#bc4800",
+              "surface-dim": "#cfdaf2",
+              "surface-container": "#e7eeff",
+              "on-error-container": "#93000a",
+              "surface-tint": "#0053db",
+              "primary-fixed": "#dbe1ff",
+              "inverse-primary": "#b4c5ff",
+              "primary": "#004ac6",
+              "outline": "#737686",
+              "secondary": "#505f76",
+              "on-tertiary-fixed-variant": "#7d2d00",
+              "tertiary": "#943700",
+              "inverse-on-surface": "#ecf1ff",
+              "tertiary-fixed": "#ffdbcd",
+              "on-primary-fixed-variant": "#003ea8",
+              "on-background": "#111c2d",
+              "on-tertiary-fixed": "#360f00",
+              "surface-container-highest": "#d8e3fb",
+              "on-secondary-fixed-variant": "#38485d",
+              "outline-variant": "#c3c6d7",
+              "surface-variant": "#d8e3fb",
+              "secondary-fixed-dim": "#b7c8e1",
+              "surface-bright": "#f9f9ff",
+              "on-secondary-container": "#54647a",
+              "background": "#f9f9ff",
+              "on-error": "#ffffff",
+              "secondary-fixed": "#d3e4fe",
+              "inverse-surface": "#263143",
+              "surface-container-low": "#f0f3ff",
+              "error-container": "#ffdad6",
+              "on-surface-variant": "#434655",
+              "secondary-container": "#d0e1fb",
+              "surface-container-high": "#dee8ff",
+              "surface": "#f9f9ff",
+              "on-secondary-fixed": "#0b1c30",
+              "on-primary-container": "#eeefff",
+              "on-primary": "#ffffff",
+              "error": "#ba1a1a",
+              "surface-container-lowest": "#ffffff",
+              "primary-container": "#2563eb",
+              "on-surface": "#111c2d",
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed-dim": "#ffb596",
+              "on-secondary": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Manrope", "sans-serif"],
+              "body": ["IBM Plex Sans Arabic", "sans-serif"],
+              "label": ["IBM Plex Sans Arabic", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'IBM Plex Sans Arabic', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .premium-gradient { background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- Sidebar Shell -->
+<aside class="flex flex-col h-full fixed right-0 w-64 border-l-0 rtl z-40 bg-slate-50 dark:bg-slate-950">
+<div class="px-6 py-8">
+<h1 class="text-lg font-black text-blue-700 dark:text-blue-400 font-headline">نظام المبيعات</h1>
+<p class="text-xs text-slate-500 font-label mt-1">الإدارة التنفيذية</p>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<a class="flex items-center px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:bg-slate-200/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined ml-3" data-icon="dashboard">dashboard</span>
+<span class="text-sm font-label">لوحة القيادة</span>
+</a>
+<a class="flex items-center px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:bg-slate-200/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined ml-3" data-icon="assessment">assessment</span>
+<span class="text-sm font-label">التقارير</span>
+</a>
+<!-- Active Navigation -->
+<a class="flex items-center px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-4 border-blue-600 rounded-l-lg scale-[0.99] transition-all" href="#">
+<span class="material-symbols-outlined ml-3" data-icon="insights" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span class="text-sm font-semibold font-label">تحليل الإعلانات</span>
+</a>
+<a class="flex items-center px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:bg-slate-200/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined ml-3" data-icon="analytics">analytics</span>
+<span class="text-sm font-label">مقاييس متقدمة</span>
+</a>
+<a class="flex items-center px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 hover:bg-slate-200/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined ml-3" data-icon="settings">settings</span>
+<span class="text-sm font-label">الإعدادات</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-100 dark:border-slate-800">
+<a class="flex items-center px-4 py-3 text-slate-600 dark:text-slate-400 hover:text-error transition-all" href="#">
+<span class="material-symbols-outlined ml-3" data-icon="logout">logout</span>
+<span class="text-sm font-label">تسجيل الخروج</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Shell -->
+<main class="mr-64 min-h-screen">
+<!-- Top App Bar -->
+<header class="flex flex-row-reverse justify-between items-center w-full px-8 py-4 z-50 sticky top-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm shadow-blue-900/5">
+<div class="flex items-center gap-4">
+<div class="relative">
+<input class="pr-10 pl-4 py-2 bg-surface-container-low border-none rounded-full text-sm w-64 focus:ring-2 focus:ring-primary/20 font-body" placeholder="بحث في الحملات..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-slate-400 text-sm" data-icon="search">search</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-2">
+<button class="p-2 hover:bg-slate-100/50 rounded-full transition-colors"><span class="material-symbols-outlined text-slate-600" data-icon="notifications">notifications</span></button>
+<button class="p-2 hover:bg-slate-100/50 rounded-full transition-colors"><span class="material-symbols-outlined text-slate-600" data-icon="mail">mail</span></button>
+<button class="p-2 hover:bg-slate-100/50 rounded-full transition-colors"><span class="material-symbols-outlined text-slate-600" data-icon="translate">translate</span></button>
+</div>
+<div class="h-8 w-8 rounded-full bg-primary-fixed overflow-hidden ring-2 ring-white">
+<img alt="User Profile" data-alt="professional male executive headshot in business attire with neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD294-g0ueT8W7QHoeOQxrizOMWI0G8hB1gcMMeSKpZLNfopZhsI8c3NFLjpxgibsDNSaghcIPie01VKF85ICJPSxnnNQYiW8uQyV1IXDP40jBTZ1d1QTAAz-i2Okeb43l_shSrPt-Fp3yicsuJvPLFQ9lNuPohlcFBH7RlrNa7J9P5l6I2835O3HtSwcKVNF2eSWZNA-NgGHOVuPgwokuECTKS15Ryb4ND8F-dutmZ9gSp9Rub6HOLJsrY_JlFw8_srSdJR8ZWSW1A"/>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="p-8 max-w-7xl mx-auto">
+<!-- Header Section -->
+<section class="mb-10 flex justify-between items-end">
+<div>
+<h2 class="text-3xl font-bold font-headline tracking-tight text-on-surface">تحليل أداء الحملات الإعلانية</h2>
+<p class="text-on-surface-variant mt-1 font-body">نظرة شاملة على جودة الإعلانات ومعدلات التحويل بناءً على سلوك العميل.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-6 py-2.5 rounded-full border border-outline-variant font-medium text-sm hover:bg-surface-container-low transition-all font-label">تصدير التقرير</button>
+<button class="px-6 py-2.5 rounded-full premium-gradient text-white font-medium text-sm shadow-lg shadow-primary/20 transition-all hover:opacity-90 font-label">حملة جديدة</button>
+</div>
+</section>
+<!-- Interactive Filters -->
+<section class="mb-8 p-4 bg-surface-container-low rounded-2xl flex gap-4 items-center overflow-x-auto no-scrollbar">
+<span class="text-sm font-semibold ml-2 font-label text-on-surface">تصفية حسب:</span>
+<button class="px-4 py-2 bg-surface-container-lowest rounded-full text-sm font-medium border border-primary/10 text-primary shadow-sm">آخر 30 يوم</button>
+<button class="px-4 py-2 bg-white/50 rounded-full text-sm font-medium text-on-surface-variant hover:bg-white transition-all">الفيسبوك</button>
+<button class="px-4 py-2 bg-white/50 rounded-full text-sm font-medium text-on-surface-variant hover:bg-white transition-all">سناب شات</button>
+<button class="px-4 py-2 bg-white/50 rounded-full text-sm font-medium text-on-surface-variant hover:bg-white transition-all">جوجل</button>
+<div class="h-6 w-px bg-outline-variant/30 mx-2"></div>
+<button class="px-4 py-2 bg-white/50 rounded-full text-sm font-medium text-on-surface-variant hover:bg-white transition-all">الأعلى مبيعاً</button>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-6">
+<!-- BEST PERFORMING ADS (🟢) -->
+<div class="col-span-12 lg:col-span-8">
+<div class="mb-4 flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+<h3 class="text-xl font-bold font-headline">أفضل الإعلانات أداءً</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Ad Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-3xl border border-transparent hover:shadow-xl hover:shadow-blue-900/5 transition-all">
+<div class="flex items-start justify-between mb-6">
+<div class="flex gap-4">
+<div class="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
+<img alt="Ad Thumbnail" data-alt="colorful marketing graphics and clean interface showing business growth charts and analytics" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeTsx6hZo-S4koBIkZqlNR8sLkCwfCM2i6QvOhLpi6yLVWnOjfCdcjSfDsIm0_o46KTj4fR5BhXlkY15e-nLPNXUK6FgU58tjrm6b9a1vDc5VouCUf-9gyysdhJCWnWnehcOBlVDWX0bGIf1MdR8HPE1SJXlaV6VWSWd0w6-hNR34RtYdsenL4ViO5vi2IhRyjKPTlUkywzeIM47qAODcnBM847pt-FhabkROfalI2ERBu6g2V4BSwD1_a_3Tl1omJkMWxzVjh-10L"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface font-headline">حملة الشتاء المميزة</h4>
+<p class="text-xs text-on-surface-variant font-label">رقم التعريف: AD-99283</p>
+</div>
+</div>
+<span class="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold font-label">ممتاز</span>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-body">العملاء المحتملون (Leads)</span>
+<span class="font-bold text-on-surface">1,450</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-body">معدل التحويل</span>
+<span class="font-bold text-on-surface">12.4%</span>
+</div>
+<div class="relative pt-1">
+<div class="overflow-hidden h-2 text-xs flex rounded bg-emerald-100">
+<div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-emerald-500" style="width:85%"></div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-4 pt-2 border-t border-slate-50">
+<div class="text-center">
+<p class="text-[10px] text-slate-400 font-label">الانسحاب</p>
+<p class="text-xs font-bold text-on-surface">4%</p>
+</div>
+<div class="text-center">
+<p class="text-[10px] text-slate-400 font-label">الارتباك</p>
+<p class="text-xs font-bold text-on-surface">1.2%</p>
+</div>
+<div class="text-center">
+<p class="text-[10px] text-slate-400 font-label">المبيعات</p>
+<p class="text-xs font-bold text-emerald-600">$45.2K</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Ad Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-3xl border border-transparent hover:shadow-xl hover:shadow-blue-900/5 transition-all">
+<div class="flex items-start justify-between mb-6">
+<div class="flex gap-4">
+<div class="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
+<img alt="Ad Thumbnail" data-alt="minimalist luxury product photo of a smartwatch with clean white aesthetic and soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXu-J61QQgXVen6Ka59Fsz8K2pWtzbYktrd2CWcO14vIEAF34AZLna1kW1BxU63c1Nur-YKxVRZ2k_5Bdayt2XB8BVLP0FIxg6_sIFVZEX_AVVCa03jal1wJoF-WLJG0k-mQW_syJsG9hZhUgF3tLOS2hmHUXKLccHtlQP-hXbyTep1UKfZI0I1oYbAUuNSYMAgqdEvLyo9LOwkPugKR3wwErESbBb0G77WJtIudknu6zoFyW6254IVSq7XjLOmvwcgeKidOUhl70-mA"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface font-headline">إطلاق الساعة الذكية</h4>
+<p class="text-xs text-on-surface-variant font-label">رقم التعريف: AD-77210</p>
+</div>
+</div>
+<span class="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold font-label">جيد جداً</span>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-body">العملاء المحتملون (Leads)</span>
+<span class="font-bold text-on-surface">890</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface-variant font-body">معدل التحويل</span>
+<span class="font-bold text-on-surface">8.1%</span>
+</div>
+<div class="relative pt-1">
+<div class="overflow-hidden h-2 text-xs flex rounded bg-emerald-100">
+<div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-emerald-500" style="width:65%"></div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-4 pt-2 border-t border-slate-50">
+<div class="text-center">
+<p class="text-[10px] text-slate-400 font-label">الانسحاب</p>
+<p class="text-xs font-bold text-on-surface">7%</p>
+</div>
+<div class="text-center">
+<p class="text-[10px] text-slate-400 font-label">الارتباك</p>
+<p class="text-xs font-bold text-on-surface">2.5%</p>
+</div>
+<div class="text-center">
+<p class="text-[10px] text-slate-400 font-label">المبيعات</p>
+<p class="text-xs font-bold text-emerald-600">$28.9K</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- MISLEADING ADS (⚠️) -->
+<div class="col-span-12 lg:col-span-4">
+<div class="mb-4 flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+<h3 class="text-xl font-bold font-headline">إعلانات مضللة (ارتباك عالٍ)</h3>
+</div>
+<div class="bg-amber-50/50 p-6 rounded-3xl border border-amber-100 flex flex-col h-[calc(100%-2.5rem)]">
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface font-headline">تحليل الارتباك</h4>
+<p class="text-xs text-amber-700/70 font-label">تحتاج لمراجعة فورية للمحتوى</p>
+</div>
+</div>
+<!-- Report Style Card -->
+<div class="bg-white p-5 rounded-2xl shadow-sm border-r-4 border-amber-500 mb-4">
+<div class="flex justify-between mb-3">
+<span class="font-bold text-sm font-headline">عرض الخصم الشامل</span>
+<span class="text-amber-600 font-bold text-xs">ارتباك 42%</span>
+</div>
+<p class="text-xs text-slate-500 mb-4 line-clamp-2">العملاء ينسحبون مباشرة بعد ظهور تفاصيل السعر، مما يوحي بعدم وضوح العرض في الإعلان.</p>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-slate-50 p-3 rounded-xl text-center">
+<p class="text-[10px] text-slate-400">الانسحاب بعد السعر</p>
+<p class="text-sm font-bold text-error">78%</p>
+</div>
+<div class="bg-slate-50 p-3 rounded-xl text-center">
+<p class="text-[10px] text-slate-400">التحويل الفعلي</p>
+<p class="text-sm font-bold text-on-surface">0.8%</p>
+</div>
+</div>
+</div>
+<div class="bg-white p-5 rounded-2xl shadow-sm border-r-4 border-amber-500">
+<div class="flex justify-between mb-3">
+<span class="font-bold text-sm font-headline">إعلان المجموعات السكنية</span>
+<span class="text-amber-600 font-bold text-xs">ارتباك 35%</span>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<span class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+<span class="block h-full bg-amber-500 w-[35%]"></span>
+</span>
+</div>
+<p class="text-[10px] text-slate-400 text-center">تطابق منخفض بين الإعلان وصفحة الهبوط</p>
+</div>
+</div>
+</div>
+<!-- WORST ADS (🔴) -->
+<div class="col-span-12 lg:col-span-8">
+<div class="mb-4 flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-error"></span>
+<h3 class="text-xl font-bold font-headline">الإعلانات الأقل أداءً</h3>
+</div>
+<div class="bg-surface-container-low rounded-[2rem] overflow-hidden">
+<table class="w-full text-right border-collapse">
+<thead>
+<tr class="bg-slate-100/50">
+<th class="px-8 py-5 text-on-surface-variant font-label text-sm font-semibold tracking-wider">الإعلان</th>
+<th class="px-8 py-5 text-on-surface-variant font-label text-sm font-semibold tracking-wider">Leads</th>
+<th class="px-8 py-5 text-on-surface-variant font-label text-sm font-semibold tracking-wider">معدل التحويل</th>
+<th class="px-8 py-5 text-on-surface-variant font-label text-sm font-semibold tracking-wider">الانسحاب</th>
+<th class="px-8 py-5 text-on-surface-variant font-label text-sm font-semibold tracking-wider">المبيعات</th>
+<th class="px-8 py-5 text-on-surface-variant font-label text-sm font-semibold tracking-wider text-left">الإجراء</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<!-- Row 1 -->
+<tr class="hover:bg-white/50 transition-colors">
+<td class="px-8 py-6">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-slate-200 overflow-hidden">
+<img alt="Product" data-alt="close-up of red running shoe" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRDS4wiopnv8NZiK5--JPyowXrLeDP6xRSFxJkDtfm6g7e1L_AGxicGwslm15Bjuo8n2S0ZhfdYa4eDvrTFmBPgba0FAYd4dYvUmH883pU4OQ11YpVZ2SIGcvmPwGCUa1F9V9r683n-7LocY1irlECVgR59FhSdJLFVf22Amtf1siS2DGpiMD45Ez84aQkWq86Gqn7GMa64ZB13Z9o8Ko0bVeo62CyzRupzPW0a4ZnuBo1eMBRfY7tTMn647axABFf8IzE682X5mK1"/>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm font-headline">حملة الأحذية الرياضية</p>
+<p class="text-[10px] text-slate-400">تيك توك • فيديو</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-6 text-sm">210</td>
+<td class="px-8 py-6 text-sm text-error font-bold">1.2%</td>
+<td class="px-8 py-6">
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-on-surface">62%</span>
+<span class="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+<span class="block h-full bg-error w-[62%]"></span>
+</span>
+</div>
+</td>
+<td class="px-8 py-6 text-sm font-bold">$1,200</td>
+<td class="px-8 py-6 text-left">
+<button class="text-primary hover:underline text-sm font-label">تحرير</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-white/50 transition-colors">
+<td class="px-8 py-6">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-slate-200 overflow-hidden">
+<img alt="Product" data-alt="clean smartphone product shot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANARJR3_f-a79OtKZBmvFKoUrWBf-VmuZsawug6TGbp7rtXi4t4i7WR0y28vFO76m5KFX-Oua8wRDM4iy9RdSrDhzeaDJY4btcyDyHeY80nkG1OwUH_BSBVjcYsrtZdiIsPE3rX35LCKAzXWFQi6dEkK1SLEZwGpdsuVMzjSV_zzR7d6Rmu2RMqjBK-Al6vCKyiG0SyC4ixkuD6XMWAnDMgw4_YD4N2TBCnv25Jsgjn5zhnrBWFFArXFWrkDderQ1bXFtQg7sEUBbL"/>
+</div>
+<div>
+<p class="font-bold text-on-surface text-sm font-headline">ملحقات الهواتف</p>
+<p class="text-[10px] text-slate-400">سناب شات • فلاتر</p>
+</div>
+</div>
+</td>
+<td class="px-8 py-6 text-sm">45</td>
+<td class="px-8 py-6 text-sm text-error font-bold">0.5%</td>
+<td class="px-8 py-6">
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-on-surface">89%</span>
+<span class="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+<span class="block h-full bg-error w-[89%]"></span>
+</span>
+</div>
+</td>
+<td class="px-8 py-6 text-sm font-bold">$340</td>
+<td class="px-8 py-6 text-left">
+<button class="text-primary hover:underline text-sm font-label">تحرير</button>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-4 bg-slate-50 text-center">
+<button class="text-xs font-bold text-on-surface-variant flex items-center justify-center gap-2 mx-auto hover:text-primary transition-colors">
+                                عرض 15 إعلان آخر
+                                <span class="material-symbols-outlined text-sm" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+<!-- AI OPTIMIZATION SUGGESTIONS (✨) -->
+<div class="col-span-12 lg:col-span-4">
+<div class="mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-600 text-xl" data-icon="auto_awesome">auto_awesome</span>
+<h3 class="text-xl font-bold font-headline">مقترحات تحسين الذكاء الاصطناعي</h3>
+</div>
+<div class="space-y-4">
+<!-- Suggestion 1: High Confusion -->
+<div class="bg-primary/5 border border-primary/10 p-5 rounded-3xl relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<div class="flex items-start gap-3">
+<div class="p-2 bg-primary/10 rounded-xl text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="pause_circle">pause_circle</span>
+</div>
+<div>
+<h4 class="text-sm font-bold font-headline mb-1">إيقاف إعلان "خصم الشامل"</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-3">سجل هذا الإعلان معدل ارتباك 42%. العملاء يتراجعون عند ظهور السعر. يوصى بمراجعة الرسالة التسويقية.</p>
+<div class="flex gap-2">
+<button class="px-4 py-1.5 bg-primary text-white text-[10px] font-bold rounded-full hover:opacity-90 transition-all">تنفيذ فوراً</button>
+<button class="px-4 py-1.5 border border-outline-variant text-[10px] font-bold rounded-full hover:bg-white transition-all">تجاهل</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Suggestion 2: Low CAC Scale -->
+<div class="bg-emerald-50/50 border border-emerald-100 p-5 rounded-3xl relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+<div class="flex items-start gap-3">
+<div class="p-2 bg-emerald-100 rounded-xl text-emerald-600">
+<span class="material-symbols-outlined text-xl" data-icon="trending_up">trending_up</span>
+</div>
+<div>
+<h4 class="text-sm font-bold font-headline mb-1">زيادة ميزانية "حملة الشتاء"</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-3">تمتلك هذه الحملة أقل تكلفة استحواذ (CAC) حالياً. زيادة الميزانية بنسبة 25% قد تضاعف المبيعات.</p>
+<div class="flex gap-2">
+<button class="px-4 py-1.5 bg-emerald-600 text-white text-[10px] font-bold rounded-full hover:opacity-90 transition-all">توسيع النطاق</button>
+<button class="px-4 py-1.5 border border-emerald-200 text-[10px] font-bold rounded-full hover:bg-white transition-all">التفاصيل</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Suggestion 3: Audience Refresh -->
+<div class="bg-slate-50 border border-slate-200 p-5 rounded-3xl relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-slate-400"></div>
+<div class="flex items-start gap-3">
+<div class="p-2 bg-slate-200 rounded-xl text-slate-600">
+<span class="material-symbols-outlined text-xl" data-icon="refresh">refresh</span>
+</div>
+<div>
+<h4 class="text-sm font-bold font-headline mb-1">تحديث جمهور "الساعة الذكية"</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-3">معدل التفاعل بدأ بالانخفاض. الذكاء الاصطناعي يقترح استهداف الفئة العمرية 25-34 بدلاً من 18-24.</p>
+<div class="flex gap-2">
+<button class="px-4 py-1.5 bg-slate-800 text-white text-[10px] font-bold rounded-full hover:opacity-90 transition-all">تغيير الجمهور</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB for quick action -->
+<button class="fixed bottom-8 left-8 w-14 h-14 premium-gradient text-white rounded-full flex items-center justify-center shadow-2xl shadow-primary/40 hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined" data-icon="add" style="font-variation-settings: 'opsz' 32;">add</span>
+</button>
+</body></html>

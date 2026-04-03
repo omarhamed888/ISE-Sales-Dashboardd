@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+
+<html class="light" dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>نظام المبيعات - الإدارة العليا</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#c3c6d7",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-primary-fixed": "#00174b",
+                        "surface-tint": "#0053db",
+                        "inverse-primary": "#b4c5ff",
+                        "on-surface": "#111c2d",
+                        "primary": "#004ac6",
+                        "surface-dim": "#cfdaf2",
+                        "surface-container-low": "#f0f3ff",
+                        "on-surface-variant": "#434655",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#d0e1fb",
+                        "tertiary-container": "#bc4800",
+                        "surface": "#f9f9ff",
+                        "tertiary": "#943700",
+                        "on-primary": "#ffffff",
+                        "background": "#f9f9ff",
+                        "primary-container": "#2563eb",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#54647a",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "secondary": "#505f76",
+                        "inverse-surface": "#263143",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#e7eeff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#111c2d",
+                        "surface-container-highest": "#d8e3fb",
+                        "outline": "#737686",
+                        "surface-container-high": "#dee8ff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-primary-container": "#eeefff",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-tertiary-container": "#ffede6",
+                        "primary-fixed": "#dbe1ff",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-variant": "#d8e3fb",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "inverse-on-surface": "#ecf1ff",
+                        "surface-bright": "#f9f9ff",
+                        "on-secondary-fixed": "#0b1c30"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope", "IBM Plex Sans Arabic"],
+                        "body": ["Inter", "IBM Plex Sans Arabic"],
+                        "label": ["Inter", "IBM Plex Sans Arabic"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-nav { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); }
+        .sidebar-active { box-shadow: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- SideNavBar (Authority: JSON & Design System) -->
+<aside class="fixed right-0 top-0 h-full w-64 z-40 bg-[#f0f3ff] dark:bg-slate-900 font-manrope text-right flex flex-col h-full rtl">
+<div class="p-8">
+<div class="flex items-center gap-3 mb-10">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-white">
+<span class="material-symbols-outlined">trending_up</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold text-[#004ac6] dark:text-[#2563eb]">نظام المبيعات</h1>
+<p class="text-xs text-on-surface-variant">الإدارة العليا</p>
+</div>
+</div>
+<nav class="space-y-2">
+<!-- Dashboard Active -->
+<a class="flex flex-row-reverse items-center justify-start bg-[#004ac6]/10 text-[#004ac6] dark:text-[#2563eb] border-r-4 border-[#004ac6] px-4 py-3 scale-98 hover:bg-[#004ac6]/5 transition-colors" href="#">
+<span class="material-symbols-outlined ml-3" data-icon="dashboard">dashboard</span>
+<span class="font-medium">لوحة القيادة</span>
+</a>
+<a class="flex flex-row-reverse items-center justify-start text-slate-600 dark:text-slate-400 px-4 py-3 hover:bg-[#004ac6]/5 transition-colors" href="#">
+<span class="material-symbols-outlined ml-3" data-icon="assessment">assessment</span>
+<span class="font-medium">التقارير</span>
+</a>
+<a class="flex flex-row-reverse items-center justify-start text-slate-600 dark:text-slate-400 px-4 py-3 hover:bg-[#004ac6]/5 transition-colors" href="#">
+<span class="material-symbols-outlined ml-3" data-icon="post_add">post_add</span>
+<span class="font-medium">إرسال تقرير</span>
+</a>
+<a class="flex flex-row-reverse items-center justify-start text-slate-600 dark:text-slate-400 px-4 py-3 hover:bg-[#004ac6]/5 transition-colors" href="#">
+<span class="material-symbols-outlined ml-3" data-icon="ads_click">ads_click</span>
+<span class="font-medium">تحليل الإعلانات</span>
+</a>
+<a class="flex flex-row-reverse items-center justify-start text-slate-600 dark:text-slate-400 px-4 py-3 hover:bg-[#004ac6]/5 transition-colors" href="#">
+<span class="material-symbols-outlined ml-3" data-icon="query_stats">query_stats</span>
+<span class="font-medium">مقاييس متقدمة</span>
+</a>
+<a class="flex flex-row-reverse items-center justify-start text-slate-600 dark:text-slate-400 px-4 py-3 hover:bg-[#004ac6]/5 transition-colors mt-auto" href="#">
+<span class="material-symbols-outlined ml-3" data-icon="settings">settings</span>
+<span class="font-medium">الإعدادات</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-8 border-t border-outline-variant/10">
+<div class="flex items-center gap-3">
+<img alt="صورة الملف الشخصي للمدير التنفيذي" class="w-10 h-10 rounded-full object-cover" data-alt="صورة الملف الشخصي للمدير التنفيذي مرتديا بدلة رسمية بخلفية مكتب حديثة" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDE7Wx6i-VK5Yrv520MvItajH6NKXQ_T0u3VASWbFJvsUR04N8CtLDyqwGu1v8UXTWk9lDmWc7c4rbGkxqGXAqj_OWpjwjTkZACUEbqgQb8xPdgIlrW91P_Ybiw3E1xFt-2e19eb8FrvuwHY7o1rONsSH_3Xd1efa2NRXYu8ChDCHsZ9j6wIZNvqg_DJXcD8RWrGjoaXBbpZfquiiiaT3b6-9b_b3L0hYbTcxCNXWgzICaXEvHQmKjRli9WjbmeAxBkBPrlYwBvNGiV"/>
+<div class="text-right">
+<p class="text-sm font-bold text-on-surface">أحمد الساير</p>
+<p class="text-[10px] text-on-surface-variant">المدير التنفيذي</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="mr-64 min-h-screen pb-12">
+<!-- TopNavBar (Authority: JSON) -->
+<header class="fixed top-0 w-full z-30 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl flex flex-row-reverse justify-between items-center px-8 h-16 w-full pr-72 shadow-sm dark:shadow-none">
+<div class="flex items-center gap-6">
+<div class="flex items-center bg-surface-container-low px-4 py-1.5 rounded-full border border-outline-variant/20">
+<span class="material-symbols-outlined text-outline ml-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-64 text-right" placeholder="البحث في التقارير..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-outline hover:text-primary transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant/30"></div>
+<h2 class="text-xl font-black text-slate-900 dark:text-white font-headline">نظام التقارير</h2>
+</div>
+</header>
+<!-- Dashboard Canvas -->
+<div class="pt-24 px-8 max-w-7xl mx-auto">
+<!-- Page Header Header -->
+<div class="mb-10 flex justify-between items-end">
+<div>
+<h2 class="text-3xl font-headline font-extrabold text-on-surface tracking-tight">نظرة عامة على الأداء</h2>
+<p class="text-on-surface-variant mt-1 text-lg">آخر تحديث: اليوم، 10:45 صباحاً</p>
+</div>
+<div class="flex gap-3">
+<button class="bg-surface-container-highest px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                        آخر 30 يوم
+                    </button>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined">download</span>
+                        تصدير التقرير
+                    </button>
+</div>
+</div>
+<!-- KPI Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<!-- Total Messages -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border-none shadow-sm flex flex-col justify-between h-40">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">chat</span>
+</div>
+<span class="text-emerald-600 text-sm font-bold bg-emerald-50 px-2 py-1 rounded-lg">+12.5%</span>
+</div>
+<div>
+<p class="text-on-surface-variant text-sm font-medium">إجمالي الرسائل</p>
+<h3 class="text-3xl font-headline font-extrabold text-on-surface">48,294</h3>
+</div>
+</div>
+<!-- Conversion Rate -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border-none shadow-sm flex flex-col justify-between h-40">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 rounded-xl bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">conversion_path</span>
+</div>
+<span class="text-emerald-600 text-sm font-bold bg-emerald-50 px-2 py-1 rounded-lg">+2.1%</span>
+</div>
+<div>
+<p class="text-on-surface-variant text-sm font-medium">معدل التحويل</p>
+<h3 class="text-3xl font-headline font-extrabold text-on-surface">18.4%</h3>
+</div>
+</div>
+<!-- Best Platform -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border-none shadow-sm flex flex-col justify-between h-40">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">ads_click</span>
+</div>
+<div class="flex -space-x-2 rtl:space-x-reverse">
+<div class="w-6 h-6 rounded-full bg-blue-600 ring-2 ring-white"></div>
+</div>
+</div>
+<div>
+<p class="text-on-surface-variant text-sm font-medium">أفضل منصة أداءً</p>
+<h3 class="text-2xl font-headline font-extrabold text-on-surface">Snapchat Ads</h3>
+</div>
+</div>
+<!-- Drop After Price -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border-none shadow-sm flex flex-col justify-between h-40">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 rounded-xl bg-error/10 flex items-center justify-center text-error">
+<span class="material-symbols-outlined">trending_down</span>
+</div>
+<span class="text-error text-sm font-bold bg-error/5 px-2 py-1 rounded-lg">-4.2%</span>
+</div>
+<div>
+<p class="text-on-surface-variant text-sm font-medium">التسرب بعد السعر</p>
+<h3 class="text-3xl font-headline font-extrabold text-on-surface">32.8%</h3>
+</div>
+</div>
+</div>
+<!-- Analytics Row 1 -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+<!-- Daily Trend Line Chart (Simplified Visual Representation) -->
+<div class="lg:col-span-2 bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+<div class="flex justify-between items-center mb-8">
+<h4 class="text-xl font-bold font-headline">اتجاه المبيعات اليومي</h4>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-xs text-on-surface-variant">البيانات الحالية</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-outline-variant"></span>
+<span class="text-xs text-on-surface-variant">الأسبوع الماضي</span>
+</div>
+</div>
+</div>
+<div class="h-64 flex items-end justify-between gap-2 relative">
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
+<div class="border-t border-outline"></div>
+<div class="border-t border-outline"></div>
+<div class="border-t border-outline"></div>
+<div class="border-t border-outline"></div>
+</div>
+<!-- Mock Bars/Points -->
+<div class="w-full bg-primary/20 h-32 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full bg-primary h-24 rounded-t-lg group-hover:h-28 transition-all"></div>
+</div>
+<div class="w-full bg-primary/20 h-40 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full bg-primary h-32 rounded-t-lg group-hover:h-36 transition-all"></div>
+</div>
+<div class="w-full bg-primary/20 h-48 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full bg-primary h-44 rounded-t-lg group-hover:h-46 transition-all"></div>
+</div>
+<div class="w-full bg-primary/20 h-24 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full bg-primary h-16 rounded-t-lg group-hover:h-20 transition-all"></div>
+</div>
+<div class="w-full bg-primary/20 h-56 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full bg-primary h-52 rounded-t-lg group-hover:h-54 transition-all"></div>
+</div>
+<div class="w-full bg-primary/20 h-64 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full bg-primary h-60 rounded-t-lg group-hover:h-62 transition-all"></div>
+</div>
+<div class="w-full bg-primary/20 h-36 rounded-t-lg relative group">
+<div class="absolute bottom-0 w-full bg-primary h-28 rounded-t-lg group-hover:h-32 transition-all"></div>
+</div>
+</div>
+<div class="flex justify-between mt-4 text-xs text-on-surface-variant font-medium">
+<span>الأحد</span><span>الاثنين</span><span>الثلاثاء</span><span>الأربعاء</span><span>الخميس</span><span>الجمعة</span><span>السبت</span>
+</div>
+</div>
+<!-- Platform Donut -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm flex flex-col">
+<h4 class="text-xl font-bold font-headline mb-6">توزيع المنصات</h4>
+<div class="relative flex justify-center items-center py-6">
+<div class="w-48 h-48 rounded-full border-[16px] border-primary/20 flex items-center justify-center">
+<div class="text-center">
+<span class="text-3xl font-black block">100%</span>
+<span class="text-[10px] text-on-surface-variant">إجمالي الوصول</span>
+</div>
+</div>
+<!-- Mock segments using rotations if we could, but let's keep it simple with text/legend -->
+</div>
+<div class="space-y-4 mt-auto">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-sm">Snapchat</span>
+</div>
+<span class="font-bold">45%</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-blue-400"></span>
+<span class="text-sm">Facebook</span>
+</div>
+<span class="font-bold">25%</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-pink-500"></span>
+<span class="text-sm">Instagram</span>
+</div>
+<span class="font-bold">20%</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-slate-400"></span>
+<span class="text-sm">أخرى</span>
+</div>
+<span class="font-bold">10%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sales Team & Funnel Row -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+<!-- Sales Team Performance -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<div class="p-8 pb-4">
+<h4 class="text-xl font-bold font-headline">أداء فريق المبيعات</h4>
+</div>
+<div class="px-8 pb-8 space-y-6">
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl">
+<div class="flex items-center gap-4">
+<img alt="عضو فريق مبيعات" class="w-12 h-12 rounded-full object-cover" data-alt="رجل مبتسم في ملابس عمل مهنية خلفية بيضاء" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0MpNCb0D9TAdV_bJntmXtUQv-34-94Qpn9JT8M8NvopYgyTRobon5oK01Xi_Hqio_TldGiXqQd-DWKbiE5pBjE_xJGTCl3DRk5PPwb8sQ7QlI8SurKscMYhUqJZnzTYLv9YpmdKigORTlDOuqJQXkzDEp3lQiSoY7uhsKdmJyXm11Vummuv7vgfzDd4HtCZRxKDVIUZWxMu6ra-K-7vyXN_x14eSr7QDMz1_PfMPDnsKeQ98Gquo10rtEKPTUQ6DB3mVAEW_vcBPn"/>
+<div>
+<p class="font-bold">خالد بن محمد</p>
+<p class="text-xs text-on-surface-variant">24 صفقة ناجحة</p>
+</div>
+</div>
+<div class="text-left">
+<p class="text-primary font-black">94,200 ر.س</p>
+<div class="w-32 h-1.5 bg-outline-variant/30 rounded-full mt-1">
+<div class="bg-primary h-full rounded-full w-[90%]"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl">
+<div class="flex items-center gap-4">
+<img alt="عضو فريق مبيعات" class="w-12 h-12 rounded-full object-cover" data-alt="امرأة شابة واثقة بملابس رسمية زرقاء" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_vpF0AysI_lBoP4z5rA7YToJDb1rkDqU6sEAtt1qt6y1A9voNkLBmiYWpBNUjtSS-hRJ-CpXNGXJFjkr7EgVpBOMip_zA4fO2lqG-ZjPCJZnOiy1nFIYDscNKNsnE9Xd2KpyMYT5X0A_VolVsBbwrJRbVJAz3i8OodGs-k4AmPdh2hvSdFNdbIl1vAuOe-PTt78GTt82OtcyZ4XFX3TXgU9a29TY-cLVqdPXBALDh-xUWvCRq3w9i26Sd9xC8m8MwATFZZYl0PWyD"/>
+<div>
+<p class="font-bold">سارة عبدالله</p>
+<p class="text-xs text-on-surface-variant">19 صفقة ناجحة</p>
+</div>
+</div>
+<div class="text-left">
+<p class="text-primary font-black">72,500 ر.س</p>
+<div class="w-32 h-1.5 bg-outline-variant/30 rounded-full mt-1">
+<div class="bg-primary h-full rounded-full w-[70%]"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl">
+<div class="flex items-center gap-4">
+<img alt="عضو فريق مبيعات" class="w-12 h-12 rounded-full object-cover" data-alt="رجل أعمال شاب يرتدي نظارات وخلفية مكتب حديثة" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfD_Txa4GHpcmopTy_1AlB97Fyc-OuaQZ4e9-RCbzqtT1ryzeQ6tOwWXyY0q_A68i5cbsoWhm0iABumm93j7MvXWKhwDL52l4dWA1ZQiKlW7yR1ZJrDdcBDcTCT6lR2hwVOTsF5Mhxn-LEerhG_6CpNCAQD8RadCjsFkwysmrgp30c2-G4iSyFL3CQsMJJM-rYbZJZDGa0_Fc0vOYHS97HVFSVSu0UN8YCofUp4k1c8AL-IvRlhmfOjYtj74AcQgSuktpXBvZ_SiKE"/>
+<div>
+<p class="font-bold">فيصل العمري</p>
+<p class="text-xs text-on-surface-variant">15 صفقة ناجحة</p>
+</div>
+</div>
+<div class="text-left">
+<p class="text-primary font-black">58,000 ر.س</p>
+<div class="w-32 h-1.5 bg-outline-variant/30 rounded-full mt-1">
+<div class="bg-primary h-full rounded-full w-[55%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Funnel Chart (Editorial Layout) -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+<h4 class="text-xl font-bold font-headline mb-8">قمع المبيعات (Sales Funnel)</h4>
+<div class="space-y-4">
+<div class="relative">
+<div class="bg-primary-container h-12 w-full rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                                الانطباعات: 1,200,000
+                            </div>
+</div>
+<div class="relative flex justify-center">
+<div class="bg-primary h-12 w-4/5 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                                النقرات: 85,000 (7.1%)
+                            </div>
+</div>
+<div class="relative flex justify-center">
+<div class="bg-on-primary-fixed-variant h-12 w-3/5 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                                الرسائل: 48,294 (56%)
+                            </div>
+</div>
+<div class="relative flex justify-center">
+<div class="bg-tertiary h-12 w-2/5 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                                المبيعات: 8,886 (18.4%)
+                            </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Sections: Ads Performance -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Top & Worst Ads -->
+<div class="space-y-8">
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-emerald-600">stars</span>
+<h4 class="text-xl font-bold font-headline">أفضل الإعلانات أداءً</h4>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden">
+<img alt="إعلان" class="w-full h-full object-cover" data-alt="تصميم داخلي فخم لغرفة معيشة بأسلوب حديث وإضاءة دافئة" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB88F79FS44gCS4wJ_9D6yT7nlKbdkjFtbKsjjsiNYVWlbMwY0XKlOWv1-PXE2XO_ulfHeqfdsfXW-RYM_xQUVt1yjuxFXCFh-wjahh7luNGO2HMpfUNwOK_cJBDDgBF72ElQref_CZrhC3juqwNtvDWgAFz1x8wlAGJGfyj5uRIQycSh9z8hzmT74WXGtonpVhe3abHg8nLOlpEe7NJmM03LMAr_WlA9SGXPIUroI9tnLHePfkKgJAs3zcg-52w2gOMxtcK5AyNeYe"/>
+</div>
+<div class="flex-1">
+<p class="font-bold text-sm">حملة العروض الشتوية - فيديو</p>
+<p class="text-xs text-on-surface-variant">Snapchat • عائد 4.5x</p>
+</div>
+<div class="text-left">
+<p class="text-emerald-600 font-bold text-sm">2,450 رسالة</p>
+</div>
+</div>
+<div class="h-[1px] bg-outline-variant/20"></div>
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden">
+<img alt="إعلان" class="w-full h-full object-cover" data-alt="حذاء رياضي أحمر بتصميم عصري على خلفية ملونة لافتة" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF3_-ol8XD28ljBHPAiTKVK95qjqQ1OwtfsDdA6d4HEoPAGR46ncI8fEMyL8apNYX5c9pA2_1Jo_rYCReVgLlMHXZ2r86PxQJxmIsB4vW49o24BupXWH62ct_sEk4aV1gRxeZwbOL9WDwrrHU56yEUWnsyed4-1Nt05V2OqAMmdxf-BmiMo_U-sZrs7ccagLG6A803dRIQdeI6n2-Tvcqqvy3JIo-sMFLlaJHDTyznkkt3hKkcF01lrZovZfZiHJq3w9oOMApKUxq_"/>
+</div>
+<div class="flex-1">
+<p class="font-bold text-sm">المنتج الجديد - صورة ثابتة</p>
+<p class="text-xs text-on-surface-variant">Instagram • عائد 3.2x</p>
+</div>
+<div class="text-left">
+<p class="text-emerald-600 font-bold text-sm">1,820 رسالة</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-error/5">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-error">trending_down</span>
+<h4 class="text-xl font-bold font-headline">إعلانات بحاجة لتحسين</h4>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-4 opacity-75">
+<div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden grayscale">
+<img alt="إعلان ضعيف" class="w-full h-full object-cover" data-alt="منتج رياضي بأسلوب مينيماليست وإضاءة باردة" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFBQSYAv2uNZpKuk0-RQE9kq9XHC3K2V8KWdmfH7s4g_NS0YEoVMlA1IY9B35kEGXymZ02Lj2eqLnenWTOTNIm-2QuCFbTPEKiXnHfPJ3uDgYq79SlCKSoxM6iRI37wQ6U0Li3xcgGG72vPLr5j3YfKJnM4Y7WRtMgslxPxGS_l59HF7TYwim6Zz4BPVS3Msy4KZgYX9PtAxjBK9sYjAdR645sToZLaJJgMozQz7FiRm0iDl8Xo7LNWl-89KnuNDFtP47XSibOZfKZ"/>
+</div>
+<div class="flex-1">
+<p class="font-bold text-sm">إعلان إعادة الاستهداف 04</p>
+<p class="text-xs text-on-surface-variant">Facebook • تكلفة مرتفعة</p>
+</div>
+<div class="text-left">
+<p class="text-error font-bold text-sm">0.8% CTR</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Reports & Stacked Bar -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+<div class="flex justify-between items-center mb-8">
+<h4 class="text-xl font-bold font-headline">تحليل نقاط التسرب (Drop-off)</h4>
+<span class="text-xs font-bold text-on-surface-variant">آخر 7 أيام</span>
+</div>
+<div class="space-y-8">
+<div>
+<div class="flex justify-between text-xs mb-2 font-bold">
+<span>بعد السؤال عن السعر</span>
+<span class="text-error">32%</span>
+</div>
+<div class="h-3 bg-surface-container rounded-full overflow-hidden flex">
+<div class="h-full bg-error w-[32%]"></div>
+<div class="h-full bg-outline-variant/30 w-[68%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-2 font-bold">
+<span>بعد السؤال عن التوصيل</span>
+<span class="text-tertiary">14%</span>
+</div>
+<div class="h-3 bg-surface-container rounded-full overflow-hidden flex">
+<div class="h-full bg-tertiary w-[14%]"></div>
+<div class="h-full bg-outline-variant/30 w-[86%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-2 font-bold">
+<span>عند طلب البيانات</span>
+<span class="text-primary">8%</span>
+</div>
+<div class="h-3 bg-surface-container rounded-full overflow-hidden flex">
+<div class="h-full bg-primary w-[8%]"></div>
+<div class="h-full bg-outline-variant/30 w-[92%]"></div>
+</div>
+</div>
+</div>
+<div class="mt-12">
+<h5 class="text-sm font-bold text-on-surface-variant mb-4">أحدث التقارير الواردة</h5>
+<div class="space-y-3">
+<div class="p-4 rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all cursor-pointer">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">description</span>
+<span class="text-sm font-bold">تقرير أداء الأسبوع الرابع - أكتوبر</span>
+</div>
+<span class="text-[10px] bg-surface-container-high px-2 py-1 rounded-lg">منذ ساعتين</span>
+</div>
+</div>
+<div class="p-4 rounded-xl border border-outline-variant/10 hover:border-primary/20 transition-all cursor-pointer">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">description</span>
+<span class="text-sm font-bold">مقارنة الربع الثالث لعام 2023</span>
+</div>
+<span class="text-[10px] bg-surface-container-high px-2 py-1 rounded-lg">منذ يوم</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB for Quick Actions (Suppressed according to rules if not Dashboard) -->
+<button class="fixed bottom-8 left-8 w-16 h-16 bg-gradient-to-br from-[#004ac6] to-[#2563eb] text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-105 transition-transform z-50">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</body></html>

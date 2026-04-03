@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed": "#00174b",
+              "primary-fixed-dim": "#b4c5ff",
+              "on-tertiary-container": "#ffede6",
+              "tertiary-container": "#bc4800",
+              "surface-dim": "#cfdaf2",
+              "surface-container": "#e7eeff",
+              "on-error-container": "#93000a",
+              "surface-tint": "#0053db",
+              "primary-fixed": "#dbe1ff",
+              "inverse-primary": "#b4c5ff",
+              "primary": "#004ac6",
+              "outline": "#737686",
+              "secondary": "#505f76",
+              "on-tertiary-fixed-variant": "#7d2d00",
+              "tertiary": "#943700",
+              "inverse-on-surface": "#ecf1ff",
+              "tertiary-fixed": "#ffdbcd",
+              "on-primary-fixed-variant": "#003ea8",
+              "on-background": "#111c2d",
+              "on-tertiary-fixed": "#360f00",
+              "surface-container-highest": "#d8e3fb",
+              "on-secondary-fixed-variant": "#38485d",
+              "outline-variant": "#c3c6d7",
+              "surface-variant": "#d8e3fb",
+              "secondary-fixed-dim": "#b7c8e1",
+              "surface-bright": "#f9f9ff",
+              "on-secondary-container": "#54647a",
+              "background": "#f9f9ff",
+              "on-error": "#ffffff",
+              "secondary-fixed": "#d3e4fe",
+              "inverse-surface": "#263143",
+              "surface-container-low": "#f0f3ff",
+              "error-container": "#ffdad6",
+              "on-surface-variant": "#434655",
+              "secondary-container": "#d0e1fb",
+              "surface-container-high": "#dee8ff",
+              "surface": "#f9f9ff",
+              "on-secondary-fixed": "#0b1c30",
+              "on-primary-container": "#eeefff",
+              "on-primary": "#ffffff",
+              "error": "#ba1a1a",
+              "surface-container-lowest": "#ffffff",
+              "primary-container": "#2563eb",
+              "on-surface": "#111c2d",
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed-dim": "#ffb596",
+              "on-secondary": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Manrope", "IBM Plex Sans Arabic"],
+              "body": ["Inter", "IBM Plex Sans Arabic"],
+              "label": ["Inter", "IBM Plex Sans Arabic"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'IBM Plex Sans Arabic', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-header { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); }
+        .gradient-btn { background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%); }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen">
+<!-- TopNavBar (Shared Component) -->
+<header class="flex flex-row-reverse justify-between items-center w-full px-6 py-3 z-50 sticky top-0 bg-white/70 backdrop-blur-xl shadow-sm shadow-blue-900/5">
+<div class="flex items-center gap-4">
+<div class="text-xl font-bold tracking-tight text-blue-800">نظام المبيعات</div>
+<div class="hidden md:flex items-center bg-slate-100/50 rounded-full px-3 py-1">
+<span class="material-symbols-outlined text-slate-500 text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48" placeholder="بحث..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-full hover:bg-slate-100/50 transition-colors">
+<span class="material-symbols-outlined text-slate-500" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-100/50 transition-colors">
+<span class="material-symbols-outlined text-slate-500" data-icon="translate">translate</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-primary-fixed overflow-hidden">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="professional male executive headshot in business attire with neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEGCkZT9jMMqlBE8tmGtv36IY4xHbTvZ8mceBDMkLFiIi7fd_ePANdpQqgp9k5faTi2foYPHNWzZC7rVdAGVCrXY06dEwDhpwceu7pLNUElBhbEtfQCEGZarlvnT03yBpvsGAudQ7CkVpQZw9K0lXaw2DauLDv1NM8vIaikhQAHqAW1hKOcTyYu03Ih4HYJq0kY_ZkXDAdHNm85MMoacvXi4Vyf0O_wNaB-KnOR0R1UC5CkaXJMDr0ReNQqRy1BzdRbCXIqayUbLNg"/>
+</div>
+</div>
+</header>
+<div class="flex min-h-[calc(100vh-64px)]">
+<!-- SideNavBar (Shared Component) -->
+<aside class="hidden md:flex flex-col h-full sticky top-16 w-64 bg-slate-50 border-l-0 rtl z-40">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white font-black text-lg">E</div>
+<div>
+<div class="font-manrope font-semibold text-on-surface leading-tight">الإدارة التنفيذية</div>
+<div class="text-xs text-on-surface-variant">مدير النظام</div>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-200/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm font-medium">لوحة القيادة</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 border-r-4 border-blue-600 rounded-l-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="text-sm font-semibold">التقارير</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-200/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="text-sm font-medium">تحليل الإعلانات</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-200/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-sm font-medium">الإعدادات</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-6 border-t border-slate-200/50">
+<button class="flex items-center gap-3 px-4 py-3 w-full text-slate-600 hover:bg-error-container hover:text-error rounded-lg transition-all">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-sm font-medium">تسجيل الخروج</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 p-4 md:p-8 max-w-5xl mx-auto w-full">
+<header class="mb-8">
+<h1 class="text-3xl font-headline font-extrabold text-on-surface mb-2">تقديم تقرير يومي</h1>
+<p class="text-on-surface-variant font-body">أدخل بيانات المبيعات والرسائل الواردة بدقة لضمان دقة التحليلات.</p>
+</header>
+<!-- Stepper Indicator -->
+<div class="flex items-center justify-between mb-10 px-4">
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">1</div>
+<span class="text-xs font-semibold text-primary">المعلومات الأساسية</span>
+</div>
+<div class="flex-1 h-1 mx-2 bg-primary-fixed"></div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold">2</div>
+<span class="text-xs font-medium text-on-surface-variant">قمع المبيعات</span>
+</div>
+<div class="flex-1 h-1 mx-2 bg-surface-container-high"></div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold">3</div>
+<span class="text-xs font-medium text-on-surface-variant">النتائج</span>
+</div>
+<div class="flex-1 h-1 mx-2 bg-surface-container-high"></div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold">4</div>
+<span class="text-xs font-medium text-on-surface-variant">الأسباب</span>
+</div>
+</div>
+<form class="space-y-8">
+<!-- Step 1: Basic Info -->
+<section class="bg-surface-container-lowest rounded-xl p-6 shadow-sm shadow-blue-900/5">
+<div class="flex items-center gap-2 mb-6 border-b border-surface-container-low pb-4">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<h2 class="text-lg font-headline font-bold">الخطوة 1: المعلومات الأساسية</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-3">اختر المنصة</label>
+<div class="grid grid-cols-4 gap-3">
+<button class="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-primary bg-primary-fixed/30 transition-all" type="button">
+<img alt="Snapchat" class="w-8 h-8" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqsX8HiSIL7ujZpj5wYY4PQs9l41jVOocOOJ6zRrirxlW5cUbSFfRB3ztlK5ZBijVmjV6_ThKZDwXiP7d1F1TZ89Yrzu93WK5mRvy1DZWr7Lt1HD5xLnPhjmIefZ5m3Ef9S38IxzuS-SuLplcOLCGOUvqlvfVODh0LmRzovrfUQZqfz9TNCM4xTt_hnvNp3CCnUKA9M_OosQlEbeCKpTZbqOxJtXX0xhp3DfSttn7n_dkhHfQ3gbHF7OXIvUgRXa6ZLfpUP11xs8XE"/>
+<span class="text-[10px] font-bold">Snapchat</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-transparent bg-surface-container-low hover:border-outline-variant transition-all" type="button">
+<img alt="Facebook" class="w-8 h-8" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtKhAi14dArRSnqgDREqkR4uYc86HlKgL0EBIWSSS9tQmhcBGGi5ZSGcY5xGXtNDNJXuazBaKV2K1EZ0LhxiQMp9hO1HENpMpF15NRlVUlqcpG-JVrYTHIE44TxZVSM2R_DcjdO7wz0l8r6_R_4l2qjsjUOaNQ35GMQpE2_So94fB5fLKK6BdjkF4U686W3SfTKerKYixEA6g0ldiQW95D8Cja-1vOZUssB0RodlviwK4DmDPrWhEWm5J6X6cjVBjfWMoyX_qXRG6R"/>
+<span class="text-[10px] font-bold">Facebook</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-transparent bg-surface-container-low hover:border-outline-variant transition-all" type="button">
+<img alt="Instagram" class="w-8 h-8" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAM7Fx0b3yZy0wbMx-Mqr_DYAoShhMGCz4Th8t5QxjuzeNeRFyFl-mPmJGuowZN6KkCzIiQoN4kG12axU1ieIduqdZ-1aJvyA4tNyQq4HaC_4Mv7SbuLDI6cw6Tp6YiL-qgIBzABQw9Kgwdq6_qBo0FZBHvKEbSMKsyX_5190dcBvdoHA8dlWuONEGwh_35dpx8XBgk_oH2wMOyN5pX2NzYPteq-dSPbB1feR_1urjdh7r9hu8ylHLV1DpDsnf71oz6E200c9_xU2lB"/>
+<span class="text-[10px] font-bold">Instagram</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-transparent bg-surface-container-low hover:border-outline-variant transition-all" type="button">
+<img alt="WhatsApp" class="w-8 h-8" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDp9ooFMjMPHuD4l4lY5cKUsA8RMphBBWAmHvnPrRI1pTV-6veTY4DDBYRvbuQmboHIG1dJTfOQhvwNNjkXUURMqK0rOaxHihSiSr-_mmQJboCOQmLADdDMXDIn1S-0slsVMzIR6ALQhZRmgUjL99YNuj8xld5Q13o7sIE0aJLqKHpfninNLx9mbU2m309dffnQP2622EWKSwnf_tbapoBARCNZ9VPK6g_U6fxRfTadm2sJ2SpGmz-O87O-cbOifuKoc86Uap5lwOnz"/>
+<span class="text-[10px] font-bold">WhatsApp</span>
+</button>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-on-surface-variant mb-3">إجمالي الرسائل الواردة</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-xl py-4 pr-12 focus:ring-2 focus:ring-primary font-bold text-lg" placeholder="مثال: 150" type="number"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary" data-icon="mail">mail</span>
+</div>
+<p class="mt-2 text-xs text-on-surface-variant">العدد الكلي للعملاء الجدد الذين تواصلوا اليوم.</p>
+</div>
+</div>
+</section>
+<!-- Step 2: Funnel -->
+<section class="bg-surface-container-low rounded-xl p-6">
+<div class="flex items-center gap-2 mb-6 border-b border-surface-variant pb-4">
+<span class="material-symbols-outlined text-primary" data-icon="filter_alt">filter_alt</span>
+<h2 class="text-lg font-headline font-bold">الخطوة 2: قمع المبيعات (الفلترة)</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Funnel Block 1 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-transparent hover:border-primary/20 transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant">المرحلة 1</span>
+<span class="bg-red-50 text-red-600 p-1 rounded-lg"><span class="material-symbols-outlined text-sm" data-icon="person_off">person_off</span></span>
+</div>
+<h3 class="font-bold text-sm mb-4 h-10">لم يتم الرد بعد التحية</h3>
+<div class="flex items-center gap-2 mb-3">
+<input class="w-full text-center font-bold bg-surface-container-low border-none rounded-lg p-2 focus:ring-primary" type="number" value="0"/>
+<button class="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+<div class="flex justify-between items-center text-xs pt-3 border-t border-surface-container-low">
+<span class="text-on-surface-variant">الإجمالي:</span>
+<span class="font-black text-primary">0</span>
+</div>
+</div>
+<!-- Funnel Block 2 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-transparent hover:border-primary/20 transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant">المرحلة 2</span>
+<span class="bg-amber-50 text-amber-600 p-1 rounded-lg"><span class="material-symbols-outlined text-sm" data-icon="description">description</span></span>
+</div>
+<h3 class="font-bold text-sm mb-4 h-10">لم يتم الرد بعد التفاصيل</h3>
+<div class="flex items-center gap-2 mb-3">
+<input class="w-full text-center font-bold bg-surface-container-low border-none rounded-lg p-2 focus:ring-primary" type="number" value="0"/>
+<button class="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+<div class="flex justify-between items-center text-xs pt-3 border-t border-surface-container-low">
+<span class="text-on-surface-variant">الإجمالي:</span>
+<span class="font-black text-primary">0</span>
+</div>
+</div>
+<!-- Funnel Block 3 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-transparent hover:border-primary/20 transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant">المرحلة 3</span>
+<span class="bg-orange-50 text-orange-600 p-1 rounded-lg"><span class="material-symbols-outlined text-sm" data-icon="payments">payments</span></span>
+</div>
+<h3 class="font-bold text-sm mb-4 h-10">لم يتم الرد بعد السعر</h3>
+<div class="flex items-center gap-2 mb-3">
+<input class="w-full text-center font-bold bg-surface-container-low border-none rounded-lg p-2 focus:ring-primary" type="number" value="0"/>
+<button class="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+<div class="flex justify-between items-center text-xs pt-3 border-t border-surface-container-low">
+<span class="text-on-surface-variant">الإجمالي:</span>
+<span class="font-black text-primary">0</span>
+</div>
+</div>
+<!-- Funnel Block 4 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-transparent hover:border-primary/20 transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant">المرحلة 4</span>
+<span class="bg-green-50 text-green-600 p-1 rounded-lg"><span class="material-symbols-outlined text-sm" data-icon="chat">chat</span></span>
+</div>
+<h3 class="font-bold text-sm mb-4 h-10">تم الرد بعد السعر</h3>
+<div class="flex items-center gap-2 mb-3">
+<input class="w-full text-center font-bold bg-surface-container-low border-none rounded-lg p-2 focus:ring-primary" type="number" value="0"/>
+<button class="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary hover:text-white transition-colors" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+<div class="flex justify-between items-center text-xs pt-3 border-t border-surface-container-low">
+<span class="text-on-surface-variant">الإجمالي:</span>
+<span class="font-black text-primary">0</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Step 3: Results -->
+<section class="bg-surface-container-lowest rounded-xl p-6 shadow-sm shadow-blue-900/5">
+<div class="flex items-center gap-2 mb-6 border-b border-surface-container-low pb-4">
+<span class="material-symbols-outlined text-primary" data-icon="trending_up">trending_up</span>
+<h2 class="text-lg font-headline font-bold">الخطوة 3: النتائج والتحويل</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="relative">
+<label class="block text-sm font-medium text-on-surface-variant mb-2">عدد المبيعات 💰</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary font-bold text-xl text-primary" placeholder="0" type="number"/>
+</div>
+<div class="relative">
+<label class="block text-sm font-medium text-on-surface-variant mb-2">إجمالي قيمة المبيعات (SAR)</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary font-bold text-xl text-green-600" placeholder="0.00" type="number"/>
+</div>
+<div class="relative">
+<label class="block text-sm font-medium text-on-surface-variant mb-2">عدد المتابعات (Follow-ups)</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-primary font-bold text-xl" placeholder="0" type="number"/>
+</div>
+</div>
+</section>
+<!-- Step 4: Reasons -->
+<section class="bg-surface-container-low rounded-xl p-6">
+<div class="flex items-center gap-2 mb-6 border-b border-surface-variant pb-4">
+<span class="material-symbols-outlined text-primary" data-icon="assignment_late">assignment_late</span>
+<h2 class="text-lg font-headline font-bold">الخطوة 4: أسباب عدم الإتمام</h2>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+<label class="flex items-center gap-3 p-4 bg-surface-container-lowest rounded-xl cursor-pointer hover:bg-primary/5 transition-colors">
+<input class="w-5 h-5 text-primary rounded-md focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-medium">السعر مرتفع</span>
+</label>
+<label class="flex items-center gap-3 p-4 bg-surface-container-lowest rounded-xl cursor-pointer hover:bg-primary/5 transition-colors">
+<input class="w-5 h-5 text-primary rounded-md focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-medium">الارتباك بشأن الخدمة</span>
+</label>
+<label class="flex items-center gap-3 p-4 bg-surface-container-lowest rounded-xl cursor-pointer hover:bg-primary/5 transition-colors">
+<input class="w-5 h-5 text-primary rounded-md focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-medium">غير مهتم حالياً</span>
+</label>
+<label class="flex items-center gap-3 p-4 bg-surface-container-lowest rounded-xl cursor-pointer hover:bg-primary/5 transition-colors">
+<input class="w-5 h-5 text-primary rounded-md focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-medium">الموقع الجغرافي بعيد</span>
+</label>
+<label class="flex items-center gap-3 p-4 bg-surface-container-lowest rounded-xl cursor-pointer hover:bg-primary/5 transition-colors">
+<input class="w-5 h-5 text-primary rounded-md focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-medium">عدم الرد النهائي</span>
+</label>
+<label class="flex items-center gap-3 p-4 bg-surface-container-lowest rounded-xl cursor-pointer hover:bg-primary/5 transition-colors">
+<input class="w-5 h-5 text-primary rounded-md focus:ring-primary" type="checkbox"/>
+<span class="text-sm font-medium">أخرى (أدخل في الملاحظات)</span>
+</label>
+</div>
+<div class="mt-6">
+<label class="block text-sm font-medium text-on-surface-variant mb-2">ملاحظات إضافية</label>
+<textarea class="w-full bg-surface-container-lowest border-none rounded-xl p-4 focus:ring-2 focus:ring-primary text-sm" placeholder="اكتب أي ملاحظات مهمة هنا..." rows="3"></textarea>
+</div>
+</section>
+<!-- Form Actions -->
+<div class="flex flex-col md:flex-row gap-4 pt-4">
+<button class="gradient-btn flex-1 py-4 rounded-xl text-white font-bold text-lg shadow-lg shadow-blue-500/30 flex items-center justify-center gap-3 active:scale-[0.98] transition-transform" type="submit">
+<span>إرسال التقرير النهائي</span>
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+<button class="bg-surface-container-high py-4 px-8 rounded-xl text-on-surface-variant font-bold text-lg hover:bg-surface-variant transition-colors" type="button">
+                        حفظ كمسودة
+                    </button>
+</div>
+</form>
+</main>
+</div>
+<!-- Mobile Navigation (Shared Component Placeholder) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md flex justify-around items-center py-3 px-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-50">
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px]">لوحة القيادة</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" data-icon="assessment" style="font-variation-settings: 'FILL' 1;">assessment</span>
+<span class="text-[10px] font-bold">التقارير</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="text-[10px]">التحليل</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px]">الإعدادات</span>
+</a>
+</nav>
+</body></html>

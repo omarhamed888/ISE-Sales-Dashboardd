@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed": "#00174b",
+              "primary-fixed-dim": "#b4c5ff",
+              "on-tertiary-container": "#ffede6",
+              "tertiary-container": "#bc4800",
+              "surface-dim": "#cfdaf2",
+              "surface-container": "#e7eeff",
+              "on-error-container": "#93000a",
+              "surface-tint": "#0053db",
+              "primary-fixed": "#dbe1ff",
+              "inverse-primary": "#b4c5ff",
+              "primary": "#004ac6",
+              "outline": "#737686",
+              "secondary": "#505f76",
+              "on-tertiary-fixed-variant": "#7d2d00",
+              "tertiary": "#943700",
+              "inverse-on-surface": "#ecf1ff",
+              "tertiary-fixed": "#ffdbcd",
+              "on-primary-fixed-variant": "#003ea8",
+              "on-background": "#111c2d",
+              "on-tertiary-fixed": "#360f00",
+              "surface-container-highest": "#d8e3fb",
+              "on-secondary-fixed-variant": "#38485d",
+              "outline-variant": "#c3c6d7",
+              "surface-variant": "#d8e3fb",
+              "secondary-fixed-dim": "#b7c8e1",
+              "surface-bright": "#f9f9ff",
+              "on-secondary-container": "#54647a",
+              "background": "#f9f9ff",
+              "on-error": "#ffffff",
+              "secondary-fixed": "#d3e4fe",
+              "inverse-surface": "#263143",
+              "surface-container-low": "#f0f3ff",
+              "error-container": "#ffdad6",
+              "on-surface-variant": "#434655",
+              "secondary-container": "#d0e1fb",
+              "surface-container-high": "#dee8ff",
+              "surface": "#f9f9ff",
+              "on-secondary-fixed": "#0b1c30",
+              "on-primary-container": "#eeefff",
+              "on-primary": "#ffffff",
+              "error": "#ba1a1a",
+              "surface-container-lowest": "#ffffff",
+              "primary-container": "#2563eb",
+              "on-surface": "#111c2d",
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed-dim": "#ffb596",
+              "on-secondary": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Manrope", "sans-serif"],
+              "body": ["IBM Plex Sans Arabic", "sans-serif"],
+              "label": ["IBM Plex Sans Arabic", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      body { font-family: 'IBM Plex Sans Arabic', sans-serif; }
+      .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+      .premium-gradient { background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%); }
+      .ambient-shadow { box-shadow: 0 12px 32px -4px rgba(17, 28, 45, 0.04); }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopNavBar -->
+<header class="flex flex-row-reverse justify-between items-center w-full px-6 py-3 z-50 sticky top-0 bg-white/70 backdrop-blur-xl shadow-sm shadow-blue-900/5">
+<div class="flex items-center gap-6">
+<span class="text-xl font-bold tracking-tight text-blue-800 font-headline">نظام المبيعات</span>
+<div class="hidden md:flex items-center gap-4 text-sm font-medium">
+<span class="text-blue-700 font-semibold">مقاييس متقدمة</span>
+<span class="text-slate-500 hover:text-blue-600 transition-colors cursor-pointer">لوحة القيادة</span>
+<span class="text-slate-500 hover:text-blue-600 transition-colors cursor-pointer">التقارير</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<input class="bg-slate-100/50 border-none rounded-full px-4 py-2 text-sm w-64 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="بحث مخصص..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-2 text-slate-400 text-sm">search</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-slate-100/50 transition-colors text-slate-500">
+<span class="material-symbols-outlined" data-icon="translate">translate</span>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-100/50 transition-colors text-slate-500">
+<span class="material-symbols-outlined" data-icon="mail">mail</span>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-100/50 transition-colors text-slate-500 relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-white">
+<img alt="User profile" data-alt="Professional headshot of an executive in a blue suit, confident smiling with soft office background light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWcXiNQ-JtqLjOQrXg72clnmn7RRl8UmEQgvujuOIu0Sg06sH5Q13eHMaPX4IZiFpmtUUONBG3cOLqXJKG5mc2ICIjeiYdJJJTUe8eZ0-9lSOa9yW4aETSz0QUXIjpuq71Srxy6Chbhbziuj8R-hKw0os4bLn0dsosfZFYxSfFJ4usSO00Pm9HHAGV2X6pk0sfUeiyen1eW4bpI6H4RRDUM-Ve3Kqm9PLgPe8QzOdcyGr1beiaZb1EikSdrMtZNO_XRvH3IicYofWr"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex">
+<!-- SideNavBar -->
+<aside class="hidden lg:flex flex-col h-[calc(100vh-60px)] fixed right-0 w-64 bg-slate-50 rtl z-40">
+<div class="px-6 py-8">
+<div class="flex items-center gap-3 mb-10">
+<div class="w-10 h-10 rounded-xl premium-gradient flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+</div>
+<div>
+<div class="text-blue-700 font-black text-lg font-headline">الإدارة التنفيذية</div>
+<div class="text-slate-500 text-xs">مدير النظام</div>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-600 hover:bg-slate-200/50 transition-all rounded-l-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm font-medium">لوحة القيادة</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-600 hover:bg-slate-200/50 transition-all rounded-l-lg" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="text-sm font-medium">التقارير</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-600 hover:bg-slate-200/50 transition-all rounded-l-lg" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="text-sm font-medium">تحليل الإعلانات</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 border-r-4 border-blue-600 rounded-l-lg scale-[0.99] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-sm font-semibold">مقاييس متقدمة</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-600 hover:bg-slate-200/50 transition-all rounded-l-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-sm font-medium">الإعدادات</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto px-6 py-6 border-t border-slate-200/50">
+<a class="flex items-center gap-3 px-4 py-3 text-error hover:bg-error-container/20 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-sm font-medium">تسجيل الخروج</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 lg:pr-64 p-8">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-10">
+<div>
+<h1 class="text-3xl font-bold font-headline text-on-surface mb-2">المقاييس المالية والنمو</h1>
+<p class="text-on-surface-variant max-w-md">نظرة استراتيجية شاملة على تكاليف الاستحواذ، القيمة الدائمة للعملاء، وكفاءة العمليات التشغيلية.</p>
+</div>
+<div class="flex gap-3">
+<div class="flex bg-surface-container-low p-1 rounded-xl">
+<button class="px-4 py-2 text-sm font-medium rounded-lg bg-surface-container-lowest text-primary ambient-shadow transition-all">آخر 30 يوم</button>
+<button class="px-4 py-2 text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">ربع سنوي</button>
+<button class="px-4 py-2 text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">سنوي</button>
+</div>
+<button class="flex items-center gap-2 premium-gradient text-white px-6 py-2.5 rounded-full font-medium ambient-shadow hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[18px]" data-icon="download">download</span>
+                        تصدير التقرير
+                    </button>
+</div>
+</div>
+<!-- Bento Grid KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+<!-- KPI Card 1: CAC -->
+<div class="bg-surface-container-lowest p-8 rounded-xl ambient-shadow flex flex-col justify-between">
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl" data-icon="group_add">group_add</span>
+</div>
+<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">+12.5%</span>
+</div>
+<div>
+<span class="text-on-surface-variant text-sm font-medium block mb-1">تكلفة الاستحواذ (CAC)</span>
+<div class="flex items-baseline gap-2">
+<h2 class="text-4xl font-bold font-headline">$245.50</h2>
+<span class="text-slate-400 text-sm">متوسط</span>
+</div>
+</div>
+<div class="mt-6 pt-6 border-t border-slate-50">
+<div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[65%]"></div>
+</div>
+</div>
+</div>
+<!-- KPI Card 2: LTV -->
+<div class="bg-surface-container-lowest p-8 rounded-xl ambient-shadow flex flex-col justify-between">
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container/5 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-2xl" data-icon="loyalty">loyalty</span>
+</div>
+<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">+8.2%</span>
+</div>
+<div>
+<span class="text-on-surface-variant text-sm font-medium block mb-1">القيمة الدائمة للعميل (LTV)</span>
+<div class="flex items-baseline gap-2">
+<h2 class="text-4xl font-bold font-headline">$1,890</h2>
+<span class="text-slate-400 text-sm">لكل عميل</span>
+</div>
+</div>
+<div class="mt-6 pt-6 border-t border-slate-50">
+<div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-[82%]"></div>
+</div>
+</div>
+</div>
+<!-- KPI Card 3: LTV:CAC Ratio -->
+<div class="premium-gradient p-8 rounded-xl shadow-xl shadow-blue-500/20 text-white flex flex-col justify-between overflow-hidden relative">
+<div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-2xl" data-icon="balance">balance</span>
+</div>
+<span class="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-bold">صحي جداً</span>
+</div>
+<div>
+<span class="text-white/80 text-sm font-medium block mb-1">مؤشر الربحية (LTV:CAC)</span>
+<div class="flex items-baseline gap-2">
+<h2 class="text-4xl font-bold font-headline">7.7x</h2>
+<span class="text-white/60 text-sm">معدل العائد</span>
+</div>
+</div>
+<div class="mt-6 pt-6 border-t border-white/10">
+<p class="text-xs text-white/70">يتجاوز الهدف المحدد بـ 2.5 نقطة</p>
+</div>
+</div>
+</div>
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+<!-- ROI vs Budget -->
+<div class="bg-surface-container-low p-8 rounded-2xl">
+<div class="flex justify-between items-center mb-8">
+<h3 class="text-lg font-bold font-headline">العائد على الاستثمار مقابل الميزانية</h3>
+<span class="material-symbols-outlined text-slate-400">more_vert</span>
+</div>
+<div class="h-64 flex items-end justify-between gap-4">
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-primary/20 rounded-t-lg h-3/4 relative">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-lg h-2/3"></div>
+</div>
+<span class="text-xs text-on-surface-variant font-medium">أكتوبر</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-primary/20 rounded-t-lg h-1/2 relative">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-lg h-3/4"></div>
+</div>
+<span class="text-xs text-on-surface-variant font-medium">نوفمبر</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-primary/20 rounded-t-lg h-full relative">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-lg h-[85%]"></div>
+</div>
+<span class="text-xs text-on-surface-variant font-medium">ديسمبر</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-primary/20 rounded-t-lg h-[60%] relative">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-lg h-[40%]"></div>
+</div>
+<span class="text-xs text-on-surface-variant font-medium">يناير</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-primary/20 rounded-t-lg h-[90%] relative">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-lg h-[70%]"></div>
+</div>
+<span class="text-xs text-on-surface-variant font-medium">فبراير</span>
+</div>
+</div>
+</div>
+<!-- Capacity vs Leads -->
+<div class="bg-surface-container-low p-8 rounded-2xl">
+<div class="flex justify-between items-center mb-8">
+<h3 class="text-lg font-bold font-headline">القدرة الاستيعابية مقابل العملاء المحتملين</h3>
+<div class="flex gap-4">
+<div class="flex items-center gap-2 text-xs font-medium text-slate-500">
+<span class="w-2 h-2 rounded-full bg-primary"></span> العملاء
+                            </div>
+<div class="flex items-center gap-2 text-xs font-medium text-slate-500">
+<span class="w-2 h-2 rounded-full bg-slate-300"></span> السعة
+                            </div>
+</div>
+</div>
+<div class="relative h-64 flex items-center justify-center">
+<!-- Curved Line Chart Placeholder -->
+<svg class="w-full h-full" viewbox="0 0 400 150">
+<path d="M0 100 Q 100 20 200 80 T 400 50" fill="none" stroke="#004ac6" stroke-linecap="round" stroke-width="4"></path>
+<path d="M0 120 Q 100 100 200 110 T 400 90" fill="none" stroke="#cbd5e1" stroke-dasharray="8 4" stroke-width="3"></path>
+</svg>
+<div class="absolute bottom-4 left-0 w-full flex justify-between px-4 text-[10px] text-slate-400 font-medium">
+<span>الأسبوع 1</span>
+<span>الأسبوع 2</span>
+<span>الأسبوع 3</span>
+<span>الأسبوع 4</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Metrics Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- AOV Card -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl ambient-shadow border border-slate-50 flex items-center gap-6">
+<div class="w-20 h-20 rounded-full border-4 border-primary/10 border-t-primary flex items-center justify-center">
+<span class="text-lg font-bold text-primary">$412</span>
+</div>
+<div>
+<h4 class="text-on-surface font-bold text-base mb-1">متوسط قيمة الطلب (AOV)</h4>
+<p class="text-sm text-on-surface-variant mb-3">ارتفاع بنسبة 14% مقارنة بالشهر الماضي بفضل عروض الحزم.</p>
+<div class="flex gap-2">
+<span class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-500">النمو: +$52</span>
+<span class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-500">الهدف: $450</span>
+</div>
+</div>
+</div>
+<!-- Churn Rate Card -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl ambient-shadow border border-slate-50 flex items-center gap-6">
+<div class="w-20 h-20 rounded-full border-4 border-error/10 border-t-error flex items-center justify-center">
+<span class="text-lg font-bold text-error">2.4%</span>
+</div>
+<div>
+<h4 class="text-on-surface font-bold text-base mb-1">معدل الانصراف (Churn Rate)</h4>
+<p class="text-sm text-on-surface-variant mb-3">تحسن ملحوظ في الاحتفاظ بالعملاء بعد تحديث واجهة المستخدم.</p>
+<div class="flex gap-2">
+<span class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-500">السابق: 3.1%</span>
+<span class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-500">الحالة: مستقر</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Strategy Overview Section -->
+<div class="mt-12 bg-white rounded-3xl p-10 ambient-shadow relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-2 bg-primary"></div>
+<div class="flex flex-col md:flex-row gap-12 items-center">
+<div class="flex-1">
+<h2 class="text-2xl font-bold font-headline mb-4">الملخص الاستراتيجي للربع الأول</h2>
+<p class="text-on-surface-variant leading-relaxed mb-6">تشير البيانات إلى أن كفاءة الاستحواذ في أعلى مستوياتها التاريخية. نوصي بزيادة الميزانية التسويقية بنسبة 20% في قنوات البحث المدفوع، مع التركيز على العملاء ذوي القيمة الدائمة العالية لتعزيز مؤشر الربحية الإجمالي.</p>
+<div class="flex flex-wrap gap-4">
+<div class="flex items-center gap-2 text-sm font-medium text-primary">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span> تحسين معدلات التحويل
+                            </div>
+<div class="flex items-center gap-2 text-sm font-medium text-primary">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span> خفض تكاليف التشغيل
+                            </div>
+<div class="flex items-center gap-2 text-sm font-medium text-primary">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span> استهداف قطاعات جديدة
+                            </div>
+</div>
+</div>
+<div class="w-full md:w-64">
+<div class="bg-surface-container-low rounded-2xl p-6 text-center">
+<div class="text-4xl font-black text-primary mb-2">92%</div>
+<div class="text-sm font-bold text-on-surface mb-4">اكتمال الأهداف التشغيلية</div>
+<div class="w-full bg-slate-200 h-2 rounded-full">
+<div class="bg-primary h-full w-[92%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Mobile Nav Bar (Visible only on mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg flex justify-around items-center p-4 z-50 border-t-0 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-[10px] font-bold">المقاييس</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-medium">الرئيسية</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="text-[10px] font-medium">التحليلات</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px] font-medium">الإعدادات</span>
+</button>
+</nav>
+</body></html>

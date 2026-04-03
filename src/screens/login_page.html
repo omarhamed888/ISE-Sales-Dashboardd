@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>تسجيل الدخول - نظام المبيعات</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline-variant": "#c3c6d7",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed": "#360f00",
+                    "on-primary-fixed": "#00174b",
+                    "surface-tint": "#0053db",
+                    "inverse-primary": "#b4c5ff",
+                    "on-surface": "#111c2d",
+                    "primary": "#004ac6",
+                    "surface-dim": "#cfdaf2",
+                    "surface-container-low": "#f0f3ff",
+                    "on-surface-variant": "#434655",
+                    "on-tertiary-fixed-variant": "#7d2d00",
+                    "secondary-fixed": "#d3e4fe",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#d0e1fb",
+                    "tertiary-container": "#bc4800",
+                    "surface": "#f9f9ff",
+                    "tertiary": "#943700",
+                    "on-primary": "#ffffff",
+                    "background": "#f9f9ff",
+                    "primary-container": "#2563eb",
+                    "on-error": "#ffffff",
+                    "on-secondary-container": "#54647a",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "secondary": "#505f76",
+                    "inverse-surface": "#263143",
+                    "on-tertiary": "#ffffff",
+                    "surface-container": "#e7eeff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-background": "#111c2d",
+                    "surface-container-highest": "#d8e3fb",
+                    "outline": "#737686",
+                    "surface-container-high": "#dee8ff",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "on-primary-container": "#eeefff",
+                    "tertiary-fixed-dim": "#ffb596",
+                    "on-tertiary-container": "#ffede6",
+                    "primary-fixed": "#dbe1ff",
+                    "tertiary-fixed": "#ffdbcd",
+                    "surface-variant": "#d8e3fb",
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "inverse-on-surface": "#ecf1ff",
+                    "surface-bright": "#f9f9ff",
+                    "on-secondary-fixed": "#0b1c30"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope", "IBM Plex Sans Arabic"],
+                    "body": ["Inter", "IBM Plex Sans Arabic"],
+                    "label": ["Inter", "IBM Plex Sans Arabic"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-gradient {
+            background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-[#f7f9fc] text-on-surface min-h-screen flex flex-col">
+<!-- Supressing SideNavBar and TopNavBar based on "Transactional" page rule -->
+<main class="flex-grow flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
+<!-- Abstract Decorative Elements for Editorial Feel -->
+<div class="absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 bg-secondary-container/20 rounded-full blur-3xl"></div>
+<!-- Login Card -->
+<div class="w-full max-w-md z-10">
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_12px_32px_-4px_rgba(17,28,45,0.04)] overflow-hidden transition-all duration-300">
+<div class="p-8 md:p-10">
+<!-- Brand Anchor -->
+<div class="flex flex-col items-center mb-8">
+<div class="w-16 h-16 editorial-gradient rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="analytics">analytics</span>
+</div>
+<h1 class="font-headline text-2xl font-extrabold text-on-surface mb-2 tracking-tight">تسجيل الدخول</h1>
+<p class="font-body text-on-surface-variant text-sm text-center">مرحبًا بك مجددًا في نظام تتبع المبيعات</p>
+</div>
+<form action="#" class="space-y-6" method="POST">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="font-label text-sm font-medium text-on-surface-variant mr-1" for="email">
+                                البريد الإلكتروني
+                            </label>
+<div class="relative group">
+<div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+</div>
+<input class="block w-full pr-11 pl-4 py-3 bg-surface-container-low border-0 rounded-xl text-on-surface placeholder-outline focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all" id="email" name="email" placeholder="name@company.com" required="" type="email"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<div class="flex justify-between items-center px-1">
+<label class="font-label text-sm font-medium text-on-surface-variant" for="password">
+                                    كلمة المرور
+                                </label>
+<a class="text-xs font-medium text-primary hover:text-primary-container transition-colors" href="#">نسيت كلمة المرور؟</a>
+</div>
+<div class="relative group">
+<div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+</div>
+<input class="block w-full pr-11 pl-4 py-3 bg-surface-container-low border-0 rounded-xl text-on-surface placeholder-outline focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<!-- Keep Logged In -->
+<div class="flex items-center px-1">
+<input class="h-4 w-4 text-primary focus:ring-primary border-outline-variant rounded" id="remember-me" name="remember-me" type="checkbox"/>
+<label class="mr-3 block text-sm text-on-surface-variant font-body" for="remember-me">
+                                تذكرني على هذا الجهاز
+                            </label>
+</div>
+<!-- Submit Action -->
+<div class="pt-2">
+<button class="w-full editorial-gradient text-on-primary font-headline font-bold py-4 px-6 rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2" type="submit">
+<span>الدخول إلى النظام</span>
+<span class="material-symbols-outlined text-sm">login</span>
+</button>
+</div>
+</form>
+<!-- Footer Info -->
+<div class="mt-8 pt-8 border-t border-outline-variant/10 text-center">
+<p class="text-xs text-on-surface-variant font-body">
+                            ليس لديك حساب؟ 
+                            <a class="text-primary font-semibold hover:underline mr-1" href="#">تواصل مع الإدارة العليا</a>
+</p>
+</div>
+</div>
+</div>
+<!-- Contextual Branding Image (Decorative Glass Card) -->
+<div class="mt-8 relative hidden md:block">
+<div class="rounded-xl overflow-hidden shadow-sm h-32 relative">
+<img class="w-full h-full object-cover grayscale opacity-40" data-alt="abstract architectural curves with clean blue and white tones reflecting professional corporate environment and clarity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAl0rBNp6IZBQMcqQOy3tq_C2FLZiMdr8Ko7kMxrJwzryW8TXDGzTeLiYk3BiL67JbyZezt0WWeaCCjpgZ5Kpc7nIij-NrJzUdEopucp9E-oJS6faNlYXlZwPWeZNQGnsHEqMdI34c7dQoHjS4Aqa1wUKhEH2I_lIYfcyyH4Q59LHIEvyZUvVGfpf2UUZxc-TveMEu-k2qT4Ck86HX45U00euaPCyuMQguNr3KKF5-6eYN_cb02kSoo1w4WU715ink3qGafShZLa1TQ"/>
+<div class="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent flex items-center px-8">
+<div class="bg-white/40 backdrop-blur-md p-4 rounded-lg border border-white/30">
+<p class="text-[10px] uppercase tracking-widest text-primary font-bold mb-1">Sales Evolution v2.4</p>
+<p class="text-xs text-on-surface font-medium italic">"البيانات هي لغة النجاح في عالم الأعمال المعاصر"</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Simple Footer for Transactional Page -->
+<footer class="py-6 px-12 flex justify-between items-center text-[10px] text-outline font-body">
+<div>© 2024 نظام المبيعات. جميع الحقوق محفوظة.</div>
+<div class="flex gap-4">
+<a class="hover:text-on-surface-variant" href="#">سياسة الخصوصية</a>
+<a class="hover:text-on-surface-variant" href="#">شروط الاستخدام</a>
+</div>
+</footer>
+</body></html>
