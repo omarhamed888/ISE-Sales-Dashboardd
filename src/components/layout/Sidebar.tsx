@@ -1,84 +1,119 @@
 import { Link, useLocation } from "react-router-dom";
-
-const navItems = [
-  { href: "/", icon: "dashboard", label: "لوحة القيادة" },
-  { href: "/reports", icon: "assessment", label: "التقارير" },
-  { href: "/submit-report", icon: "post_add", label: "إرسال تقرير" },
-  { href: "/ads", icon: "ads_click", label: "تحليل الإعلانات" },
-  { href: "/metrics", icon: "query_stats", label: "مقاييس متقدمة" },
-];
+import { useAuth } from "@/lib/auth-context";
 
 export function Sidebar() {
   const location = useLocation();
+  const { user, signOut } = useAuth();
   const pathname = location.pathname;
+  const role = user?.role || "sales";
+
+  const adminLinks = [
+    { href: "/dashboard", icon: "dashboard", label: "اليوم" },
+    { href: "/team", icon: "groups", label: "الفريق" },
+    { href: "/ads", icon: "ads_click", label: "الإعلانات" },
+    { href: "/reports", icon: "assessment", label: "التقارير" },
+  ];
+
+  const salesLinks = [
+    { href: "/submit-report", icon: "post_add", label: "رفع تقرير" },
+    { href: "/my-reports", icon: "history", label: "تقاريري" },
+  ];
 
   const isActive = (href: string) => {
-    if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   };
 
+  const activeClasses = "bg-[#EFF6FF] text-[#2563EB] border-r-[3px] border-[#2563EB]";
+  const inactiveClasses = "text-[#64748B] hover:bg-[#F7F9FC] border-r-[3px] border-transparent";
+
   return (
-    <aside className="fixed right-0 top-0 h-full w-64 z-40 bg-[#f0f3ff] font-headline text-right flex flex-col rtl">
-      {/* Brand Header */}
-      <div className="p-6">
-        <div className="flex flex-row-reverse items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shrink-0">
-            <span className="material-symbols-outlined text-[20px]">analytics</span>
+    <aside className="fixed right-0 top-0 w-[256px] h-[100vh] bg-white border-l border-[#E2E8F0] z-50 flex flex-col shadow-sm" dir="rtl">
+      {/* Top Section */}
+      <div className="p-6 pt-8">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#2563EB] flex items-center justify-center text-white shrink-0 shadow-sm shadow-[#2563EB]/20">
+            <span className="material-symbols-outlined text-[20px] font-bold">analytics</span>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-[#004ac6] leading-tight">نظام المبيعات</h1>
-            <p className="text-[10px] text-on-surface-variant">الإدارة العليا</p>
+            <h1 className="text-xl font-extrabold text-[#1E293B] tracking-tight uppercase">ISE</h1>
           </div>
         </div>
-
-        {/* Navigation */}
-        <nav className="flex flex-col gap-1">
-          {navItems.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={`flex flex-row-reverse items-center justify-start px-4 py-3 transition-all rounded-l-none ${
-                  active
-                    ? "bg-[#004ac6]/10 text-[#004ac6] border-r-4 border-[#004ac6] font-semibold"
-                    : "text-slate-600 hover:bg-[#004ac6]/5 border-r-4 border-transparent"
-                }`}
-              >
-                <span
-                  className="material-symbols-outlined ml-3"
-                  style={active ? { fontVariationSettings: "'FILL' 1" } : undefined}
-                >
-                  {item.icon}
-                </span>
-                <span className="text-sm">{item.label}</span>
-              </Link>
-            );
-          })}
-
-          <Link
-            to="#"
-            className="flex flex-row-reverse items-center justify-start text-slate-600 px-4 py-3 hover:bg-[#004ac6]/5 transition-colors border-r-4 border-transparent mt-2"
-          >
-            <span className="material-symbols-outlined ml-3">settings</span>
-            <span className="text-sm">الإعدادات</span>
-          </Link>
-        </nav>
       </div>
+      
+      {/* Separator line */}
+      <div className="h-[1px] bg-[#E2E8F0] w-full"></div>
 
-      {/* User Profile Footer */}
-      <div className="mt-auto p-6 bg-surface-container/50 border-t border-outline-variant/10">
-        <div className="flex items-center gap-3 flex-row-reverse">
-          <img
-            alt="صورة الملف الشخصي"
-            className="w-10 h-10 rounded-xl object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMzvW2gn5l0jjIyUxN0o4ozEXmQQdKDcW-3q-cpNdFtcbuiNq9NZ2aQrPEYi6OntnTYRQRseKTdhPoV7mPqqDTbx-FUrXHqcBvhoUyQudJR1_Uo4XY5eUYLIiFkoPhdRY2_mZY9A8RVEslFUA6cSxdwDx7oep5qvrkBGquoEgN-0hYbQ0FvpNdzYKb9fT3Vk2aKsgIVh9pdVeB8KtByjt8kBfP0fBVK_BPyrHwEibc3pKlbGeVoabA6QTCCEIjqhtoB9__44LlCLyg"
-          />
-          <div className="text-right">
-            <p className="text-sm font-bold text-on-surface">أحمد الساير</p>
-            <p className="text-xs text-on-surface-variant">المدير التنفيذي</p>
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto py-6 flex flex-col gap-1">
+        {(role === "admin" || role === "superadmin") && adminLinks.map((item) => {
+          const active = isActive(item.href);
+          return (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={`flex items-center px-6 py-3 transition-colors ${active ? activeClasses : inactiveClasses}`}
+            >
+              <span
+                className="material-symbols-outlined ml-3 transition-colors"
+                style={active ? { fontVariationSettings: "'FILL' 1", color: "#2563EB" } : {}}
+              >
+                {item.icon}
+              </span>
+              <span className="text-[15px] font-bold">{item.label}</span>
+            </Link>
+          );
+        })}
+
+        {role === "superadmin" && (
+          <Link
+            to="/settings"
+            className={`flex items-center px-6 py-3 transition-colors mt-2 ${isActive("/settings") ? activeClasses : inactiveClasses}`}
+          >
+            <span className="material-symbols-outlined ml-3 transition-colors" style={isActive("/settings") ? { fontVariationSettings: "'FILL' 1", color: "#2563EB" } : {}}>settings</span>
+            <span className="text-[15px] font-bold">الإعدادات</span>
+          </Link>
+        )}
+
+        {role === "sales" && salesLinks.map((item) => {
+          const active = isActive(item.href);
+          return (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={`flex items-center px-6 py-3 transition-colors ${active ? activeClasses : inactiveClasses}`}
+            >
+              <span
+                className="material-symbols-outlined ml-3 transition-colors"
+                style={active ? { fontVariationSettings: "'FILL' 1", color: "#2563EB" } : {}}
+              >
+                {item.icon}
+              </span>
+              <span className="text-[15px] font-bold">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Bottom Section */}
+      <div className="p-6 border-t border-[#E2E8F0] bg-white">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#EFF6FF] flex items-center justify-center text-[#2563EB] font-bold text-sm border border-[#2563EB]/10 shrink-0">
+            {user?.name?.charAt(0) || "U"}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[14px] font-bold text-[#1E293B] truncate">{user?.name || "المستخدم"}</p>
+            <span className="inline-block px-2 py-0.5 mt-1 bg-[#EFF6FF] text-[#2563EB] text-[10px] font-bold rounded-md uppercase">
+              {role === "superadmin" ? "إدارة عليا" : role === "admin" ? "مشرف" : "مبيعات"}
+            </span>
           </div>
         </div>
+        <button
+          onClick={signOut}
+          className="mt-5 w-full flex items-center justify-center gap-2 px-4 py-2.5 text-[13px] font-bold text-[#DC2626] bg-white border border-[#DC2626]/20 rounded-xl hover:bg-[#DC2626]/5 active:scale-95 transition-all"
+        >
+          <span className="material-symbols-outlined text-[18px]">logout</span>
+          تسجيل الخروج
+        </button>
       </div>
     </aside>
   );

@@ -1,71 +1,33 @@
 @import "tailwindcss";
 
 @theme {
-  --color-outline-variant: #c3c6d7;
-  --color-error: #ba1a1a;
-  --color-on-tertiary-fixed: #360f00;
-  --color-on-primary-fixed: #00174b;
-  --color-surface-tint: #0053db;
-  --color-inverse-primary: #b4c5ff;
-  --color-on-surface: #111c2d;
-  --color-primary: #004ac6;
-  --color-surface-dim: #cfdaf2;
-  --color-surface-container-low: #f0f3ff;
-  --color-on-surface-variant: #434655;
-  --color-on-tertiary-fixed-variant: #7d2d00;
-  --color-secondary-fixed: #d3e4fe;
-  --color-on-error-container: #93000a;
-  --color-secondary-container: #d0e1fb;
-  --color-tertiary-container: #bc4800;
-  --color-surface: #f9f9ff;
-  --color-tertiary: #943700;
-  --color-on-primary: #ffffff;
-  --color-background: #f9f9ff;
-  --color-primary-container: #2563eb;
-  --color-on-error: #ffffff;
-  --color-on-secondary-container: #54647a;
-  --color-secondary-fixed-dim: #b7c8e1;
-  --color-secondary: #505f76;
-  --color-inverse-surface: #263143;
-  --color-on-tertiary: #ffffff;
-  --color-surface-container: #e7eeff;
-  --color-surface-container-lowest: #ffffff;
-  --color-on-background: #111c2d;
-  --color-surface-container-highest: #d8e3fb;
-  --color-outline: #737686;
-  --color-surface-container-high: #dee8ff;
-  --color-on-primary-fixed-variant: #003ea8;
-  --color-on-primary-container: #eeefff;
-  --color-tertiary-fixed-dim: #ffb596;
-  --color-on-tertiary-container: #ffede6;
-  --color-primary-fixed: #dbe1ff;
-  --color-tertiary-fixed: #ffdbcd;
-  --color-surface-variant: #d8e3fb;
-  --color-on-secondary: #ffffff;
-  --color-error-container: #ffdad6;
-  --color-on-secondary-fixed-variant: #38485d;
-  --color-primary-fixed-dim: #b4c5ff;
-  --color-inverse-on-surface: #ecf1ff;
-  --color-surface-bright: #f9f9ff;
-  --color-on-secondary-fixed: #0b1c30;
+  --color-background: #F7F9FC;
+  --color-surface: #FFFFFF;
+  --color-primary: #2563EB;
+  --color-on-surface: #1E293B;
+  --color-muted: #64748B;
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-danger: #DC2626;
+  --color-border: #E2E8F0;
   
-  --font-headline: "Manrope", "IBM Plex Sans Arabic", sans-serif;
-  --font-body: "Inter", "IBM Plex Sans Arabic", sans-serif;
-  --font-label: "Inter", "IBM Plex Sans Arabic", sans-serif;
+  --font-arabic: "IBM Plex Sans Arabic", sans-serif;
+  --font-numbers: "Manrope", sans-serif;
+  --font-sans: "IBM Plex Sans Arabic", "Inter", sans-serif;
+
+  /* Custom Spacing Tokens to match system if we want, but default TW is fine. */
 }
 
 @layer base {
   body { 
-    @apply font-body bg-background text-on-surface;
+    @apply font-sans bg-background text-on-surface;
+    direction: rtl;
   }
 }
 
 @layer utilities {
   .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-  }
-  .editorial-gradient {
-    background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
   }
   .glass-header {
     background: rgba(255, 255, 255, 0.7);
