@@ -113,6 +113,18 @@ export default function DashboardPage() {
               
               {/* SECTION 4: Recent Activity Table */}
               <RecentActivity reports={currentReports} />
+
+              {/* Coming Soon: Marketing Dashboard */}
+              <div className="mt-8 border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center">
+                <div className="text-4xl mb-3">📊</div>
+                <h3 className="text-lg font-bold text-gray-600 mb-1">Marketing Dashboard</h3>
+                <p className="text-gray-400 text-sm mb-3">
+                  تحليل الإنفاق الإعلاني • ROAS • CAC • LTV:CAC
+                </p>
+                <span className="inline-block bg-blue-100 text-blue-600 text-xs font-bold px-4 py-1.5 rounded-full">
+                  🚀 Coming Soon
+                </span>
+              </div>
            </>
         )}
      </div>

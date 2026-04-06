@@ -16,7 +16,9 @@ export function Sidebar() {
 
   const salesLinks = [
     { href: "/submit-report", icon: "post_add", label: "رفع تقرير" },
+    { href: "/deals", icon: "payments", label: "الصفقات المغلقة" },
     { href: "/my-reports", icon: "history", label: "تقاريري" },
+    { href: "/my-deals", icon: "emoji_events", label: "صفقاتي" },
   ];
 
   const isActive = (href: string) => {
@@ -63,6 +65,14 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {(role === "admin" || role === "superadmin") && (
+          <div className={`flex items-center px-6 py-3 border-r-[3px] border-transparent cursor-not-allowed opacity-40`}>
+            <span className="material-symbols-outlined ml-3 text-[#64748B]">campaign</span>
+            <span className="text-[15px] font-bold text-[#64748B] flex-1">Marketing Dashboard</span>
+            <span className="text-[9px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">Soon</span>
+          </div>
+        )}
 
         {role === "superadmin" && (
           <Link

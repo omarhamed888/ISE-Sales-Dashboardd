@@ -10,6 +10,8 @@ import AdvancedMetricsPage from '@/pages/AdvancedMetricsPage';
 import TeamPage from '@/pages/TeamPage';
 import SettingsPage from '@/pages/SettingsPage';
 import MyReportsPage from '@/pages/MyReportsPage';
+import DealsPage from '@/pages/DealsPage';
+import MyDealsPage from '@/pages/MyDealsPage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -76,6 +78,8 @@ export default function App() {
       {/* Sales Routes */}
       <Route path="/submit-report" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><SubmitReportPage /></AppLayout></ProtectedRoute>} />
       <Route path="/my-reports" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><MyReportsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/deals" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><DealsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/my-deals" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><MyDealsPage /></AppLayout></ProtectedRoute>} />
 
       {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />
