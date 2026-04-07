@@ -8,15 +8,18 @@ export function Sidebar() {
   const role = user?.role || "sales";
 
   const adminLinks = [
-    { href: "/dashboard", icon: "dashboard", label: "اليوم" },
+    { href: "/dashboard", icon: "dashboard", label: "لوحة القيادة" },
     { href: "/team", icon: "groups", label: "الفريق" },
     { href: "/ads", icon: "ads_click", label: "الإعلانات" },
     { href: "/reports", icon: "assessment", label: "التقارير" },
+    { href: "/insights", icon: "auto_awesome", label: "الرؤى" },
   ];
 
   const salesLinks = [
     { href: "/submit-report", icon: "post_add", label: "رفع تقرير" },
+    { href: "/deals", icon: "payments", label: "الصفقات المغلقة" },
     { href: "/my-reports", icon: "history", label: "تقاريري" },
+    { href: "/my-deals", icon: "emoji_events", label: "صفقاتي" },
   ];
 
   const isActive = (href: string) => {
@@ -35,7 +38,7 @@ export function Sidebar() {
             <span className="material-symbols-outlined text-[20px] font-bold">analytics</span>
           </div>
           <div>
-            <h1 className="text-xl font-extrabold text-[#1E293B] tracking-tight uppercase">ISE</h1>
+            <h1 className="text-xl font-extrabold text-[#1E293B] tracking-tight uppercase">BDI</h1>
           </div>
         </div>
       </div>
@@ -63,6 +66,14 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {(role === "admin" || role === "superadmin") && (
+          <div className="flex items-center px-6 py-3 text-[#CBD5E1] border-r-[3px] border-transparent cursor-not-allowed">
+            <span className="material-symbols-outlined ml-3">campaign</span>
+            <span className="text-[15px] font-bold">Marketing Dashboard</span>
+            <span className="mr-auto text-[9px] font-black bg-[#EFF6FF] text-[#2563EB] px-2 py-0.5 rounded-full">Coming Soon</span>
+          </div>
+        )}
 
         {role === "superadmin" && (
           <Link
@@ -103,7 +114,7 @@ export function Sidebar() {
           <div className="flex-1 min-w-0">
             <p className="text-[14px] font-bold text-[#1E293B] truncate">{user?.name || "المستخدم"}</p>
             <span className="inline-block px-2 py-0.5 mt-1 bg-[#EFF6FF] text-[#2563EB] text-[10px] font-bold rounded-md uppercase">
-              {role === "superadmin" ? "إدارة عليا" : role === "admin" ? "مشرف" : "مبيعات"}
+              {role === "superadmin" ? "مدير النظام" : role === "admin" ? "مشرف" : "مبيعات"}
             </span>
           </div>
         </div>

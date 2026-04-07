@@ -16,7 +16,8 @@ export function AdMatrixChart({ ads }: { ads: any[] }) {
                 <p className="text-[12px] text-[#64748B] font-bold">يوضح المخطط حجم الجمهور المستقطب مقابل كفاءة الإغلاق. الدوائر الكبيرة تعني عدد تحويلات (مبيعات) أعلى.</p>
             </div>
             
-            <div className="h-[400px] w-full relative" dir="ltr">
+            <div className="w-full relative" dir="ltr">
+                <div style={{ width: '100%', height: 300 }} className="relative">
                 <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" opacity={0.5} />
@@ -40,13 +41,14 @@ export function AdMatrixChart({ ads }: { ads: any[] }) {
                          <span className="absolute top-4 right-4 text-[10px] font-black text-[#F59E0B] bg-[#F59E0B]/10 px-2 py-1 rounded-lg">راجع الاستهداف</span>
                      </div>
                 </div>
-                <div className="absolute inset-x-0 bottom-[40px] top-[220px] pointer-events-none pl-[50px] flex" dir="rtl">
+                <div className="absolute inset-x-0 bottom-[40px] top-[140px] pointer-events-none pl-[50px] flex" dir="rtl">
                      <div className="flex-1 border-l border-dashed border-[#CBD5E1]/40 relative">
                          <span className="absolute bottom-4 left-4 text-[10px] font-black text-[#2563EB] bg-[#2563EB]/10 px-2 py-1 rounded-lg">واعد المبيعات</span>
                      </div>
                      <div className="flex-1 relative">
                          <span className="absolute bottom-4 right-4 text-[10px] font-black text-[#EF4444] bg-[#EF4444]/10 px-2 py-1 rounded-lg">مكلف - تخلص منه</span>
                      </div>
+                </div>
                 </div>
             </div>
         </div>

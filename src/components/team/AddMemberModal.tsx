@@ -2,6 +2,7 @@ import { useState } from "react";
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
+import { useCourses } from "@/lib/hooks/useCourses";
 
 interface AddMemberModalProps {
   isOpen: boolean;
@@ -10,9 +11,12 @@ interface AddMemberModalProps {
 
 export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
   const { user } = useAuth();
+  const courses = useCourses();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("sales");
+  const [teamName, setTeamName] = useState("");
+  const [programTrack, setProgramTrack] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -38,6 +42,8 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
         email: email.toLowerCase().trim(),
         role,
         isActive: true,
+        teamName: teamName.trim() || null,
+        programTrack: programTrack.trim() || null,
         addedBy: user?.uid,
         addedAt: serverTimestamp()
       });
@@ -67,7 +73,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-[13px] font-bold text-[#1E293B] mb-2">الاسم الكامل</label>
             <input
@@ -82,7 +88,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
           </div>
 
           <div>
-            <label className="block text-[13px] font-bold text-[#1E293B] mb-2">البريد الإلكتروني (Google Email)</label>
+            <label className="block text-[13px] font-bold text-[#1E293B] mb-2">البريد الإلكتروني</label>
             <input
               type="email"
               required
@@ -96,10 +102,37 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
           </div>
 
           <div>
+            <label className="block text-[13px] font-bold text-[#1E293B] mb-2">اسم الفريق</label>
+            <input
+              type="text"
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              className="w-full bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 transition-all placeholder:text-[#94A3B8]"
+              placeholder="مثال: Team ميرنا"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[13px] font-bold text-[#1E293B] mb-2">المسار / الكورس (اختياري)</label>
+            <select
+              value={programTrack}
+              onChange={e => setProgramTrack(e.target.value)}
+              disabled={loading}
+              className="w-full bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 transition-all"
+            >
+              <option value="">-- اختر كورساً --</option>
+              {courses.map(c => (
+                <option key={c.id} value={c.name}>{c.name} ({c.shortCode})</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
             <label className="block text-[13px] font-bold text-[#1E293B] mb-2">الصلاحية</label>
             <div className="grid grid-cols-2 gap-3">
-               <button type="button" onClick={() => setRole("sales")} className={`py-3 rounded-xl border flex justify-center text-sm font-bold transition-all ${role === "sales" ? 'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]' : 'bg-[#F7F9FC] border-[#E2E8F0] text-[#64748B] hover:border-[#CBD5E1]'}`}>مبيعات (Sales)</button>
-               <button type="button" onClick={() => setRole("admin")} className={`py-3 rounded-xl border flex justify-center text-sm font-bold transition-all ${role === "admin" ? 'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]' : 'bg-[#F7F9FC] border-[#E2E8F0] text-[#64748B] hover:border-[#CBD5E1]'}`}>مشرف (Admin)</button>
+               <button type="button" onClick={() => setRole("sales")} className={`py-3 rounded-xl border flex justify-center text-sm font-bold transition-all ${role === "sales" ? 'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]' : 'bg-[#F7F9FC] border-[#E2E8F0] text-[#64748B] hover:border-[#CBD5E1]'}`}>مبيعات</button>
+               <button type="button" onClick={() => setRole("admin")} className={`py-3 rounded-xl border flex justify-center text-sm font-bold transition-all ${role === "admin" ? 'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]' : 'bg-[#F7F9FC] border-[#E2E8F0] text-[#64748B] hover:border-[#CBD5E1]'}`}>مشرف</button>
             </div>
           </div>
 
@@ -111,7 +144,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
              >
                {loading ? <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span> : "إضافة الموظف"}
              </button>
-             <p className="text-center text-[11px] font-bold text-[#94A3B8]">سيتم إشعار الموظف بإمكانية الدخول باستخدام حساب Google المدخل</p>
+             <p className="text-center text-[11px] font-bold text-[#94A3B8]">يسجل الموظف الدخول باستخدام البريد الإلكتروني المدخل</p>
           </div>
         </form>
       </div>

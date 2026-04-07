@@ -4,10 +4,13 @@ import { db } from "@/lib/firebase";
 import { Link } from "react-router-dom";
 import { useFilter } from "@/lib/filter-context";
 import { filterReports } from "@/lib/utils/dashboard-filters";
-import { InsightsSection } from "@/components/dashboard/InsightsSection";
+import { SmartInsightsSection } from "@/components/dashboard/SmartInsightsSection";
+import { RecommendationsSection } from "@/components/dashboard/RecommendationsSection";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { ChartsGrid } from "@/components/dashboard/ChartsGrid";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { TeamStatusSummary } from "@/components/dashboard/TeamStatusSummary";
+import { RejectionAnalyticsSection } from "@/components/dashboard/RejectionAnalyticsSection";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 
@@ -26,46 +29,7 @@ export default function DashboardPage() {
     return () => unsubscribe();
   }, []);
 
-  const { currentReports, prevReports } = useMemo(() => {
-     const current = filterReports(allReports, filter);
-     
-     // Calculate precise previous period for trend arrows
-     const prev = allReports.filter(r => {
-         // Platform Filter
-         if (filter.platform !== "all") {
-             const m = ["واتساب", "whatsapp"].includes(filter.platform.toLowerCase());
-             const pf = r.platform?.toLowerCase() || '';
-             const match = m ? (pf.includes("whatsapp") || pf.includes("واتساب")) : (pf.includes("messenger") || pf.includes("ماسنجر") || pf.includes("انستقرام"));
-             if (!match) return false;
-         }
-         
-         // Rep Filter
-         if (filter.salesRep !== "all" && r.salesRepId !== filter.salesRep) return false;
-         
-         // Date offset logic
-         const reportDateStr = r.createdAt ? new Date(r.createdAt) : new Date((r.date || "").split('/').reverse().join('-'));
-         const rTime = reportDateStr.getTime();
-         if (isNaN(rTime)) return false;
-
-         const now = new Date();
-         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-         const msPerDay = 24 * 60 * 60 * 1000;
-
-         if (filter.dateRange === "اليوم") {
-             return rTime >= today - msPerDay && rTime < today; // Yesterday
-         }
-         if (filter.dateRange === "الأسبوع") {
-             return rTime >= today - (14 * msPerDay) && rTime < today - (7 * msPerDay);
-         }
-         if (filter.dateRange === "الشهر") {
-             return rTime >= today - (60 * msPerDay) && rTime < today - (30 * msPerDay);
-         }
-         
-         return false; // 'all' has no precise previous period
-     });
-
-     return { currentReports: current, prevReports: prev };
-  }, [allReports, filter]);
+  const currentReports = useMemo(() => filterReports(allReports, filter), [allReports, filter]);
 
   if (loading) {
     return (
@@ -102,17 +66,44 @@ export default function DashboardPage() {
            <EmptyState />
         ) : (
            <>
-              {/* SECTION 1: AI Insights */}
-              <InsightsSection currentPeriod={currentReports} prevPeriod={prevReports} />
-              
-              {/* SECTION 2: KPI Cards */}
-              <KPICards reports={currentReports} prevReports={prevReports} />
-              
-              {/* SECTION 3: Charts */}
-              <ChartsGrid reports={currentReports} prevReports={prevReports} />
-              
-              {/* SECTION 4: Recent Activity Table */}
+              {/* SECTION 1: KPI Cards */}
+              <KPICards reports={currentReports} />
+
+              {/* SECTION 2: Charts */}
+              <ChartsGrid reports={currentReports} />
+
+              {/* SECTION 3: AI Insights + Recommendations */}
+              <SmartInsightsSection reports={currentReports} />
+              <RecommendationsSection reports={currentReports} />
+
+              {/* SECTION 4: Rejection Analytics */}
+              <>
+                <div className="flex items-center gap-4 my-2">
+                  <div className="flex-1 h-px bg-[#E2E8F0]"></div>
+                  <span className="text-[12px] font-black text-[#64748B] uppercase tracking-widest px-3 py-1.5 bg-[#F7F9FC] border border-[#E2E8F0] rounded-full">تحليل أسباب الرفض</span>
+                  <div className="flex-1 h-px bg-[#E2E8F0]"></div>
+                </div>
+                <RejectionAnalyticsSection reports={currentReports} />
+              </>
+
+              {/* SECTION 5: Team Status */}
+              <div className="flex items-center gap-4 my-2">
+                <div className="flex-1 h-px bg-[#E2E8F0]"></div>
+                <span className="text-[12px] font-black text-[#64748B] uppercase tracking-widest px-3 py-1.5 bg-[#F7F9FC] border border-[#E2E8F0] rounded-full">حالة الفريق</span>
+                <div className="flex-1 h-px bg-[#E2E8F0]"></div>
+              </div>
+              <TeamStatusSummary allReports={allReports} />
+
+              {/* SECTION 6: Recent Activity */}
               <RecentActivity reports={currentReports} />
+
+              {/* Coming Soon: Marketing Dashboard */}
+              <div className="mt-8 border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center">
+                <div className="text-4xl mb-3">📊</div>
+                <h3 className="text-lg font-bold text-gray-600 mb-1">Marketing Dashboard</h3>
+                <p className="text-gray-400 text-sm mb-3">تحليل الإنفاق الإعلاني • ROAS • CAC • LTV:CAC</p>
+                <span className="inline-block bg-blue-100 text-blue-600 text-xs font-bold px-4 py-1.5 rounded-full">🚀 Coming Soon</span>
+              </div>
            </>
         )}
      </div>

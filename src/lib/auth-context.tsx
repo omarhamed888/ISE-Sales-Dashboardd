@@ -1,37 +1,46 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, User, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut } from "firebase/auth";
+import { onAuthStateChanged, User, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut as firebaseSignOut } from "firebase/auth";
 import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
-export interface AuthUser {
+export interface AppUser {
   uid: string;
   email: string;
   name: string;
-  role: "sales" | "admin" | "superadmin";
+  role: 'sales' | 'admin' | 'superadmin';
   isActive: boolean;
+  teamName?: string;
+  programTrack?: string;
+  addedAt?: any;
+  lastLogin?: any;
 }
 
+// Keep AuthUser as alias for compatibility
+export type AuthUser = AppUser;
+
 const AuthContext = createContext<{
-  user: AuthUser | null;
+  user: AppUser | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-}>({ 
-  user: null, 
-  loading: true, 
+}>({
+  user: null,
+  loading: true,
   signInWithGoogle: async () => {},
+  signInWithEmail: async () => {},
   signOut: async () => {}
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Authenticate user via Google and verify against Firestore
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    
+
     // Step 2: Firebase Google popup opens
     const result = await signInWithPopup(auth, provider);
     const firebaseUser = result.user;
@@ -43,9 +52,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       where("isActive", "==", true),
       limit(1)
     );
-    
+
     const querySnapshot = await getDocs(q);
-    
+
     if (querySnapshot.empty) {
       // AUTO-BOOTSTRAP: If the user is not found, we attempt to register them as a superadmin.
       // This solves the initial lockout problem for the developer.
@@ -66,6 +75,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await firebaseSignOut(auth);
         throw new Error("unregistered");
       }
+    }
+  };
+
+  const signInWithEmail = async (email: string, password: string) => {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    const firebaseUser = result.user;
+
+    // Verify user exists in Firestore
+    const q = query(
+      collection(db, "users"),
+      where("email", "==", firebaseUser.email),
+      where("isActive", "==", true),
+      limit(1)
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      await firebaseSignOut(auth);
+      throw new Error("unregistered");
     }
   };
 
@@ -95,6 +123,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               name: data.name || "Sales Member",
               role: data.role || "sales",
               isActive: true,
+              teamName: data.teamName,
+              programTrack: data.programTrack,
+              addedAt: data.addedAt,
+              lastLogin: data.lastLogin,
             });
           } else {
             // Not found or not active
@@ -114,7 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInWithEmail, signOut }}>
       {children}
     </AuthContext.Provider>
   );

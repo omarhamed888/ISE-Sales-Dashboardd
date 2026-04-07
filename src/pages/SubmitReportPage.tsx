@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { parseReport } from "@/lib/services/gemini-parser";
+import { useCourses } from "@/lib/hooks/useCourses";
 import type { ParsedReportData, ReportFunnel, FunnelStage } from "@/lib/services/gemini-parser";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -66,6 +67,7 @@ function TableSection({ title, defaultExpanded, data, onChange }: { title: strin
 
 export default function SubmitReportPage() {
   const { user } = useAuth();
+  const courses = useCourses();
   
   // Accountability
   const [checkingAccountability, setCheckingAccountability] = useState(true);
@@ -115,7 +117,7 @@ export default function SubmitReportPage() {
     setParseError(null);
     
     try {
-      const result = await parseReport(reportText, formPlatform);
+      const result = await parseReport(reportText, formPlatform, courses.map(c => c.name));
       setParsedData(result.parsedData);
       setAppState('review');
     } catch (error: any) {
@@ -198,17 +200,22 @@ export default function SubmitReportPage() {
                     </div>
                     <div>
                         <h2 className="text-[16px] font-black font-headline text-[#1E293B]">مرحباً، {user?.name}</h2>
-                        <p className="text-[12px] font-bold text-[#64748B]">تقديم وتوثيق البيانات التراكمية</p>
+                        <p className="text-[12px] font-bold text-[#64748B]">توثيق نتائج اليوم</p>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl p-3 flex flex-col justify-center">
-                        <span className="text-[10px] font-bold text-[#64748B] mb-1">تاريخ التحليل:</span>
-                        <span className={`text-[13px] font-black ${forcedDate ? 'text-error' : 'text-[#1E293B]'}`}>
-                            {new Date(formDate).toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric'})}
-                            {forcedDate && " (متأخر)"}
-                        </span>
+                        <span className="text-[10px] font-bold text-[#64748B] mb-1">تاريخ التقرير:</span>
+                        <input
+                            type="date"
+                            value={formDate}
+                            onChange={e => { if (!forcedDate) setFormDate(e.target.value); }}
+                            disabled={!!forcedDate}
+                            className={`bg-transparent border-none p-0 text-[13px] font-black focus:ring-0 outline-none w-full ${forcedDate ? 'text-error cursor-not-allowed' : 'text-[#1E293B]'}`}
+                            dir="ltr"
+                        />
+                        {forcedDate && <span className="text-[10px] text-error font-bold">(متأخر)</span>}
                     </div>
                     <div>
                         <span className="text-[10px] font-bold text-[#64748B] mb-1 block">منصة العمل اليوم:</span>
@@ -223,7 +230,7 @@ export default function SubmitReportPage() {
             <div className="bg-white rounded-[24px] shadow-sm border border-[#E2E8F0] p-6 flex flex-col items-start relative">
                 <div className="flex justify-between w-full items-center mb-4">
                     <label className="text-[14px] font-black text-[#1E293B]">الصق تقرير اليوم هنا</label>
-                    <button onClick={() => setReportText("تقرير يوم أداء\nتم استلام 120 طلب. \n10 مبيعات.\nتسرب:\n15 لم يرد بعد التحية (طموح)\n20 لم يرد بعد تفاصيل\n")} className="text-[11px] font-bold text-[#2563EB] hover:underline bg-[#EFF6FF] px-2 py-1 rounded-md">إدراج نموذج تجريبي</button>
+                    <button onClick={() => setReportText("تقرير يوم أداء\nتم استلام 120 طلب. \n10 مبيعات.\nتسرب:\n15 لم يرد بعد التحية (طموح)\n20 لم يرد بعد تفاصيل\n")} className="text-[11px] font-bold text-[#2563EB] hover:underline bg-[#EFF6FF] px-2 py-1 rounded-md">نموذج تجريبي</button>
                 </div>
                 
                 <textarea 
@@ -280,7 +287,7 @@ export default function SubmitReportPage() {
                       </div>
                       <div>
                           <h2 className="text-[15px] font-black text-[#1E293B]">تم تحليل التقرير بنجاح</h2>
-                          <p className="text-[11px] font-bold text-[#64748B] flex items-center gap-1 mt-0.5">مُستخرج بواسطة <span className="bg-[#2563EB]/10 text-[#2563EB] px-1.5 py-0.5 rounded-[4px] text-[9px] font-black">Gemini AI</span></p>
+                          <p className="text-[11px] font-bold text-[#64748B] flex items-center gap-1 mt-0.5">تم الاستخراج بواسطة <span className="bg-[#2563EB]/10 text-[#2563EB] px-1.5 py-0.5 rounded-[4px] text-[9px] font-black">Gemini</span></p>
                       </div>
                   </div>
                   <button onClick={() => { setAppState("input"); setParsedData(null); }} className="text-[#2563EB] font-bold text-[12px] bg-[#EFF6FF] px-4 py-2 rounded-xl transition-colors hover:bg-[#E2E8F0]">
@@ -314,19 +321,19 @@ export default function SubmitReportPage() {
               {/* FUNNELS */}
               <div className="bg-white border border-[#E2E8F0] p-6 rounded-[24px] mb-8 shadow-sm">
                   <h3 className="font-black text-[#1E293B] text-[16px] mb-6 flex items-center gap-2">
-                       <span className="material-symbols-outlined text-[#2563EB]">filter_list</span> تسلسل النزيف التسويقي
+                       <span className="material-symbols-outlined text-[#2563EB]">filter_list</span> مراحل قمع التحويل
                   </h3>
                   
                   <TableSection title="لم يرد بعد التحية" defaultExpanded={false} data={parsedData.funnel.noReplyAfterGreeting} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, noReplyAfterGreeting: d}})} />
                   <TableSection title="لم يرد بعد التفاصيل" defaultExpanded={false} data={parsedData.funnel.noReplyAfterDetails} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, noReplyAfterDetails: d}})} />
                   <TableSection title="لم يرد بعد السعر" defaultExpanded={false} data={parsedData.funnel.noReplyAfterPrice} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, noReplyAfterPrice: d}})} />
-                  <TableSection title="رد بعد السعر (قيد الإغلاق)" defaultExpanded={true} data={parsedData.funnel.repliedAfterPrice} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, repliedAfterPrice: d}})} />
+                  <TableSection title="رد بعد السعر" defaultExpanded={true} data={parsedData.funnel.repliedAfterPrice} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, repliedAfterPrice: d}})} />
               </div>
 
               {/* Special Cases Tracker */}
               <div className="bg-white border border-[#E2E8F0] p-6 rounded-[24px] mb-8 shadow-sm">
                   <h3 className="font-black text-[#1E293B] text-[15px] mb-4 flex items-center gap-2">
-                       <span className="material-symbols-outlined text-amber-500">lightbulb</span> الملاحظات الخاصة والاعتراضات
+                       <span className="material-symbols-outlined text-amber-500">lightbulb</span> ملاحظات وردود الفعل
                   </h3>
                   <div className="flex flex-wrap gap-2 mb-4">
                       {parsedData.specialCases.map((note, i) => (
@@ -335,7 +342,7 @@ export default function SubmitReportPage() {
                               <button onClick={() => removeNote(i)} className="text-[#64748B] hover:text-error bg-white rounded-md w-4 h-4 flex items-center justify-center"><span className="material-symbols-outlined text-[12px]">close</span></button>
                           </div>
                       ))}
-                      {parsedData.specialCases.length === 0 && <span className="text-[#64748B] text-[11px] font-bold">لا يوجد ملاحظات مرفقة للذكاء الاصطناعي...</span>}
+                      {parsedData.specialCases.length === 0 && <span className="text-[#64748B] text-[11px] font-bold">لا توجد ملاحظات مرفقة.</span>}
                   </div>
                   <div className="flex gap-2">
                       <input value={newNote} onChange={e => setNewNote(e.target.value)} onKeyDown={e => e.key === 'Enter' && addSpecialNote()} placeholder="إضافة ملاحظة جديدة..." className="flex-1 bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-4 py-2 text-[12px] font-bold focus:border-[#2563EB] outline-none" />
@@ -365,7 +372,7 @@ export default function SubmitReportPage() {
                  
                  <label className="flex items-center gap-3 cursor-pointer">
                      <input type="checkbox" checked={isConfirmed} onChange={e => setIsConfirmed(e.target.checked)} className="w-5 h-5 rounded border-[#E2E8F0] text-[#2563EB] focus:ring-0" />
-                     <span className="font-bold text-[#1E293B] text-[13px]">راجعت البيانات وهي مطابقة لعملي.</span>
+                     <span className="font-bold text-[#1E293B] text-[13px]">البيانات مراجعة ومطابقة لما أنجزته اليوم.</span>
                  </label>
 
                  <div className="flex items-center gap-3 w-full md:w-auto">
@@ -397,7 +404,7 @@ export default function SubmitReportPage() {
                  <span className="material-symbols-outlined text-[48px]">check_circle</span>
              </div>
              <h3 className="font-black text-[#1E293B] text-[24px] mb-2 font-headline">تم حفظ التقرير بنجاح</h3>
-             <p className="text-[13px] font-bold text-[#64748B] mb-8">تم تدوين التقرير في سجلك بشكل موثق. شكراً لمجهودك اليوم.</p>
+             <p className="text-[13px] font-bold text-[#64748B] mb-8">تم حفظ تقريرك بنجاح. شكراً على مجهودك اليوم.</p>
 
              <div className="bg-[#F7F9FC] border border-[#E2E8F0] w-full p-4 rounded-xl flex justify-between items-center mb-8">
                  <div className="text-right">

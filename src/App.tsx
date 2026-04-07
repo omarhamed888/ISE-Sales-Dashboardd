@@ -10,6 +10,9 @@ import AdvancedMetricsPage from '@/pages/AdvancedMetricsPage';
 import TeamPage from '@/pages/TeamPage';
 import SettingsPage from '@/pages/SettingsPage';
 import MyReportsPage from '@/pages/MyReportsPage';
+import InsightsPage from '@/pages/InsightsPage';
+import DealsPage from '@/pages/DealsPage';
+import MyDealsPage from '@/pages/MyDealsPage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -69,6 +72,7 @@ export default function App() {
       <Route path="/reports" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><ReportsPage /></AppLayout></ProtectedRoute>} />
       <Route path="/ads" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><AdsAnalysisPage /></AppLayout></ProtectedRoute>} />
       <Route path="/metrics" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><AdvancedMetricsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/insights" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><InsightsPage /></AppLayout></ProtectedRoute>} />
       
       {/* Superadmin Only Routes */}
       <Route path="/settings" element={<ProtectedRoute allowedRoles={["superadmin"]}><AppLayout><SettingsPage /></AppLayout></ProtectedRoute>} />
@@ -76,6 +80,8 @@ export default function App() {
       {/* Sales Routes */}
       <Route path="/submit-report" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><SubmitReportPage /></AppLayout></ProtectedRoute>} />
       <Route path="/my-reports" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><MyReportsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/deals" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><DealsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/my-deals" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><MyDealsPage /></AppLayout></ProtectedRoute>} />
 
       {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />

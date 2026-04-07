@@ -1,4 +1,8 @@
 import { useState } from "react";
+import {
+  calcInteractionsFromParsedData,
+  calcConversionRate,
+} from "@/lib/utils/dashboard-aggregations";
 
 interface ReportDetailModalProps {
   report: any;
@@ -16,6 +20,12 @@ export function ReportDetailModal({ report, isOpen, onClose }: ReportDetailModal
 
   const sum = pd.summary || {};
   const f = pd.funnel || pd.funnels || {};
+  const totalMsgs =
+    (typeof pd.totalMessages === "number" ? pd.totalMessages : null) ??
+    sum.totalMessages ??
+    0;
+  const interactionsKpi = calcInteractionsFromParsedData(pd);
+  const conversionKpi = calcConversionRate(interactionsKpi, totalMsgs);
 
   // Construct table breakdown by Ad
   // We look through greeting, details, price, success steps
@@ -74,15 +84,15 @@ export function ReportDetailModal({ report, isOpen, onClose }: ReportDetailModal
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-[#F7F9FC] border border-[#E2E8F0] p-4 rounded-xl text-center">
                     <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-widest mb-1">الرسائل المستلمة</p>
-                    <p className="text-[20px] font-black text-[#1E293B]">{sum.totalMessages || 0}</p>
+                    <p className="text-[20px] font-black text-[#1E293B]">{totalMsgs}</p>
                 </div>
                 <div className="bg-[#F7F9FC] border border-[#E2E8F0] p-4 rounded-xl text-center">
                     <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-widest mb-1">الردود الفعالة</p>
-                    <p className="text-[20px] font-black text-[#1E293B]">{sum.interactions || 0}</p>
+                    <p className="text-[20px] font-black text-[#1E293B]">{interactionsKpi}</p>
                 </div>
                 <div className="bg-[#EFF6FF] border border-[#2563EB]/20 p-4 rounded-xl text-center">
                     <p className="text-[11px] font-bold text-[#2563EB] uppercase tracking-widest mb-1">معدل التحويل</p>
-                    <p className="text-[20px] font-black text-[#2563EB]">{sum.conversionRate || 0}%</p>
+                    <p className="text-[20px] font-black text-[#2563EB]">{conversionKpi}%</p>
                 </div>
                 <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-center">
                     <p className="text-[11px] font-bold text-amber-700 uppercase tracking-widest mb-1">خلط توظيف</p>

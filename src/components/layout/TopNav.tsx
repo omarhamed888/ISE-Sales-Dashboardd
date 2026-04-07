@@ -10,7 +10,8 @@ const routeTitles: Record<string, string> = {
   "/settings": "الإعدادات",
   "/submit-report": "رفع تقرير",
   "/my-reports": "تقاريري",
-  "/metrics": "مقاييس متقدمة"
+  "/metrics": "المقاييس المتقدمة",
+  "/insights": "الرؤى"
 };
 
 function getTitle(pathname: string): string {

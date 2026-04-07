@@ -31,10 +31,10 @@ export function PerformanceTab({ users, reports, allReports, onEdit }: Performan
             statusText = "سلم تقرير الإنتاجية اليوم";
         } else if (now.getHours() < 16) {
             statusColor = "bg-amber-400";
-            statusText = "مسجل حضور، ولم يسجل التقرير بعد";
+            statusText = "حاضر — لم يرفع تقريره بعد";
         } else {
              statusColor = "bg-error";
-             statusText = "لم يستكمل تقرير اليوم! + لا أعذار";
+             statusText = "لم يرفع تقرير اليوم";
         }
 
         return { ...u, agg, lastReport, statusColor, statusText };
@@ -43,7 +43,7 @@ export function PerformanceTab({ users, reports, allReports, onEdit }: Performan
     if (usersWithStats.length === 0) {
         return (
             <div className="bg-white rounded-2xl p-8 border border-[#E2E8F0] shadow-sm flex flex-col items-center justify-center min-h-[300px]">
-                <p className="text-[#64748B] font-bold">لا يوجد موظفين نشطين حالياً</p>
+                <p className="text-[#64748B] font-bold">لا يوجد موظفون نشطون حالياً</p>
             </div>
         );
     }
@@ -71,7 +71,7 @@ export function PerformanceTab({ users, reports, allReports, onEdit }: Performan
                                 </div>
                             </div>
                             <span className="bg-[#F7F9FC] text-[#64748B] px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-[#E2E8F0]">
-                                {user.role === "admin" ? "إنتاج وإشراف" : "مبيعات مباشرة"}
+                                {user.role === "admin" ? "إداري" : "مبيعات"}
                             </span>
                         </div>
 
@@ -94,9 +94,9 @@ export function PerformanceTab({ users, reports, allReports, onEdit }: Performan
                         {/* Progress Tracker vs Team */}
                         <div className="mb-6">
                             <div className="flex justify-between items-center text-[11px] font-bold mb-2">
-                                <span className="text-[#64748B]">قياس الكفاءة مقابل الفريق</span>
+                                <span className="text-[#64748B]">الأداء مقارنةً بالفريق</span>
                                 <span className={isAboveAvg ? "text-emerald-600" : "text-amber-600"}>
-                                    {isAboveAvg ? "+ أعلى من المتوسط" : "أقل من المتوسط"}
+                                    {isAboveAvg ? "أعلى من المتوسط" : "أقل من المتوسط"}
                                 </span>
                             </div>
                             <div className="h-2 w-full bg-[#F7F9FC] rounded-full relative overflow-hidden block border border-[#E2E8F0]">
@@ -106,6 +106,24 @@ export function PerformanceTab({ users, reports, allReports, onEdit }: Performan
                                 <div className="absolute top-0 right-[50%] w-0.5 h-full bg-[#1E293B] shadow-sm z-10"></div>
                             </div>
                         </div>
+
+                        {/* Team / Program Track Badges */}
+                        {(user.teamName || user.programTrack) && (
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {user.teamName && (
+                                    <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-[12px]">groups</span>
+                                        {user.teamName}
+                                    </span>
+                                )}
+                                {user.programTrack && (
+                                    <span className="bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-[12px]">school</span>
+                                        {user.programTrack}
+                                    </span>
+                                )}
+                            </div>
+                        )}
 
                         {/* Last Action Context */}
                         <div className="flex items-center gap-2 mb-6 bg-surface-container-low p-2 rounded-lg text-[11px] font-bold text-[#64748B]">
@@ -119,7 +137,7 @@ export function PerformanceTab({ users, reports, allReports, onEdit }: Performan
                                 عرض التقارير
                             </Link>
                             <button onClick={() => onEdit(user)} className="flex-1 text-center text-[12px] font-bold bg-white text-[#2563EB] border border-[#2563EB]/20 py-2.5 rounded-xl hover:bg-[#EFF6FF] transition-colors">
-                                تعديل الصلاحية
+                                تعديل البيانات
                             </button>
                         </div>
 

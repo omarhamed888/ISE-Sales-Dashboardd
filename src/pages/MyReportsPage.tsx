@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
+import {
+  calcInteractionsFromParsedData,
+  calcConversionRate,
+} from "@/lib/utils/dashboard-aggregations";
 
 export default function MyReportsPage() {
     const { user } = useAuth();
@@ -73,8 +77,8 @@ export default function MyReportsPage() {
         <div className="max-w-[960px] mx-auto font-body" dir="rtl">
             <header className="mb-8 flex justify-between items-end">
                 <div>
-                    <h1 className="text-[28px] font-black text-[#1E293B] font-headline mb-2">تقاريري وأدائي</h1>
-                    <p className="text-[13px] font-bold text-[#64748B]">سجل التقارير ومتابعة أيام العمل الخاصة بك.</p>
+                    <h1 className="text-[28px] font-black text-[#1E293B] font-headline mb-2">تقاريري</h1>
+                    <p className="text-[13px] font-bold text-[#64748B]">سجل جميع تقاريرك ومتابعة أدائك.</p>
                 </div>
                 {streak > 0 && (
                     <div className="bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl flex items-center gap-2">
@@ -95,13 +99,26 @@ export default function MyReportsPage() {
                 <div className="bg-white border border-[#E2E8F0] p-6 rounded-2xl shadow-sm flex flex-col justify-center">
                     <p className="text-[11px] font-bold text-[#64748B] mb-2">إجمالي التفاعلات المسجلة</p>
                     <p className="font-black text-[28px] text-[#1E293B] font-headline">
-                        {reports.reduce((sum, r) => sum + (r.parsedData?.interactions || 0), 0)}
+                        {reports.reduce(
+                            (sum, r) => sum + calcInteractionsFromParsedData(r.parsedData),
+                            0
+                        )}
                     </p>
                 </div>
                 <div className="bg-[#2563EB]/5 border border-[#2563EB]/20 p-6 rounded-2xl shadow-sm flex flex-col justify-center">
                     <p className="text-[11px] font-bold text-[#2563EB] mb-2">معدل التحويل التراكمي</p>
                     <p className="font-black text-[28px] text-[#2563EB] font-headline">
-                        {(reports.reduce((sum, r) => sum + (r.parsedData?.conversionRate || 0), 0) / (reports.length || 1)).toFixed(1)}%
+                        {(() => {
+                            const tm = reports.reduce(
+                                (s, r) => s + (r.parsedData?.totalMessages || 0),
+                                0
+                            );
+                            const intr = reports.reduce(
+                                (s, r) => s + calcInteractionsFromParsedData(r.parsedData),
+                                0
+                            );
+                            return calcConversionRate(intr, tm).toFixed(1);
+                        })()}%
                     </p>
                 </div>
             </div>
@@ -134,7 +151,9 @@ export default function MyReportsPage() {
                                         </span>
                                     </td>
                                     <td className="p-4 font-bold text-[#1E293B] text-center">{report.parsedData?.totalMessages || 0}</td>
-                                    <td className="p-4 font-bold text-[#1E293B] text-center">{report.parsedData?.interactions || 0}</td>
+                                    <td className="p-4 font-bold text-[#1E293B] text-center">
+                                        {calcInteractionsFromParsedData(report.parsedData)}
+                                    </td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg w-max">
                                             <span className="material-symbols-outlined text-[14px]">check_circle</span>
@@ -145,7 +164,7 @@ export default function MyReportsPage() {
                             ))}
                             {reports.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="p-12 text-center text-[#64748B] font-bold text-[13px]">لا يوجد تقارير مرفوعة حتى الآن.</td>
+                                    <td colSpan={5} className="p-12 text-center text-[#64748B] font-bold text-[13px]">لا توجد تقارير مرفوعة حتى الآن.</td>
                                 </tr>
                             )}
                         </tbody>

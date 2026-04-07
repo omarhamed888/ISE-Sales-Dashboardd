@@ -52,5 +52,23 @@ service cloud.firestore {
       allow update: if isAuth() && resource.data.uid == request.auth.uid;
       allow delete: if false;
     }
+
+    match /courses/{courseId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    match /insights/{insightId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
+    match /deals/{dealId} {
+      allow read: if isAdmin() || (isAuth() && resource.data.salesRepId == request.auth.uid);
+      allow create: if isAuth();
+      allow update: if isAdmin();
+      allow delete: if isSuperAdmin();
+    }
   }
 }

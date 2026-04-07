@@ -85,9 +85,9 @@ export function FilterBar() {
           className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-[13px] font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]/50 appearance-none cursor-pointer hover:bg-surface-container transition-colors disabled:opacity-50"
           disabled={isLoadingProps}
         >
-          <option value="all">كل المنصات</option>
+          <option value="all">جميع المنصات</option>
           <option value="whatsapp">واتساب</option>
-          <option value="messenger">ماسنجر فيسبوك</option>
+          <option value="messenger">ماسنجر</option>
         </select>
 
         {/* Sales Rep Dropdown */}
@@ -97,7 +97,7 @@ export function FilterBar() {
           className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-[13px] font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]/50 appearance-none cursor-pointer hover:bg-surface-container transition-colors disabled:opacity-50"
           disabled={isLoadingProps}
         >
-          <option value="all">كل الموظفين</option>
+          <option value="all">جميع المندوبين</option>
           {salesReps.map(rep => (
             <option key={rep.uid} value={rep.uid}>{rep.name}</option>
           ))}
@@ -110,7 +110,7 @@ export function FilterBar() {
           className="max-w-[200px] truncate bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-[13px] font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]/50 appearance-none cursor-pointer hover:bg-surface-container transition-colors disabled:opacity-50"
           disabled={isLoadingProps}
         >
-          <option value="all">كل الإعلانات</option>
+          <option value="all">جميع الإعلانات</option>
           {uniqueAds.map(ad => (
             <option key={ad} value={ad}>{ad}</option>
           ))}

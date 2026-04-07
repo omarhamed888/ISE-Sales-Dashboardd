@@ -1,25 +1,49 @@
-import { useMemo } from "react";
 import { FilterState } from "@/lib/filter-context";
+import { DASHBOARD_DATA_QUALITY_FROM_DATE } from "@/lib/config";
+import {
+  normalizeReportDateKey,
+  isReportDateInDashboardRange,
+  getPreviousPeriodYmdRange,
+  isKeyInClosedRange,
+} from "@/lib/utils/report-dates";
 
+function platformMatches(filter: FilterState, r: any): boolean {
+  if (filter.platform === "all") return true;
+  const pf = (r.platform || "").toLowerCase();
+  if (filter.platform === "whatsapp") {
+    return pf.includes("whatsapp") || pf.includes("واتساب");
+  }
+  if (filter.platform === "messenger") {
+    return (
+      pf.includes("messenger") ||
+      pf.includes("ماسنجر") ||
+      pf.includes("انستقرام") ||
+      pf.includes("إنستغرام")
+    );
+  }
+  return true;
+}
+
+function passesDateAndQuality(r: any, filter: FilterState): boolean {
+  const key = normalizeReportDateKey(r);
+
+  if (filter.dateRange === "الإجمالي") {
+    if (!key) return true;
+    return key >= DASHBOARD_DATA_QUALITY_FROM_DATE;
+  }
+
+  return isReportDateInDashboardRange(key, filter.dateRange);
+}
+
+/** Reports matching dashboard filters (by business `date`, not submission time). */
 export function filterReports(reports: any[], filter: FilterState) {
-  return reports.filter(r => {
-    // Platform
-    if (filter.platform !== "all") {
-       // Convert internal platform to arabic to match DB string
-       const platformMap: Record<string, string[]> = {
-         "whatsapp": ["واتساب", "whatsapp", "WhatsApp"],
-         "messenger": ["ماسنجر", "انستقرام", "إنستغرام", "messenger"] // group fb ecosystem
-       };
-       const match = platformMap[filter.platform]?.find(p => r.platform?.toLowerCase().includes(p.toLowerCase()));
-       if (!match) return false;
-    }
-    
-    // Sales Rep
+  return reports.filter((r) => {
+    if (!platformMatches(filter, r)) return false;
+
     if (filter.salesRep !== "all" && r.salesRepId !== filter.salesRep) {
-       return false;
+      return false;
     }
 
-    // Ad Name filtering
     if (filter.adName !== "all" && r.parsedData?.funnel) {
       let hasAd = false;
       Object.values(r.parsedData.funnel).forEach((stages: any) => {
@@ -30,28 +54,43 @@ export function filterReports(reports: any[], filter: FilterState) {
       if (!hasAd) return false;
     }
 
-    // Date Range Filtration
-    const reportDateStr = r.createdAt ? new Date(r.createdAt) : new Date(r.date.split('/').reverse().join('-')); // try parse standard
-    const rTime = reportDateStr.getTime();
-    
-    // Safety check just in case date parsing fails
-    if (isNaN(rTime)) return true;
-
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    if (filter.dateRange === "اليوم") {
-       if (rTime < today.getTime()) return false;
-    }
-    if (filter.dateRange === "الأسبوع") {
-       const weekAgo = today.getTime() - (7 * 24 * 60 * 60 * 1000);
-       if (rTime < weekAgo) return false;
-    }
-    if (filter.dateRange === "الشهر") {
-       const monthAgo = today.getTime() - (30 * 24 * 60 * 60 * 1000);
-       if (rTime < monthAgo) return false;
-    }
-
-    return true;
+    return passesDateAndQuality(r, filter);
   });
+}
+
+/** Same non-date filters as `filterReports`, but restricted to a YYYY-MM-DD inclusive range (for previous-period KPIs). */
+export function filterReportsByYmdRange(
+  reports: any[],
+  filter: FilterState,
+  from: string,
+  to: string
+) {
+  return reports.filter((r) => {
+    if (!platformMatches(filter, r)) return false;
+    if (filter.salesRep !== "all" && r.salesRepId !== filter.salesRep) return false;
+
+    if (filter.adName !== "all" && r.parsedData?.funnel) {
+      let hasAd = false;
+      Object.values(r.parsedData.funnel).forEach((stages: any) => {
+        if (Array.isArray(stages)) {
+          if (stages.some((s: any) => s.adName === filter.adName)) hasAd = true;
+        }
+      });
+      if (!hasAd) return false;
+    }
+
+    const key = normalizeReportDateKey(r);
+    if (!key) return false;
+    if (key < DASHBOARD_DATA_QUALITY_FROM_DATE) return false;
+    return isKeyInClosedRange(key, from, to);
+  });
+}
+
+export function getDashboardPreviousPeriodReports(
+  allReports: any[],
+  filter: FilterState
+): any[] {
+  const range = getPreviousPeriodYmdRange(filter.dateRange);
+  if (!range) return [];
+  return filterReportsByYmdRange(allReports, filter, range.from, range.to);
 }
