@@ -4,12 +4,12 @@ export interface FunnelStage {
   id: string;
   adName: string;
   count: number;
-  notes?: string;        // الوظيفة بعد "/" في ماسنجر
-  leadNotes?: string[];  // ملاحظات فردية تحت كل عميل في "رد بعد السعر" (واتساب/تيك توك)
+  notes?: string;       // الوظائف (comma-separated)
+  leadNotes?: string[]; // الحالة (من "رد بعد السعر" أو ماسنجر)
 }
 
 export interface ReportFunnel {
-  noReplyAfterGreeting: FunnelStage[];   // ماسنجر فقط
+  noReplyAfterGreeting: FunnelStage[];  // ماسنجر فقط
   noReplyAfterDetails: FunnelStage[];
   noReplyAfterPrice: FunnelStage[];
   repliedAfterPrice: FunnelStage[];
@@ -46,12 +46,12 @@ export interface ParsedDealsOutput {
 
 export interface ParsedReportData {
   totalMessages: number;
-  messagesCount: number;       // ماسنجر: رسائل فقط | واتساب/تيك توك: = totalMessages
-  commentsCount: number;       // ماسنجر: كومنتات | واتساب/تيك توك: 0
-  interactions: number;        // مجموع "رد بعد السعر"
+  messagesCount: number;
+  commentsCount: number;
+  interactions: number;
   conversionRate: number;
   funnel: ReportFunnel;
-  commentsFunnel: ReportFunnel; // ماسنجر: كومنتات فقط | واتساب/تيك توك: فارغ
+  commentsFunnel: ReportFunnel;
   specialCases: string[];
   jobConfusionCount: number;
   rejectionReasons: RejectionReason[];
@@ -60,7 +60,7 @@ export interface ParsedReportData {
   salesNotes: string;
   programTrack: string;
   sourceType: string;
-  closedDeals: DealInput[];    // الصفقات المغلقة المدمجة في التقرير
+  closedDeals: DealInput[];
 }
 
 const REJECTION_CATEGORIES = [
@@ -69,90 +69,86 @@ const REJECTION_CATEGORIES = [
 ];
 
 const SYSTEM_INSTRUCTION = `أنت محلل بيانات مبيعات متخصص في السوق العربي.
-ستستقبل تقرير مبيعات يومي كنص خام. مهمتك: استخرج البيانات وأرجع JSON صحيح فقط بدون أي نص إضافي.
+ستستقبل تقرير مبيعات يومي كنص خام. مهمتك: استخرج البيانات وأرجع JSON صحيح فقط بدون أي نص إضافي أو markdown.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-فورمات واتساب / تيك توك (نفس الشيء)
+📋 فورمات واتساب / تيك توك (نفس الشيء)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-*اجمالى (N)*  →  totalMessages = N
+(N) ليد  →  totalMessages = N
 
-توزيع الليدز حسب الإعلان:
-- اسم_الإعلان: N   →  leadsByAd: [{adName, leadCount}]
+توزيع الإعلانات:  ← عنوان فقط، تجاهله
 
-* مردش بعد التفاصيل (N)
-M (اسم_الإعلان)   →  noReplyAfterDetails: [{adName: "اسم_الإعلان", count: M}]
-M (اسم_الإعلان)
+1. مردش بعد التفاصيل (N):  →  noReplyAfterDetails, total count = N
+اسم_الإعلان: (الوظائف: وظيفة1، وظيفة2، وظيفة3)
+   → entry: { adName: "اسم_الإعلان", count: عدد_الوظائف_المذكورة, notes: "وظيفة1، وظيفة2، وظيفة3", leadNotes: [] }
+   count = عدد الوظائف المذكورة بين القوسين (كل وظيفة = شخص)
 
-* مردش بعد السعر (N)
-M (اسم_الإعلان)   →  noReplyAfterPrice: [{adName, count: M}]
+2. مردش بعد السعر (N):  →  noReplyAfterPrice
+اسم_الإعلان: (الوظائف: وظيفة1، وظيفة2)
+   → نفس الطريقة
 
-* رد بعد السعر (N)
-M (اسم_الإعلان)   →  repliedAfterPrice: [{adName, count: M, leadNotes: [ملاحظات تحته]}]
-هيفكر ويرد         ← هذه ملاحظات عميل تتراكم في leadNotes للـ entry السابق
-هيحضر اونلاين      ← نفس الشيء
-M (اسم_الإعلان)   →  entry جديد
-محتاج يتكلم مراته
+3. رد بعد السعر (N):  →  repliedAfterPrice
+اسم_الإعلان: (الوظائف: وظيفة1 | الحالة: حالة1، حالة2)
+   → entry: { adName, count: عدد_الوظائف, notes: "وظيفة1", leadNotes: ["حالة1", "حالة2"] }
+   الوظائف قبل "|"، الحالة بعد "|"
+   لو مفيش "|" فكله وظائف
 
-قاعدة leadNotes: أي سطر يلي سطر "M (اسم)" وهو ليس "M (اسم)" آخر، يُضاف في leadNotes للـ entry السابق.
+أسباب الرفض: (سبب1: X - سبب2: Y - سبب3: Z)
+   → rejectionReasons: [{ rawText: "سبب1", count: X, category: ... }]
 
-أسباب الرفض:
-- السبب: N   →  rejectionReasons: [{rawText, count, category}]
+ملاحظات: (نص حر)  →  salesNotes
 
-ملاحظات:
-[نص حر]   →  salesNotes
+المبيعات المغلقة (Sales):
+اسم | اسم_الإعلان | اسم_البرنامج | المبلغ | التاريخ
+   → closedDeals: [{ customerName, adSource, programName, programCount: 1, dealValue, firstContactDate }]
+   لو في عدة صفوف → كل سطر = صفقة منفصلة
 
-الصفقات المغلقة: N
-1)
-الاسم: [اسم]      → customerName
-المصدر: [مصدر]    → adSource
-البرنامج: [برنامج] → programName
-عدد البرامج: N    → programCount
-دفع: N            → dealValue
-أول تواصل: تاريخ  → firstContactDate (YYYY-MM-DD)
-
-⚠️ واتساب/تيك توك: لا يوجد مرحلة "مردش بعد أهلا" → noReplyAfterGreeting = []
+leadsByAd: اجمع مجموع الليدز لكل إعلان عبر كل المراحل (مردش بعد التفاصيل + مردش بعد السعر + رد بعد السعر)
+⚠️ واتساب/تيك توك: noReplyAfterGreeting = [] دائماً
 ⚠️ واتساب/تيك توك: commentsFunnel كله فارغ []
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-فورمات ماسنجر
+📋 فورمات ماسنجر
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-السطر الأول: "ماسنجر ( X رساله - Y كومنت )"
-→ messagesCount = X, commentsCount = Y, totalMessages = X + Y
+السطر الأول: (X رسالة - Y كومنت)
+   → messagesCount = X, commentsCount = Y, totalMessages = X + Y
 
-━━━ رسائل ( X ) ━━━   ← بداية قسم الرسائل
+━━━ رسائل (X) ━━━
 
-مردش بعد أهلا ( N )
-N اسم_الإعلان    →  noReplyAfterGreeting: [{adName: "اسم_الإعلان", count: N}]
+مردش بعد أهلاً (N): (إعلان1: M | إعلان2: M | إعلان3: M)
+   → noReplyAfterGreeting: [{ adName: "إعلان1", count: M }, { adName: "إعلان2", count: M }]
+   الفصل بـ "|" بين الإعلانات
 
-مردش بعد التفاصيل ( N )
-- اسم_الإعلان / الوظيفة  →  [{adName, count: 1, notes: "الوظيفة"}]
+مردش بعد التفاصيل (N): (اسم_الإعلان / الوظائف)
+مردش بعد التفاصيل (N): (اسم_الإعلان / الوظائف)
+   → كل سطر = entry واحد: { adName, count: 1, notes: "الوظائف", leadNotes: [] }
+   كل إدخال = شخص واحد، يمكن تكرار نفس الإعلان لأشخاص مختلفين
 
-مردش بعد السعر ( N )
-- اسم_الإعلان / الوظيفة
+مردش بعد السعر (N): (اسم_الإعلان / الوظائف)
+   → نفس الطريقة
 
-رد بعد السعر ( N )
-- اسم_الإعلان / الوظيفة
+رد بعد السعر (N): (اسم_الإعلان / الوظائف / الحالة)
+   → { adName, count: 1, notes: "الوظائف", leadNotes: ["الحالة"] }
 
-حالات خاصة رسائل:
-- وصف_الحالة / اسم_الإعلان  →  specialCases (كنص)
+حالات خاصة: (نوع_الحالة / اسم_الإعلان)
+   → specialCases: ["نوع_الحالة / اسم_الإعلان"]
 
-━━━ كومنتات ( Y ) ━━━  ← بداية قسم الكومنتات (نفس هيكل رسائل)
+━━━ كومنتات (Y) ━━━  ← نفس هيكل رسائل
 
 ⚠️ للماسنجر:
-- funnel = دمج رسائل + كومنتات (اجمع الأعداد لنفس المراحل)
+- funnel = دمج رسائل + كومنتات (اجمع entries نفس المرحلة)
 - commentsFunnel = كومنتات فقط (بدون رسائل)
-- لا يوجد صفقات مدمجة في ماسنجر عادةً، لكن لو وُجدت استخرجها
+- noReplyAfterGreeting موجود في الماسنجر فقط
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 قواعد عامة
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 - interactions = مجموع count في repliedAfterPrice
-- jobConfusionCount = عدد من ظنوا التقرير وظيفة (من أسباب الرفض "فاكرها وظيفة")
+- jobConfusionCount = عدد من ظنوا الإعلان وظيفة (من أسباب الرفض)
 - الأرقام العربية (١٢٣) والإنجليزية (123) كلاهما مقبول
-- لو مفيش بيانات لمرحلة → []
+- لو مفيش بيانات → []
 - لا تخترع بيانات غير موجودة
 - أرجع JSON صالح فقط`;
 
@@ -186,25 +182,18 @@ const USER_PROMPT = (text: string, courses: string[]) => `
   "rejectionReasons": [{ "rawText": string, "count": number, "category": string }],
   "detectedJobs": [{ "rawText": string, "normalizedLabel": string, "sector": string, "count": number, "stage": string }],
   "closedDeals": [
-    {
-      "customerName": string,
-      "adSource": string,
-      "programName": string,
-      "programCount": number,
-      "dealValue": number,
-      "firstContactDate": string
-    }
+    { "customerName": string, "adSource": string, "programName": string, "programCount": number, "dealValue": number, "firstContactDate": string }
   ]
 }
 
-ملاحظات JSON:
-- واتساب/تيك توك: noReplyAfterGreeting = [] دائماً
-- واتساب/تيك توك: commentsFunnel كل arrays فارغة []
+قواعد JSON:
+- واتساب/تيك توك: noReplyAfterGreeting = [] و commentsFunnel كله فارغ
 - ماسنجر: funnel = دمج رسائل + كومنتات، commentsFunnel = كومنتات فقط
-- leadNotes: الملاحظات الفردية اللي تحت كل "M (اسم_الإعلان)" في رد بعد السعر
-- notes: الوظيفة بعد "/" في ماسنجر
-- closedDeals: فارغ [] لو مفيش صفقات مغلقة
+- notes = الوظائف المذكورة (مفصولة بفاصلة)
+- leadNotes = الحالة فقط (بعد "|" في واتساب، أو الجزء الثالث "/" في ماسنجر)
+- closedDeals = [] لو مفيش مبيعات
 - firstContactDate بصيغة YYYY-MM-DD أو "" لو غائب
+- dealValue رقم فقط بدون عملة
 
 REPORT TEXT:
 ${text}
@@ -239,16 +228,17 @@ interface RawGeminiOutput {
 }
 
 function fallbackRegexExtraction(rawText: string): RawGeminiOutput {
+  const toEn = (s: string) => s.replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
   const extractNumber = (pattern: RegExp) => {
-    const match = rawText.match(pattern);
-    return match ? parseInt(match[1].replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))) : 0;
+    const m = rawText.match(pattern);
+    return m ? parseInt(toEn(m[1])) : 0;
   };
-
+  const empty = { noReplyAfterGreeting: [], noReplyAfterDetails: [], noReplyAfterPrice: [], repliedAfterPrice: [] };
   return {
-    totalMessages: extractNumber(/اجمالى[^\d]*([\d٠-٩]+)/),
+    totalMessages: extractNumber(/\((\d+|[٠-٩]+)\)\s*ليد/),
     interactions: 0,
-    funnel: { noReplyAfterGreeting: [], noReplyAfterDetails: [], noReplyAfterPrice: [], repliedAfterPrice: [] },
-    commentsFunnel: { noReplyAfterGreeting: [], noReplyAfterDetails: [], noReplyAfterPrice: [], repliedAfterPrice: [] },
+    funnel: { ...empty },
+    commentsFunnel: { ...empty },
     messagesCount: 0,
     commentsCount: 0,
     specialCases: ["استخراج احتياطي (Fallback) بسبب فشل اتصال Gemini."],
@@ -379,10 +369,6 @@ export async function parseReport(
     conversionRate = parseFloat(((interactions / totalMessages) * 100).toFixed(1));
   }
 
-  const closedDeals: DealInput[] = Array.isArray(rawOutput.closedDeals)
-    ? rawOutput.closedDeals as DealInput[]
-    : [];
-
   return {
     parsedData: {
       totalMessages,
@@ -400,7 +386,7 @@ export async function parseReport(
       salesNotes: rawOutput.salesNotes || "",
       programTrack: rawOutput.programTrack || "",
       sourceType: rawOutput.sourceType || platform,
-      closedDeals,
+      closedDeals: (rawOutput.closedDeals || []) as DealInput[],
     },
     platform
   };
