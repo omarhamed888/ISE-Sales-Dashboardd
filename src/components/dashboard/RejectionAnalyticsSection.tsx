@@ -85,14 +85,14 @@ export function RejectionAnalyticsSection({ reports }: Props) {
           <span className="material-symbols-outlined text-purple-500">tag</span>
           سحابة أسباب الرفض
         </h3>
-        <div className="flex flex-wrap gap-2 leading-relaxed">
+        <div className="flex flex-wrap gap-3 leading-loose p-2">
           {allReasons.map((reason, i) => {
             const colors = CATEGORY_COLORS[reason.category] || DEFAULT_COLOR;
             return (
               <span
                 key={i}
                 title={`${reason.category}: ${reason.count} مرة`}
-                className={`inline-block px-2 py-0.5 rounded-lg border font-bold cursor-default transition-all hover:opacity-80 ${colors.bg} ${colors.text} ${colors.border}`}
+                className={`inline-block px-3 py-1 rounded-xl border font-bold cursor-default transition-all hover:opacity-80 hover:scale-105 ${colors.bg} ${colors.text} ${colors.border}`}
                 style={{ fontSize: getFontSize(reason.count) }}
               >
                 {reason.rawText}
@@ -164,16 +164,17 @@ export function RejectionAnalyticsSection({ reports }: Props) {
             <tbody>
               {sortedReasons.map((reason, i) => {
                 const colors = CATEGORY_COLORS[reason.category] || DEFAULT_COLOR;
+                const isEven = i % 2 === 0;
                 return (
-                  <tr key={i} className="border-b border-[#E2E8F0] last:border-0 hover:bg-[#F7F9FC]/50">
+                  <tr key={i} className={`border-b border-[#E2E8F0] last:border-0 hover:bg-[#EFF6FF]/40 transition-colors ${isEven ? "bg-white" : "bg-[#FAFBFC]"}`}>
                     <td className="p-4 font-black text-[#94A3B8]">{i + 1}</td>
-                    <td className="p-4 font-bold text-[#1E293B]">{reason.rawText}</td>
+                    <td className="p-4 font-bold text-[#0F172A]">{reason.rawText}</td>
                     <td className="p-4">
                       <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${colors.bg} ${colors.text} ${colors.border}`}>
                         {reason.category}
                       </span>
                     </td>
-                    <td className="p-4 text-center font-black text-[#1E293B]">{reason.count}</td>
+                    <td className="p-4 text-center font-black text-[#0F172A]">{reason.count}</td>
                   </tr>
                 );
               })}

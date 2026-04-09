@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 
-export function AttendanceTab({ users, reports, excuses }: { users: any[], reports: any[], excuses: any[] }) {
+export function AttendanceTab({ users, reports }: { users: any[], reports: any[] }) {
     const [weekOffset, setWeekOffset] = useState(0);
 
     // Calculate the array of 6 days (Saturday to Thursday) for the requested week
@@ -44,8 +44,7 @@ export function AttendanceTab({ users, reports, excuses }: { users: any[], repor
 
         if (hasReport) return { type: "report", icon: "check_circle", color: "text-emerald-500", bg: "bg-emerald-50", tooltip: "تم تسليم التقرير" };
 
-        const hasExcuse = excuses.some(e => e.userId === userId && e.date === ymd && e.status === "approved");
-        if (hasExcuse) return { type: "excuse", icon: "description", color: "text-[#2563EB]", bg: "bg-[#EFF6FF]", tooltip: "عذر معتمد" };
+
 
         if (targetDate.getTime() > now.getTime() && ymd !== todayStr) {
              return { type: "future", icon: "horizontal_rule", color: "text-[#E2E8F0]", bg: "transparent", tooltip: "-" };
@@ -63,7 +62,7 @@ export function AttendanceTab({ users, reports, excuses }: { users: any[], repor
             <div className="p-6 border-b border-[#E2E8F0] flex justify-between items-center bg-[#F7F9FC]">
                 <div>
                    <h3 className="text-lg font-black text-[#1E293B] font-headline">سجل الحضور والغياب</h3>
-                   <p className="text-[12px] font-bold text-[#64748B]">يعتمد الحضور على رفع تقارير العمل اليومية أو إرفاق الأعذار المقبولة.</p>
+                   <p className="text-[12px] font-bold text-[#64748B]">يعتمد الحضور على رفع تقارير العمل اليومية.</p>
                 </div>
                 <div className="flex items-center gap-2 bg-white rounded-xl border border-[#E2E8F0] p-1 shadow-sm">
                     <button onClick={() => setWeekOffset(w => w - 1)} className="p-2 text-[#64748B] hover:text-[#1E293B] hover:bg-[#F7F9FC] rounded-lg transition-colors">

@@ -14,14 +14,24 @@
   --font-arabic: "IBM Plex Sans Arabic", sans-serif;
   --font-numbers: "Manrope", sans-serif;
   --font-sans: "IBM Plex Sans Arabic", "Inter", sans-serif;
-
-  /* Custom Spacing Tokens to match system if we want, but default TW is fine. */
 }
 
 @layer base {
   body { 
     @apply font-sans bg-background text-on-surface;
     direction: rtl;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+  }
+
+  /* Make all images and embeds scale down on mobile */
+  img, video, iframe, embed, object {
+    max-width: 100%;
+  }
+
+  /* Smooth tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -39,5 +49,11 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+  /* Ensure tables can scroll on mobile without breaking layout */
+  .table-mobile-scroll {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

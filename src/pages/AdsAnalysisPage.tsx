@@ -83,21 +83,17 @@ export default function AdsAnalysisPage() {
     <div className="max-w-[1500px] w-full mx-auto space-y-8 animate-in fade-in duration-500 pb-20 font-body" dir="rtl">
       
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-white p-8 rounded-[32px] shadow-sm border border-[#E2E8F0]">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 bg-white p-5 md:p-8 rounded-[24px] md:rounded-[32px] shadow-sm border border-[#E2E8F0]">
         <div>
-           <div className="flex items-center gap-4 mb-2">
-              <div className="w-12 h-12 rounded-[16px] bg-[#2563EB]/10 flex items-center justify-center text-[#2563EB]">
-                 <span className="material-symbols-outlined text-[24px]">ads_click</span>
+           <div className="flex items-center gap-3 md:gap-4 mb-2">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-[14px] md:rounded-[16px] bg-[#2563EB]/10 flex items-center justify-center text-[#2563EB]">
+                 <span className="material-symbols-outlined text-[20px] md:text-[24px]">ads_click</span>
               </div>
-              <h1 className="text-[28px] font-black tracking-tight text-[#1E293B] font-headline">الإعلانات</h1>
+              <h1 className="text-[20px] md:text-[28px] font-black tracking-tight text-[#1E293B] font-headline">الإعلانات</h1>
            </div>
-           <div className="flex items-center gap-3">
-              <p className="text-[14px] font-bold text-[#64748B]">
-                  تم استخراج <span className="text-[#2563EB] font-black">{stats.length}</span> حملة إعلانية مسجلة
-              </p>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E2E8F0]"></span>
-              <p className="text-[14px] font-bold text-[#64748B]">تحليل أداء الحملات الإعلانية ومعدلات تسرب الجمهور</p>
-           </div>
+           <p className="text-[13px] font-bold text-[#64748B]">
+               تم استخراج <span className="text-[#2563EB] font-black">{stats.length}</span> حملة إعلانية مسجلة
+           </p>
         </div>
 
         {/* Global Filter Applies warning */}

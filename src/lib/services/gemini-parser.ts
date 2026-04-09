@@ -29,10 +29,13 @@ export interface DetectedJob {
 }
 
 export interface ParsedReportData {
-  totalMessages: number;
+  totalMessages: number;       // رسائل + كومنتات combined
+  messagesCount: number;       // رسائل فقط (Messenger)
+  commentsCount: number;       // كومنتات فقط (Messenger)
   interactions: number;
   conversionRate: number;
-  funnel: ReportFunnel;
+  funnel: ReportFunnel;                // combined رسائل + كومنتات
+  commentsFunnel: ReportFunnel;        // كومنتات only (Messenger), empty for other platforms
   specialCases: string[];
   jobConfusionCount: number;
   rejectionReasons: RejectionReason[];
@@ -40,7 +43,7 @@ export interface ParsedReportData {
   leadsByAd: Array<{ adName: string; leadCount: number }>;
   salesNotes: string;
   programTrack: string;
-  sourceType: string;
+  sourceType: string;                  // "واتساب" | "ماسنجر" | "تيك توك"
 }
 
 export interface DealInput {
@@ -68,16 +71,48 @@ const SYSTEM_INSTRUCTION = `أنت محلل بيانات مبيعات متخصص
 
 مهمتك: استخرج البيانات وأرجعها كـ JSON صحيح فقط بدون أي نص إضافي أو markdown.
 
+━━━ فهم فورمات المنصات ━━━
+
+فورمات واتساب وتيك توك (نفس الشيء):
+  اجمالى (N)
+  مردش بعد أهلا (N)  → noReplyAfterGreeting
+  مردش بعد التفاصيل (N) → noReplyAfterDetails
+  مردش بعد السعر (N) → noReplyAfterPrice
+  رد بعد السعر (N) → repliedAfterPrice
+
+فورمات ماسنجر:
+  السطر الأول: "ماسنجر ( X رساله - Y كومنت )" → messagesCount=X, commentsCount=Y, totalMessages=X+Y
+  ━━━ رسائل ( X ) ━━━  ← قسم الرسائل
+  ━━━ كومنتات ( Y ) ━━━ ← قسم الكومنتات
+  كل قسم له نفس مراحل الفانل
+
+قاعدة التفاصيل (لجميع المنصات):
+  "مردش بعد أهلا ( N )" يليه أسطر: "N اسم_الإعلان"
+    → كل سطر = entry في noReplyAfterGreeting: {adName: "اسم_الإعلان", count: N, job: ""}
+  "مردش بعد التفاصيل ( N )" يليه: "- اسم_الإعلان / الوظيفة"
+    → كل سطر = entry: {adName: "اسم_الإعلان", count: 1, job: "الوظيفة"}
+  "مردش بعد السعر ( N )" → نفس الطريقة
+  "رد بعد السعر ( N )" → نفس الطريقة
+
+حساب messagesCount و commentsCount:
+  - واتساب/تيك توك: messagesCount = totalMessages, commentsCount = 0
+  - ماسنجر: استخرج X و Y من هيدر "ماسنجر ( X رساله - Y كومنت )"
+
+للماسنجر:
+  - funnel = دمج رسائل + كومنتات معاً (جمع الأرقام)
+  - commentsFunnel = كومنتات بمفردها
+
 عند استخراج أسباب الرفض، صنّف كل سبب في إحدى هذه الفئات فقط:
 سعر | خلط وظيفي | عدم اهتمام | توقيت | صيغة الدراسة | احتياج غير مطابق | سلطة قرار | عدم فهم | قطاع/وظيفة | أخرى
 
-قواعد صارمة:
-- interactions = فقط عدد الردود بعد السعر
-- jobConfusionCount = عدد من ظنوا التقرير وظيفة
-- لو مفيش بيانات لمرحلة، أرجع array فارغة []
-- لا تخترع بيانات غير موجودة في النص
-- أرجع JSON صالح فقط، لا شيء آخر
-- sourceType: "واتساب" أو "ماسنجر" أو "انستقرام" أو "مختلط"`;
+قواعد عامة:
+- interactions = مجموع أعداد "رد بعد السعر" فقط
+- jobConfusionCount = من ظنوا التقرير وظيفة
+- الوظيفة بعد "/" في السطر تذهب لحقل notes في الـ entry
+- الأرقام العربية (١٢٣) والإنجليزية (123) كلاهما صحيح، تعامل معهما نفس الشيء
+- لو مفيش بيانات لمرحلة أرجع []
+- لا تخترع بيانات غير موجودة
+- أرجع JSON صالح فقط`;
 
 const USER_PROMPT = (text: string, courses: string[]) => `
 الكورسات المتاحة للإسناد: ${courses.length > 0 ? courses.join('، ') : 'غير محدد'}
@@ -85,12 +120,20 @@ const USER_PROMPT = (text: string, courses: string[]) => `
 الهيكل المطلوب بالضبط:
 {
   "totalMessages": number,
+  "messagesCount": number,
+  "commentsCount": number,
   "interactions": number,
   "jobConfusionCount": number,
-  "sourceType": string,
+  "sourceType": "واتساب" | "ماسنجر" | "تيك توك",
   "programTrack": string,
   "salesNotes": string,
   "funnel": {
+    "noReplyAfterGreeting": [ { "adName": string, "count": number, "notes": string } ],
+    "noReplyAfterDetails": [ { "adName": string, "count": number, "notes": string } ],
+    "noReplyAfterPrice": [ { "adName": string, "count": number, "notes": string } ],
+    "repliedAfterPrice": [ { "adName": string, "count": number, "notes": string } ]
+  },
+  "commentsFunnel": {
     "noReplyAfterGreeting": [ { "adName": string, "count": number, "notes": string } ],
     "noReplyAfterDetails": [ { "adName": string, "count": number, "notes": string } ],
     "noReplyAfterPrice": [ { "adName": string, "count": number, "notes": string } ],
@@ -108,18 +151,31 @@ const USER_PROMPT = (text: string, courses: string[]) => `
   ]
 }
 
+ملاحظات JSON:
+- notes في كل entry = الوظيفة المكتوبة بعد "/" في السطر (إن وُجدت)
+- للماسنجر: funnel = دمج رسائل + كومنتات، commentsFunnel = كومنتات فقط
+- للواتساب/تيك توك: commentsFunnel يكون فيه arrays فارغة
+
 REPORT TEXT:
 ${text}
 `;
 
 interface RawGeminiOutput {
   totalMessages?: number;
+  messagesCount?: number;
+  commentsCount?: number;
   interactions?: number;
   jobConfusionCount?: number;
   sourceType?: string;
   programTrack?: string;
   salesNotes?: string;
   funnel?: {
+    noReplyAfterGreeting?: any[];
+    noReplyAfterDetails?: any[];
+    noReplyAfterPrice?: any[];
+    repliedAfterPrice?: any[];
+  };
+  commentsFunnel?: {
     noReplyAfterGreeting?: any[];
     noReplyAfterDetails?: any[];
     noReplyAfterPrice?: any[];
@@ -146,6 +202,8 @@ function fallbackRegexExtraction(rawText: string): RawGeminiOutput {
       noReplyAfterPrice: [],
       repliedAfterPrice: []
     },
+    messagesCount: 0,
+    commentsCount: 0,
     specialCases: ["استخراج احتياطي (Fallback Parser) عمل بسبب فشل اتصال Gemini."],
     jobConfusionCount: 0,
     rejectionReasons: [],
@@ -153,7 +211,13 @@ function fallbackRegexExtraction(rawText: string): RawGeminiOutput {
     leadsByAd: [],
     salesNotes: "",
     programTrack: "",
-    sourceType: "واتساب"
+    sourceType: "واتساب",
+    commentsFunnel: {
+      noReplyAfterGreeting: [],
+      noReplyAfterDetails: [],
+      noReplyAfterPrice: [],
+      repliedAfterPrice: [],
+    }
   };
 }
 
@@ -254,7 +318,18 @@ export async function parseReport(
   const noReplyAfterPrice = normalizeStages(rawFunnel.noReplyAfterPrice, "p");
   const repliedAfterPrice = normalizeStages(rawFunnel.repliedAfterPrice, "r");
 
+  // commentsFunnel (Messenger only)
+  const rawCommentsFunnel = rawOutput.commentsFunnel || {};
+  const commentsFunnel: ReportFunnel = {
+    noReplyAfterGreeting: normalizeStages(rawCommentsFunnel.noReplyAfterGreeting, "cg"),
+    noReplyAfterDetails: normalizeStages(rawCommentsFunnel.noReplyAfterDetails, "cd"),
+    noReplyAfterPrice: normalizeStages(rawCommentsFunnel.noReplyAfterPrice, "cp"),
+    repliedAfterPrice: normalizeStages(rawCommentsFunnel.repliedAfterPrice, "cr"),
+  };
+
   const totalMessages = rawOutput.totalMessages || 0;
+  const messagesCount = rawOutput.messagesCount ?? totalMessages;
+  const commentsCount = rawOutput.commentsCount ?? 0;
   const interactions = rawOutput.interactions || 0;
 
   const specialCases = Array.isArray(rawOutput.specialCases) ? rawOutput.specialCases : [];
@@ -285,6 +360,8 @@ export async function parseReport(
   return {
     parsedData: {
       totalMessages,
+      messagesCount,
+      commentsCount,
       interactions,
       conversionRate,
       funnel: {
@@ -293,6 +370,7 @@ export async function parseReport(
         noReplyAfterPrice,
         repliedAfterPrice,
       },
+      commentsFunnel,
       specialCases,
       jobConfusionCount,
       rejectionReasons,

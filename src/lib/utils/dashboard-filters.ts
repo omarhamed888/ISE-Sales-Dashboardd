@@ -21,6 +21,9 @@ function platformMatches(filter: FilterState, r: any): boolean {
       pf.includes("إنستغرام")
     );
   }
+  if (filter.platform === "tiktok") {
+    return pf.includes("tiktok") || pf.includes("تيك توك");
+  }
   return true;
 }
 

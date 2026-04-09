@@ -58,9 +58,32 @@ export default function DashboardPage() {
     );
   }
 
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return "صباح الخير";
+    if (h < 17) return "مساء الخير";
+    return "مساء النور";
+  })();
+
+  const todayFormatted = new Date().toLocaleDateString("ar-EG", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
-     <div className="max-w-[1500px] w-full mx-auto space-y-6 animate-in fade-in duration-500 pb-20 font-body">
-        
+     <div className="max-w-[1500px] w-full mx-auto space-y-6 animate-in fade-in duration-500 pb-20 font-body" dir="rtl">
+
+        {/* Welcome Banner */}
+        <div className="bg-gradient-to-l from-[#EFF6FF] to-white rounded-2xl border border-[#E2E8F0] px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-black text-[#0F172A]">{greeting} 👋</h2>
+            <p className="text-sm text-[#64748B] mt-0.5">{todayFormatted}</p>
+          </div>
+          <span className="material-symbols-outlined text-[32px] text-[#2563EB]/20" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
+        </div>
+
         {/* Only show sections if we have data for the filtered period */}
         {currentReports.length === 0 ? (
            <EmptyState />
@@ -78,19 +101,25 @@ export default function DashboardPage() {
 
               {/* SECTION 4: Rejection Analytics */}
               <>
-                <div className="flex items-center gap-4 my-2">
-                  <div className="flex-1 h-px bg-[#E2E8F0]"></div>
-                  <span className="text-[12px] font-black text-[#64748B] uppercase tracking-widest px-3 py-1.5 bg-[#F7F9FC] border border-[#E2E8F0] rounded-full">تحليل أسباب الرفض</span>
-                  <div className="flex-1 h-px bg-[#E2E8F0]"></div>
+                <div className="flex items-center gap-3 my-1">
+                  <div className="flex-1 h-px bg-[#E2E8F0]" />
+                  <div className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#E2E8F0] rounded-full shadow-sm">
+                    <span className="material-symbols-outlined text-[16px] text-[#64748B]">bar_chart</span>
+                    <span className="text-[11px] font-black text-[#64748B] uppercase tracking-widest">تحليل أسباب الرفض</span>
+                  </div>
+                  <div className="flex-1 h-px bg-[#E2E8F0]" />
                 </div>
                 <RejectionAnalyticsSection reports={currentReports} />
               </>
 
               {/* SECTION 5: Team Status */}
-              <div className="flex items-center gap-4 my-2">
-                <div className="flex-1 h-px bg-[#E2E8F0]"></div>
-                <span className="text-[12px] font-black text-[#64748B] uppercase tracking-widest px-3 py-1.5 bg-[#F7F9FC] border border-[#E2E8F0] rounded-full">حالة الفريق</span>
-                <div className="flex-1 h-px bg-[#E2E8F0]"></div>
+              <div className="flex items-center gap-3 my-1">
+                <div className="flex-1 h-px bg-[#E2E8F0]" />
+                <div className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#E2E8F0] rounded-full shadow-sm">
+                  <span className="material-symbols-outlined text-[16px] text-[#64748B]" style={{ fontVariationSettings: "'FILL' 1" }}>groups</span>
+                  <span className="text-[11px] font-black text-[#64748B] uppercase tracking-widest">حالة الفريق</span>
+                </div>
+                <div className="flex-1 h-px bg-[#E2E8F0]" />
               </div>
               <TeamStatusSummary allReports={allReports} />
 
@@ -98,11 +127,11 @@ export default function DashboardPage() {
               <RecentActivity reports={currentReports} />
 
               {/* Coming Soon: Marketing Dashboard */}
-              <div className="mt-8 border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center">
-                <div className="text-4xl mb-3">📊</div>
-                <h3 className="text-lg font-bold text-gray-600 mb-1">Marketing Dashboard</h3>
-                <p className="text-gray-400 text-sm mb-3">تحليل الإنفاق الإعلاني • ROAS • CAC • LTV:CAC</p>
-                <span className="inline-block bg-blue-100 text-blue-600 text-xs font-bold px-4 py-1.5 rounded-full">🚀 Coming Soon</span>
+              <div className="mt-4 border-2 border-dashed border-[#E2E8F0] rounded-2xl p-8 text-center bg-[#F8FAFC]">
+                <span className="material-symbols-outlined text-[40px] text-[#CBD5E1] block mb-3">campaign</span>
+                <h3 className="text-base font-bold text-[#64748B] mb-1">Marketing Dashboard</h3>
+                <p className="text-[#94A3B8] text-sm mb-3">تحليل الإنفاق الإعلاني • ROAS • CAC • LTV:CAC</p>
+                <span className="inline-block bg-[#EFF6FF] text-[#2563EB] text-xs font-bold px-4 py-1.5 rounded-full border border-[#2563EB]/10">Coming Soon</span>
               </div>
            </>
         )}

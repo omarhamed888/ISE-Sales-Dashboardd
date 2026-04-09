@@ -57,32 +57,35 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col bg-background text-on-surface relative font-body" dir="rtl">
+    <main
+      className="min-h-screen flex flex-col bg-gradient-to-br from-[#EFF6FF] via-white to-[#F0FDF4] text-[#0F172A] relative font-body"
+      dir="rtl"
+    >
       <div className="flex-grow flex items-center justify-center p-6 relative overflow-hidden">
-        {/* Abstract Background Effect */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/10 rounded-full blur-[100px] pointer-events-none"></div>
+        {/* Soft decorative blobs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#2563EB]/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[#10B981]/8 rounded-full blur-[120px] pointer-events-none" />
 
         {/* Login Card */}
-        <div className="w-full max-w-[420px] z-10 transition-all duration-500 animate-in fade-in zoom-in-95">
-          <div className="bg-surface-container-lowest rounded-[32px] shadow-[0_12px_48px_-8px_rgba(37,99,235,0.08)] border border-outline-variant/10 overflow-hidden text-center">
+        <div className="w-full max-w-[440px] z-10 transition-all duration-500 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-[32px] shadow-[0_12px_48px_-8px_rgba(37,99,235,0.10)] border border-[#E2E8F0] overflow-hidden text-center">
             <div className="p-10 flex flex-col items-center">
 
               {/* Unregistered Error State */}
               {errorStatus === "unregistered" ? (
                 <div className="flex flex-col items-center w-full animate-in fade-in zoom-in-95 pb-4">
-                  <div className="w-24 h-24 bg-error/10 rounded-[24px] flex items-center justify-center mb-6">
-                    <span className="material-symbols-outlined text-[48px] text-error font-extralight">cancel</span>
+                  <div className="w-24 h-24 bg-[#EF4444]/10 rounded-[24px] flex items-center justify-center mb-6">
+                    <span className="material-symbols-outlined text-[48px] text-[#EF4444]">cancel</span>
                   </div>
-                  <h2 className="font-headline text-2xl font-bold text-on-surface mb-3 tracking-tight">
+                  <h2 className="text-2xl font-black text-[#0F172A] mb-3 tracking-tight">
                     هذا الحساب غير مسجل في النظام
                   </h2>
-                  <p className="font-body text-on-surface-variant text-[15px] leading-relaxed">
+                  <p className="text-sm text-[#64748B] leading-relaxed">
                     تواصل مع الإدارة لتفعيل حسابك
                   </p>
                   <button
                     onClick={() => setErrorStatus("none")}
-                    className="mt-6 text-primary text-sm font-bold underline"
+                    className="mt-6 text-[#2563EB] text-sm font-bold underline"
                   >
                     العودة لتسجيل الدخول
                   </button>
@@ -90,75 +93,92 @@ export default function LoginPage() {
               ) : (
                 <>
                   {/* Brand Elements */}
-                  <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mb-6 text-primary border border-primary/10 shadow-sm relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                    <span className="material-symbols-outlined text-[40px] font-extralight">query_stats</span>
+                  <div className="w-20 h-20 bg-[#2563EB] rounded-3xl flex items-center justify-center mb-6 text-white shadow-lg shadow-[#2563EB]/30">
+                    <span className="material-symbols-outlined text-[40px]" style={{ fontVariationSettings: "'FILL' 1" }}>query_stats</span>
                   </div>
 
-                  <h1 className="font-headline text-3xl font-extrabold text-on-surface mb-2 tracking-tight" dir="ltr">
-                    ISE Sales Intelligence
+                  <h1 className="text-3xl font-black text-[#0F172A] mb-1 tracking-tight" dir="ltr">
+                    BDI Sales Intelligence
                   </h1>
-                  <p className="font-body text-on-surface-variant font-medium text-base mb-8">
+                  <p className="text-sm text-[#64748B] font-medium mb-8">
                     منصة تحليل أداء المبيعات
                   </p>
 
                   {/* Error States */}
                   {errorStatus === "wrong-credentials" && (
-                    <div className="w-full p-4 mb-4 bg-error/10 border border-error/20 text-error text-sm rounded-2xl font-bold animate-in fade-in">
+                    <div className="w-full p-4 mb-4 bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-sm rounded-2xl font-bold animate-in fade-in flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[16px] shrink-0">error</span>
                       البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى المحاولة مرة أخرى.
                     </div>
                   )}
                   {errorStatus === "other" && (
-                    <div className="w-full p-4 mb-4 bg-error/10 border border-error/20 text-error text-sm rounded-2xl font-bold animate-in fade-in">
+                    <div className="w-full p-4 mb-4 bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-sm rounded-2xl font-bold animate-in fade-in flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[16px] shrink-0">error</span>
                       حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.
                     </div>
                   )}
 
                   {/* Email / Password Form */}
                   <form onSubmit={handleEmailLogin} className="w-full flex flex-col gap-3 mb-5">
-                    <input
-                      type="email"
-                      dir="ltr"
-                      placeholder="team@bdi-sales.com"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      required
-                      disabled={isLoading}
-                      className="w-full bg-[#F7F9FC] border border-outline-variant/30 rounded-2xl px-4 py-3.5 text-[14px] font-bold text-on-surface focus:border-primary focus:outline-none transition-colors placeholder:text-on-surface-variant/50 placeholder:font-normal"
-                    />
-                    <input
-                      type="password"
-                      placeholder="كلمة المرور"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      required
-                      disabled={isLoading}
-                      className="w-full bg-[#F7F9FC] border border-outline-variant/30 rounded-2xl px-4 py-3.5 text-[14px] font-bold text-on-surface focus:border-primary focus:outline-none transition-colors placeholder:text-on-surface-variant/50 placeholder:font-normal"
-                    />
+                    {/* Email field with icon */}
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] text-[20px] pointer-events-none">
+                        mail
+                      </span>
+                      <input
+                        type="email"
+                        dir="ltr"
+                        placeholder="team@bdi-sales.com"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        required
+                        disabled={isLoading}
+                        className="w-full bg-white border border-[#E2E8F0] rounded-xl pr-11 pl-4 py-3.5 text-[14px] font-bold text-[#0F172A] focus:border-[#2563EB] focus:outline-none transition-colors placeholder:text-[#94A3B8] placeholder:font-normal"
+                      />
+                    </div>
+                    {/* Password field with icon */}
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8] text-[20px] pointer-events-none">
+                        lock
+                      </span>
+                      <input
+                        type="password"
+                        placeholder="كلمة المرور"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        required
+                        disabled={isLoading}
+                        className="w-full bg-white border border-[#E2E8F0] rounded-xl pr-11 pl-4 py-3.5 text-[14px] font-bold text-[#0F172A] focus:border-[#2563EB] focus:outline-none transition-colors placeholder:text-[#94A3B8] placeholder:font-normal"
+                      />
+                    </div>
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-primary text-white font-bold py-4 px-6 rounded-2xl hover:bg-primary/95 hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:-translate-y-0 disabled:hover:shadow-none"
+                      className="w-full bg-[#2563EB] text-white font-bold py-4 px-6 rounded-xl hover:bg-[#1D4ED8] hover:shadow-lg hover:shadow-[#2563EB]/20 hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:-translate-y-0 disabled:hover:shadow-none"
                     >
-                      {isLoading
-                        ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        : <span className="text-[16px] tracking-wide">تسجيل الدخول</span>
-                      }
+                      {isLoading ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <span className="text-[16px] tracking-wide">تسجيل الدخول</span>
+                          <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+                        </>
+                      )}
                     </button>
                   </form>
 
                   {/* Divider */}
                   <div className="w-full flex items-center gap-3 mb-5">
-                    <div className="flex-1 h-px bg-outline-variant/20"></div>
-                    <span className="text-on-surface-variant text-sm font-bold">أو</span>
-                    <div className="flex-1 h-px bg-outline-variant/20"></div>
+                    <div className="flex-1 h-px bg-[#E2E8F0]" />
+                    <span className="text-[#94A3B8] text-sm font-bold">أو</span>
+                    <div className="flex-1 h-px bg-[#E2E8F0]" />
                   </div>
 
-                  {/* Google Button (secondary, smaller) */}
+                  {/* Google Button */}
                   <button
                     onClick={handleGoogleLogin}
                     disabled={isLoading}
-                    className="w-full bg-white text-on-surface font-bold py-3 px-6 rounded-2xl border border-outline-variant/30 hover:bg-[#F7F9FC] hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed text-[14px]"
+                    className="w-full bg-white text-[#374151] font-semibold py-3 px-6 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed text-[14px]"
                   >
                     <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" className="shrink-0" aria-hidden="true">
                       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -170,7 +190,7 @@ export default function LoginPage() {
                   </button>
 
                   {/* Bottom Helper Text */}
-                  <p className="mt-6 text-[13px] font-bold text-on-surface-variant font-body">
+                  <p className="mt-6 text-xs text-[#94A3B8] font-medium">
                     للوصول للنظام تواصل مع الإدارة
                   </p>
                 </>

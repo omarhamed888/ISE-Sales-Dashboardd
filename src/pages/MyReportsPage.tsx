@@ -75,9 +75,9 @@ export default function MyReportsPage() {
 
     return (
         <div className="max-w-[960px] mx-auto font-body" dir="rtl">
-            <header className="mb-8 flex justify-between items-end">
+            <header className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
-                    <h1 className="text-[28px] font-black text-[#1E293B] font-headline mb-2">تقاريري</h1>
+                    <h1 className="text-[22px] md:text-[28px] font-black text-[#1E293B] font-headline mb-1">تقاريري</h1>
                     <p className="text-[13px] font-bold text-[#64748B]">سجل جميع تقاريرك ومتابعة أدائك.</p>
                 </div>
                 {streak > 0 && (
@@ -91,23 +91,42 @@ export default function MyReportsPage() {
                 )}
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white border border-[#E2E8F0] p-6 rounded-2xl shadow-sm flex flex-col justify-center">
-                    <p className="text-[11px] font-bold text-[#64748B] mb-2">إجمالي التقارير المرفوعة</p>
-                    <p className="font-black text-[28px] text-[#1E293B] font-headline">{reports.length}</p>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-5 flex flex-col gap-2 border-r-4 border-r-[#F59E0B] transition-all hover:-translate-y-0.5 hover:shadow-md">
+                    <div className="w-9 h-9 rounded-xl bg-[#FFFBEB] flex items-center justify-center mb-1">
+                        <span className="material-symbols-outlined text-[18px] text-[#F59E0B]" style={{ fontVariationSettings: "'FILL' 1" }}>local_fire_department</span>
+                    </div>
+                    <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">سلسلة الالتزام</p>
+                    <p className="text-4xl font-black text-[#0F172A]">{streak}</p>
+                    <p className="text-xs text-[#94A3B8]">أيام متواصلة</p>
                 </div>
-                <div className="bg-white border border-[#E2E8F0] p-6 rounded-2xl shadow-sm flex flex-col justify-center">
-                    <p className="text-[11px] font-bold text-[#64748B] mb-2">إجمالي التفاعلات المسجلة</p>
-                    <p className="font-black text-[28px] text-[#1E293B] font-headline">
+                <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-5 flex flex-col gap-2 border-r-4 border-r-[#2563EB] transition-all hover:-translate-y-0.5 hover:shadow-md">
+                    <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] flex items-center justify-center mb-1">
+                        <span className="material-symbols-outlined text-[18px] text-[#2563EB]" style={{ fontVariationSettings: "'FILL' 1" }}>receipt_long</span>
+                    </div>
+                    <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">إجمالي التقارير</p>
+                    <p className="text-4xl font-black text-[#0F172A]">{reports.length}</p>
+                    <p className="text-xs text-[#94A3B8]">تقرير مرفوع</p>
+                </div>
+                <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-5 flex flex-col gap-2 border-r-4 border-r-[#10B981] transition-all hover:-translate-y-0.5 hover:shadow-md">
+                    <div className="w-9 h-9 rounded-xl bg-[#ECFDF5] flex items-center justify-center mb-1">
+                        <span className="material-symbols-outlined text-[18px] text-[#10B981]" style={{ fontVariationSettings: "'FILL' 1" }}>touch_app</span>
+                    </div>
+                    <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">إجمالي التفاعلات</p>
+                    <p className="text-4xl font-black text-[#0F172A]">
                         {reports.reduce(
                             (sum, r) => sum + calcInteractionsFromParsedData(r.parsedData),
                             0
                         )}
                     </p>
+                    <p className="text-xs text-[#94A3B8]">تفاعل حقيقي</p>
                 </div>
-                <div className="bg-[#2563EB]/5 border border-[#2563EB]/20 p-6 rounded-2xl shadow-sm flex flex-col justify-center">
-                    <p className="text-[11px] font-bold text-[#2563EB] mb-2">معدل التحويل التراكمي</p>
-                    <p className="font-black text-[28px] text-[#2563EB] font-headline">
+                <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-5 flex flex-col gap-2 border-r-4 border-r-[#8B5CF6] transition-all hover:-translate-y-0.5 hover:shadow-md">
+                    <div className="w-9 h-9 rounded-xl bg-[#F5F3FF] flex items-center justify-center mb-1">
+                        <span className="material-symbols-outlined text-[18px] text-[#8B5CF6]" style={{ fontVariationSettings: "'FILL' 1" }}>percent</span>
+                    </div>
+                    <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">معدل التحويل التراكمي</p>
+                    <p className="text-4xl font-black text-[#8B5CF6]">
                         {(() => {
                             const tm = reports.reduce(
                                 (s, r) => s + (r.parsedData?.totalMessages || 0),
@@ -120,6 +139,7 @@ export default function MyReportsPage() {
                             return calcConversionRate(intr, tm).toFixed(1);
                         })()}%
                     </p>
+                    <p className="text-xs text-[#94A3B8]">معدل تراكمي</p>
                 </div>
             </div>
 
@@ -131,7 +151,34 @@ export default function MyReportsPage() {
                     </h2>
                 </div>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-right text-[13px]">
+                    {/* Mobile cards */}
+                    <div className="md:hidden divide-y divide-[#F1F5F9]">
+                      {reports.map(report => (
+                        <div key={report.id} className="p-4 flex flex-col gap-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-black text-[13px] text-[#1E293B]">{report.date}</span>
+                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${report.platform === 'واتساب' ? 'bg-[#25D366]/10 text-[#128C7E]' : report.platform === 'تيك توك' ? 'bg-black/5 text-black' : 'bg-[#0084FF]/10 text-[#0084FF]'}`}>{report.platform}</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-center">
+                            <div className="bg-[#F8FAFC] rounded-lg p-2">
+                              <p className="text-[9px] font-bold text-[#64748B]">الرسائل</p>
+                              <p className="text-[13px] font-black text-[#1E293B]">{report.parsedData?.totalMessages || 0}</p>
+                            </div>
+                            <div className="bg-[#F8FAFC] rounded-lg p-2">
+                              <p className="text-[9px] font-bold text-[#64748B]">التفاعل</p>
+                              <p className="text-[13px] font-black text-[#1E293B]">{calcInteractionsFromParsedData(report.parsedData)}</p>
+                            </div>
+                            <div className="bg-emerald-50 rounded-lg p-2">
+                              <p className="text-[9px] font-bold text-emerald-700">الحالة</p>
+                              <p className="text-[11px] font-black text-emerald-600">مؤكد</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {reports.length === 0 && <p className="p-8 text-center text-[#64748B] font-bold text-[13px]">لا توجد تقارير مرفوعة حتى الآن.</p>}
+                    </div>
+                    {/* Desktop table */}
+                    <table className="w-full text-right text-[13px] hidden md:table">
                         <thead>
                             <tr className="bg-[#F7F9FC] border-b border-[#E2E8F0]">
                                 <th className="p-4 font-bold text-[#64748B] w-32">التاريخ</th>
@@ -146,7 +193,7 @@ export default function MyReportsPage() {
                                 <tr key={report.id} className="border-b border-[#E2E8F0] last:border-0 hover:bg-[#F7F9FC]/50 transition-colors">
                                     <td className="p-4 font-black text-[#1E293B]">{report.date}</td>
                                     <td className="p-4">
-                                        <span className={`px-2 py-1 rounded-md text-[10px] font-bold ${report.platform === 'واتساب' ? 'bg-[#25D366]/10 text-[#128C7E]' : 'bg-[#0084FF]/10 text-[#0084FF]'}`}>
+                                        <span className={`px-2 py-1 rounded-md text-[10px] font-bold ${report.platform === 'واتساب' ? 'bg-[#25D366]/10 text-[#128C7E]' : report.platform === 'تيك توك' ? 'bg-black/5 text-black' : 'bg-[#0084FF]/10 text-[#0084FF]'}`}>
                                             {report.platform}
                                         </span>
                                     </td>

@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-export function FilterBar() {
+export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean }) {
   const location = useLocation();
   const { user } = useAuth();
   const { filter, updateFilter, resetFilter } = useFilter();
@@ -56,15 +56,15 @@ export function FilterBar() {
   }, []);
 
   return (
-    <div className="fixed top-[64px] left-0 w-[calc(100%-256px)] h-[64px] bg-white border-b border-[#E2E8F0] z-30 px-8 flex flex-row-reverse items-center justify-between shadow-sm animate-in fade-in slide-in-from-top-4" dir="rtl">
+    <div className={`fixed top-[64px] left-0 w-full transition-all duration-300 ${isSidebarCollapsed ? "md:w-[calc(100%-88px)]" : "md:w-[calc(100%-256px)]"} h-auto md:h-[64px] bg-white border-b border-[#E2E8F0] z-30 px-4 md:px-8 py-3 md:py-0 flex flex-col md:flex-row-reverse items-start md:items-center justify-between gap-3 shadow-sm animate-in fade-in slide-in-from-top-4`} dir="rtl">
       
       {/* Visual Right (Start): Date Range Pills */}
-      <div className="flex bg-[#F7F9FC] p-1 rounded-xl border border-[#E2E8F0]">
+      <div className="flex bg-[#F7F9FC] p-1 rounded-xl border border-[#E2E8F0] w-full md:w-auto overflow-x-auto pb-1 md:pb-1 no-scrollbar shrink-0">
         {ranges.map((range) => (
           <button
             key={range}
             onClick={() => updateFilter({ dateRange: range })}
-            className={`px-5 py-1.5 text-[13px] font-bold rounded-lg transition-all duration-200 ${
+            className={`px-4 md:px-5 py-1.5 text-[12px] md:text-[13px] font-bold rounded-lg transition-all duration-200 whitespace-nowrap ${
               filter.dateRange === range
                 ? "bg-white text-[#2563EB] shadow-sm transform scale-100"
                 : "text-[#64748B] hover:text-[#1E293B] hover:bg-black/5 scale-95"
@@ -76,25 +76,26 @@ export function FilterBar() {
       </div>
 
       {/* Visual Left (End): Selectors and Reset */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
         
         {/* Platform Dropdown */}
         <select
           value={filter.platform}
           onChange={(e) => updateFilter({ platform: e.target.value as Platform })}
-          className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-[13px] font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]/50 appearance-none cursor-pointer hover:bg-surface-container transition-colors disabled:opacity-50"
+          className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-3 py-2 text-[12px] md:text-[13px] font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]/50 appearance-none cursor-pointer hover:bg-surface-container transition-colors disabled:opacity-50"
           disabled={isLoadingProps}
         >
           <option value="all">جميع المنصات</option>
           <option value="whatsapp">واتساب</option>
           <option value="messenger">ماسنجر</option>
+          <option value="tiktok">تيك توك</option>
         </select>
 
         {/* Sales Rep Dropdown */}
         <select
           value={filter.salesRep}
           onChange={(e) => updateFilter({ salesRep: e.target.value })}
-          className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-[13px] font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]/50 appearance-none cursor-pointer hover:bg-surface-container transition-colors disabled:opacity-50"
+          className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-3 py-2 text-[12px] md:text-[13px] font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]/50 appearance-none cursor-pointer hover:bg-surface-container transition-colors disabled:opacity-50 max-w-[140px] truncate"
           disabled={isLoadingProps}
         >
           <option value="all">جميع المندوبين</option>
@@ -107,7 +108,7 @@ export function FilterBar() {
         <select
           value={filter.adName}
           onChange={(e) => updateFilter({ adName: e.target.value })}
-          className="max-w-[200px] truncate bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-[13px] font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]/50 appearance-none cursor-pointer hover:bg-surface-container transition-colors disabled:opacity-50"
+          className="max-w-[140px] md:max-w-[200px] truncate bg-surface-container-low border border-outline-variant/30 rounded-xl px-3 py-2 text-[12px] md:text-[13px] font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB]/50 appearance-none cursor-pointer hover:bg-surface-container transition-colors disabled:opacity-50"
           disabled={isLoadingProps}
         >
           <option value="all">جميع الإعلانات</option>
@@ -117,15 +118,15 @@ export function FilterBar() {
         </select>
 
         {/* Separator */}
-        <div className="h-6 w-[1px] bg-[#E2E8F0] mx-1" />
+        <div className="hidden md:block h-6 w-[1px] bg-[#E2E8F0] mx-1" />
 
         {/* Reset Button */}
         <button 
           onClick={resetFilter}
-          className="h-9 w-9 rounded-xl border border-outline-variant/50 text-[#64748B] hover:text-[#DC2626] hover:bg-[#DC2626]/10 hover:border-[#DC2626]/30 flex items-center justify-center transition-all group"
+          className="h-8 md:h-9 w-8 md:w-9 rounded-xl border border-outline-variant/50 text-[#64748B] hover:text-[#DC2626] hover:bg-[#DC2626]/10 hover:border-[#DC2626]/30 flex items-center justify-center transition-all group shrink-0"
           title="إعادة تعيين الفلاتر"
         >
-          <span className="material-symbols-outlined text-[18px] group-active:-rotate-90 transition-transform">filter_alt_off</span>
+          <span className="material-symbols-outlined text-[16px] md:text-[18px] group-active:-rotate-90 transition-transform">filter_alt_off</span>
         </button>
       </div>
 

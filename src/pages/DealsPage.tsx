@@ -17,7 +17,7 @@ const emptyDeal = (): DealInput => ({
 });
 
 function formatNumber(n: number) {
-  return n.toLocaleString("ar-EG");
+  return n.toLocaleString();
 }
 
 export default function DealsPage() {
@@ -135,17 +135,17 @@ export default function DealsPage() {
         <p className="text-[#64748B] text-sm mt-1">تاريخ الإغلاق التلقائي: {today}</p>
       </div>
 
-      {/* Tabs */}
-      <div className="bg-[#F8FAFC] rounded-xl p-1 flex gap-1">
+      {/* Tabs — pill style */}
+      <div className="flex gap-2">
         <button
           onClick={() => setTab("text")}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${tab === "text" ? "bg-white text-[#2563EB] shadow-sm" : "text-[#64748B] hover:text-[#1E293B]"}`}
+          className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all border ${tab === "text" ? "bg-[#2563EB] text-white border-[#2563EB] shadow-md shadow-[#2563EB]/20" : "bg-white text-[#64748B] border-[#E2E8F0] hover:border-[#2563EB] hover:text-[#2563EB]"}`}
         >
           نص حر
         </button>
         <button
           onClick={() => setTab("manual")}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${tab === "manual" ? "bg-white text-[#2563EB] shadow-sm" : "text-[#64748B] hover:text-[#1E293B]"}`}
+          className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all border ${tab === "manual" ? "bg-[#2563EB] text-white border-[#2563EB] shadow-md shadow-[#2563EB]/20" : "bg-white text-[#64748B] border-[#E2E8F0] hover:border-[#2563EB] hover:text-[#2563EB]"}`}
         >
           إدخال يدوي
         </button>
@@ -177,17 +177,22 @@ export default function DealsPage() {
       {tab === "manual" && (
         <div className="space-y-4">
           {deals.map((deal, i) => (
-            <div key={i} className="bg-white rounded-xl border border-[#E2E8F0] p-5 space-y-3">
+            <div key={i} className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-[#1E293B] text-sm">صفقة {i + 1}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-xs font-black shrink-0">
+                    {i + 1}
+                  </div>
+                  <span className="font-bold text-[#0F172A] text-sm">صفقة {i + 1}</span>
+                </div>
                 {deals.length > 1 && (
                   <button onClick={() => removeDeal(i)} className="text-red-400 hover:text-red-600 transition-colors">
                     <span className="material-symbols-outlined text-[18px]">delete</span>
                   </button>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2">
                   <label className="text-xs font-bold text-[#64748B] block mb-1">الاسم</label>
                   <input
                     value={deal.customerName}
@@ -259,7 +264,7 @@ export default function DealsPage() {
 
       {/* Summary */}
       {(tab === "manual" || deals.some(d => d.dealValue > 0)) && (
-        <div className="bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] p-5 space-y-2">
+        <div className="bg-gradient-to-r from-[#EFF6FF] to-[#F0FDF4] rounded-2xl border border-[#E2E8F0] p-5 space-y-2">
           <h3 className="font-black text-[#1E293B] text-sm mb-3">ملخص</h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white rounded-lg p-3 text-center border border-[#E2E8F0]">
@@ -287,11 +292,16 @@ export default function DealsPage() {
         <button
           onClick={handleSave}
           disabled={saving || deals.length === 0}
-          className="w-full py-4 bg-[#2563EB] text-white font-black rounded-xl hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-base flex items-center justify-center gap-2"
+          className="w-full py-4 bg-[#2563EB] text-white font-black rounded-2xl hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-base flex items-center justify-center gap-3 shadow-lg shadow-[#2563EB]/20 hover:shadow-xl hover:shadow-[#2563EB]/30 hover:-translate-y-0.5"
         >
           {saving ? (
             <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white inline-block" /> جاري الحفظ...</>
-          ) : "حفظ الصفقات"}
+          ) : (
+            <>
+              <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+              حفظ الصفقات
+            </>
+          )}
         </button>
       )}
     </div>

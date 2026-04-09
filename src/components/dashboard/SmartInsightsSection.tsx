@@ -33,7 +33,7 @@ export function SmartInsightsSection({ reports }: { reports: any[] }) {
     if (msMsgs > 0 && msIntr === 0) {
       issueList.push({
         variant: "critical",
-        text: `🚫 فشل ماسنجر الكامل: ${msMsgs.toLocaleString("ar-EG")} رسائل بدون أي تفاعل (0%) - يجب إيقاف الإنفاق فوراً`,
+        text: `🚫 فشل ماسنجر الكامل: ${msMsgs.toLocaleString()} رسائل بدون أي تفاعل (0%) - يجب إيقاف الإنفاق فوراً`,
       });
     }
 
@@ -47,7 +47,7 @@ export function SmartInsightsSection({ reports }: { reports: any[] }) {
     if (cur.jobConfusionCount > 0) {
       issueList.push({
         variant: "critical",
-        text: `🔀 الخلط مع إعلان الوظيفة: ${cur.jobConfusionCount.toLocaleString("ar-EG")} شخص (${jobY}%) ظنوا أنه إعلان توظيف`,
+        text: `🔀 الخلط مع إعلان الوظيفة: ${cur.jobConfusionCount.toLocaleString()} شخص (${jobY}%) ظنوا أنه إعلان توظيف`,
       });
     }
 
@@ -116,30 +116,30 @@ export function SmartInsightsSection({ reports }: { reports: any[] }) {
   }, [reports]);
 
   return (
-    <div
-      className="w-full rounded-xl border border-[#e1e8ed] bg-white p-6 shadow-sm"
-      dir="rtl"
-    >
+    <div className="w-full bg-white rounded-2xl border border-[#E2E8F0] shadow-sm p-6" dir="rtl">
       <div className="grid gap-8 lg:grid-cols-2">
+        {/* Critical Issues */}
         <div>
-          <h3
-            className="mb-4 border-b-2 border-[#ecf0f1] pb-2.5 text-[1.5em] font-semibold text-[#2c3e50]"
-          >
+          <h3 className="text-base font-bold text-[#0F172A] mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#EF4444] text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
             المشاكل الحرجة
           </h3>
           {issues.length === 0 ? (
-            <p className="text-[#27ae60] font-semibold leading-relaxed">
-              لا توجد مشاكل حرجة في هذه الفترة
-            </p>
+            <div className="flex items-center gap-2 p-4 bg-[#ECFDF5] rounded-xl border border-[#10B981]/20">
+              <span className="material-symbols-outlined text-[#10B981] text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+              <p className="text-sm font-semibold text-[#10B981]">
+                لا توجد مشاكل حرجة في هذه الفترة
+              </p>
+            </div>
           ) : (
-            <ul className="list-none space-y-3 p-0">
+            <ul className="list-none space-y-2.5 p-0">
               {issues.map((it, i) => (
                 <li
                   key={i}
                   className={
                     it.variant === "critical"
-                      ? "rounded-md border-r-[3px] border-[#e74c3c] bg-[#fff5f5] px-5 py-4 leading-relaxed text-[#2c3e50]"
-                      : "rounded-md border-r-[3px] border-[#3498db] bg-[#f8f9fa] px-5 py-4 leading-relaxed text-[#2c3e50]"
+                      ? "rounded-xl border-r-4 border-[#EF4444] bg-[#FEF2F2] px-5 py-3.5 leading-relaxed text-sm text-[#374151]"
+                      : "rounded-xl border-r-4 border-[#2563EB] bg-[#EFF6FF] px-5 py-3.5 leading-relaxed text-sm text-[#374151]"
                   }
                 >
                   {it.text}
@@ -149,22 +149,25 @@ export function SmartInsightsSection({ reports }: { reports: any[] }) {
           )}
         </div>
 
+        {/* Positive Points */}
         <div>
-          <h3
-            className="mb-4 border-b-2 border-[#ecf0f1] pb-2.5 text-[1.5em] font-semibold text-[#2c3e50]"
-          >
+          <h3 className="text-base font-bold text-[#0F172A] mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#10B981] text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>thumb_up</span>
             النقاط الإيجابية
           </h3>
           {positives.length === 0 ? (
-            <p className="font-semibold leading-relaxed text-[#7f8c8d]">
-              جمّع المزيد من البيانات لعرض النقاط الإيجابية
-            </p>
+            <div className="flex items-center gap-2 p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
+              <span className="material-symbols-outlined text-[#94A3B8] text-[18px]">info</span>
+              <p className="text-sm font-semibold text-[#64748B]">
+                جمّع المزيد من البيانات لعرض النقاط الإيجابية
+              </p>
+            </div>
           ) : (
-            <ul className="list-none space-y-3 p-0">
+            <ul className="list-none space-y-2.5 p-0">
               {positives.map((t, i) => (
                 <li
                   key={i}
-                  className="rounded-md border-r-[3px] border-[#27ae60] bg-[#f8f9fa] px-5 py-4 leading-relaxed text-[#2c3e50]"
+                  className="rounded-xl border-r-4 border-[#10B981] bg-[#ECFDF5] px-5 py-3.5 leading-relaxed text-sm text-[#374151]"
                 >
                   {t}
                 </li>

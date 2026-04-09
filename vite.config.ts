@@ -13,4 +13,17 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    fs: {
+      deny: ['.claude'],
+    },
+  },
+  optimizeDeps: {
+    exclude: [],
+  },
+  build: {
+    rollupOptions: {
+      external: [],
+    },
+  },
 });

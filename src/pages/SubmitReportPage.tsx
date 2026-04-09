@@ -6,7 +6,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { Link } from "react-router-dom";
-import { AccountabilitySystem } from "@/components/sales/AccountabilitySystem";
+
 
 type AppState = "input" | "processing" | "review" | "success";
 
@@ -69,8 +69,6 @@ export default function SubmitReportPage() {
   const { user } = useAuth();
   const courses = useCourses();
   
-  // Accountability
-  const [checkingAccountability, setCheckingAccountability] = useState(true);
   const [forcedDate, setForcedDate] = useState<string | null>(null);
 
   // States
@@ -180,14 +178,36 @@ export default function SubmitReportPage() {
       setParsedData({ ...parsedData, specialCases: arr });
   };
 
+  // Step indicator
+  const steps = [
+    { id: "input", label: "الإدخال", icon: "edit_note" },
+    { id: "review", label: "المراجعة", icon: "fact_check" },
+    { id: "success", label: "التأكيد", icon: "check_circle" },
+  ];
+  const stepIndex = appState === "input" || appState === "processing" ? 0 : appState === "review" ? 1 : 2;
+
   return (
     <div className="max-w-[720px] mx-auto font-body pb-32" dir="rtl">
-        {checkingAccountability && (
-            <AccountabilitySystem 
-               onClear={() => setCheckingAccountability(false)}
-               onSetForcedDate={(d) => { setForcedDate(d); setCheckingAccountability(false); }}
-            />
-        )}
+
+      {/* Step Indicator */}
+      <div className="flex items-center justify-center gap-0 mb-8 mt-2">
+        {steps.map((step, i) => (
+          <div key={step.id} className="flex items-center">
+            <div className={`flex flex-col items-center gap-1 ${i < stepIndex ? "opacity-60" : ""}`}>
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${i === stepIndex ? "bg-[#2563EB] text-white shadow-lg shadow-[#2563EB]/30" : i < stepIndex ? "bg-[#10B981] text-white" : "bg-[#F1F5F9] text-[#94A3B8]"}`}>
+                {i < stepIndex
+                  ? <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
+                  : <span className="material-symbols-outlined text-[18px]">{step.icon}</span>
+                }
+              </div>
+              <span className={`text-[10px] font-bold hidden sm:block ${i === stepIndex ? "text-[#2563EB]" : i < stepIndex ? "text-[#10B981]" : "text-[#94A3B8]"}`}>{step.label}</span>
+            </div>
+            {i < steps.length - 1 && (
+              <div className={`w-12 sm:w-20 h-0.5 mx-1 mb-4 ${i < stepIndex ? "bg-[#10B981]" : "bg-[#E2E8F0]"}`} />
+            )}
+          </div>
+        ))}
+      </div>
 
       {/* STEP 1: INPUT */}
       {appState === "input" && (
@@ -204,7 +224,7 @@ export default function SubmitReportPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl p-3 flex flex-col justify-center">
                         <span className="text-[10px] font-bold text-[#64748B] mb-1">تاريخ التقرير:</span>
                         <input
@@ -219,9 +239,10 @@ export default function SubmitReportPage() {
                     </div>
                     <div>
                         <span className="text-[10px] font-bold text-[#64748B] mb-1 block">منصة العمل اليوم:</span>
-                        <div className="flex bg-[#F7F9FC] p-1 rounded-xl border border-[#E2E8F0]">
+                        <div className="flex flex-wrap sm:flex-nowrap bg-[#F7F9FC] p-1 rounded-xl border border-[#E2E8F0] gap-1">
                             <button onClick={() => setFormPlatform("واتساب")} className={`flex-1 text-[12px] font-black py-2 rounded-lg transition-colors ${formPlatform === 'واتساب' ? 'bg-[#25D366]/10 text-[#128C7E] shadow-sm' : 'text-[#64748B]'}`}>واتساب</button>
                             <button onClick={() => setFormPlatform("ماسنجر")} className={`flex-1 text-[12px] font-black py-2 rounded-lg transition-colors ${formPlatform === 'ماسنجر' ? 'bg-[#0084FF]/10 text-[#0084FF] shadow-sm' : 'text-[#64748B]'}`}>ماسنجر</button>
+                            <button onClick={() => setFormPlatform("تيك توك")} className={`flex-1 text-[12px] font-black py-2 rounded-lg transition-colors ${formPlatform === 'تيك توك' ? 'bg-black/10 text-black shadow-sm' : 'text-[#64748B]'}`}>تيك توك</button>
                         </div>
                     </div>
                 </div>
@@ -324,10 +345,18 @@ export default function SubmitReportPage() {
                        <span className="material-symbols-outlined text-[#2563EB]">filter_list</span> مراحل قمع التحويل
                   </h3>
                   
-                  <TableSection title="لم يرد بعد التحية" defaultExpanded={false} data={parsedData.funnel.noReplyAfterGreeting} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, noReplyAfterGreeting: d}})} />
-                  <TableSection title="لم يرد بعد التفاصيل" defaultExpanded={false} data={parsedData.funnel.noReplyAfterDetails} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, noReplyAfterDetails: d}})} />
-                  <TableSection title="لم يرد بعد السعر" defaultExpanded={false} data={parsedData.funnel.noReplyAfterPrice} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, noReplyAfterPrice: d}})} />
-                  <TableSection title="رد بعد السعر" defaultExpanded={true} data={parsedData.funnel.repliedAfterPrice} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, repliedAfterPrice: d}})} />
+                  <div className="border-r-4 border-[#F59E0B] rounded-r-none rounded-l-2xl overflow-hidden mb-1">
+                    <TableSection title="لم يرد بعد التحية" defaultExpanded={false} data={parsedData.funnel.noReplyAfterGreeting} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, noReplyAfterGreeting: d}})} />
+                  </div>
+                  <div className="border-r-4 border-[#EF4444]/60 rounded-r-none rounded-l-2xl overflow-hidden mb-1">
+                    <TableSection title="لم يرد بعد التفاصيل" defaultExpanded={false} data={parsedData.funnel.noReplyAfterDetails} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, noReplyAfterDetails: d}})} />
+                  </div>
+                  <div className="border-r-4 border-[#EF4444] rounded-r-none rounded-l-2xl overflow-hidden mb-1">
+                    <TableSection title="لم يرد بعد السعر" defaultExpanded={false} data={parsedData.funnel.noReplyAfterPrice} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, noReplyAfterPrice: d}})} />
+                  </div>
+                  <div className="border-r-4 border-[#10B981] rounded-r-none rounded-l-2xl overflow-hidden mb-1">
+                    <TableSection title="رد بعد السعر" defaultExpanded={true} data={parsedData.funnel.repliedAfterPrice} onChange={(d) => setParsedData({...parsedData, funnel: {...parsedData.funnel, repliedAfterPrice: d}})} />
+                  </div>
               </div>
 
               {/* Special Cases Tracker */}
@@ -345,8 +374,8 @@ export default function SubmitReportPage() {
                       {parsedData.specialCases.length === 0 && <span className="text-[#64748B] text-[11px] font-bold">لا توجد ملاحظات مرفقة.</span>}
                   </div>
                   <div className="flex gap-2">
-                      <input value={newNote} onChange={e => setNewNote(e.target.value)} onKeyDown={e => e.key === 'Enter' && addSpecialNote()} placeholder="إضافة ملاحظة جديدة..." className="flex-1 bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-4 py-2 text-[12px] font-bold focus:border-[#2563EB] outline-none" />
-                      <button onClick={addSpecialNote} className="bg-[#1E293B] text-white px-4 py-2 text-[12px] font-bold rounded-xl hover:bg-black">إضافة</button>
+                      <input value={newNote} onChange={e => setNewNote(e.target.value)} onKeyDown={e => e.key === 'Enter' && addSpecialNote()} placeholder="إضافة ملاحظة جديدة..." className="flex-1 min-w-0 bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-4 py-2 text-[12px] font-bold focus:border-[#2563EB] outline-none" />
+                      <button onClick={addSpecialNote} className="shrink-0 bg-[#1E293B] text-white px-4 py-2 text-[12px] font-bold rounded-xl hover:bg-black">إضافة</button>
                   </div>
               </div>
 
@@ -385,7 +414,7 @@ export default function SubmitReportPage() {
                      <button 
                         onClick={handleSave}
                         disabled={!isConfirmed || isSaving}
-                        className="flex-1 bg-[#2563EB] text-white px-8 py-3.5 rounded-xl text-[13px] font-black transition-colors disabled:opacity-50 disabled:bg-[#94A3B8] hover:bg-[#1D4ED8] flex justify-center items-center gap-2 w-[160px]"
+                        className="flex-1 bg-[#2563EB] text-white px-4 sm:px-8 py-3.5 rounded-xl text-[13px] font-black transition-colors disabled:opacity-50 disabled:bg-[#94A3B8] hover:bg-[#1D4ED8] flex justify-center items-center gap-2 sm:w-[160px]"
                      >
                          {isSaving ? <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span> : "تأكيد وحفظ"}
                      </button>

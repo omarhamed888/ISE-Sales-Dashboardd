@@ -53,8 +53,10 @@ export function ChartsGrid({ reports }: { reports: any[] }) {
   const donutData = useMemo(() => {
     const wa = platform.whatsapp.messages;
     const ms = platform.messenger.messages;
+    const tk = platform.tiktok?.messages || 0;
     const waI = platform.whatsapp.interactions;
     const msI = platform.messenger.interactions;
+    const tkI = platform.tiktok?.interactions || 0;
     const slices: { name: string; value: number; fill: string }[] = [];
     if (wa > 0) {
       slices.push({
@@ -68,6 +70,13 @@ export function ChartsGrid({ reports }: { reports: any[] }) {
         name: `ماسنجر (${msI} تفاعل)`,
         value: ms,
         fill: msI === 0 ? "#e8f5e9" : "#85c1e9",
+      });
+    }
+    if (tk > 0) {
+      slices.push({
+        name: `تيك توك (${tkI} تفاعل)`,
+        value: tk,
+        fill: tkI === 0 ? "#f2f2f2" : "#333333",
       });
     }
     return slices;

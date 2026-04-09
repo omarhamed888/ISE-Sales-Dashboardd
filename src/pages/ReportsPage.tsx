@@ -65,7 +65,9 @@ export default function ReportsPage() {
 
       // 2. Dates
       let matchesDate = true;
-      const rDate = report.createdAt ? new Date(report.createdAt).getTime() : new Date(report.date.split('/').reverse().join('-')).getTime();
+      const dateVal = typeof report.date === "string" ? report.date : "";
+      const validDateString = dateVal.includes('/') ? dateVal.split('/').reverse().join('-') : dateVal;
+      const rDate = new Date(validDateString).getTime();
       if (dateFrom) matchesDate = matchesDate && rDate >= new Date(dateFrom).getTime();
       if (dateTo) matchesDate = matchesDate && rDate <= new Date(dateTo).getTime() + 86400000;
 
@@ -151,7 +153,7 @@ export default function ReportsPage() {
     <div className="max-w-[1600px] w-full mx-auto space-y-6 animate-in fade-in duration-500 pb-20 font-body" dir="rtl">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-white p-8 rounded-[32px] shadow-sm border border-[#E2E8F0]">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 bg-white p-5 md:p-8 rounded-[24px] md:rounded-[32px] shadow-sm border border-[#E2E8F0]">
         <div>
            <div className="flex items-center gap-4 mb-2">
               <div className="w-12 h-12 rounded-[16px] bg-[#2563EB]/10 flex items-center justify-center text-[#2563EB]">
@@ -182,7 +184,7 @@ export default function ReportsPage() {
                       className="w-full bg-[#F7F9FC] border-none py-3 pr-10 pl-4 text-[13px] font-bold text-[#1E293B] outline-none"
                   />
               </div>
-              <div className="md:col-span-2 grid grid-cols-2 gap-4">
+              <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="border border-[#E2E8F0] rounded-xl overflow-hidden flex items-center bg-[#F7F9FC] px-3 focus-within:border-[#2563EB]">
                       <span className="text-[11px] font-bold text-[#64748B] w-12">من:</span>
                       <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full bg-transparent border-none py-3 text-[13px] font-bold text-[#1E293B] outline-none rtl:mr-1" />
@@ -195,7 +197,7 @@ export default function ReportsPage() {
           </div>
 
           {/* Row 2: Dropdowns */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {[
                   { label: "المنصة", state: filterPlatform, set: setFilterPlatform, opts: ["الكل", "واتساب", "ماسنجر"] },
                   { label: "الموظف", state: filterRep, set: setFilterRep, opts: salesReps },
@@ -252,6 +254,53 @@ export default function ReportsPage() {
              </div>
           ) : (
              <div className="overflow-x-auto flex-1">
+
+               {/* Mobile: Card list (< md) */}
+               <div className="md:hidden divide-y divide-[#F1F5F9]">
+                 {paginatedReports.map(report => {
+                   const drops = calculateDeepStatsForColumn(report.parsedData);
+                   const cRate = report.parsedData?.summary?.conversionRate || 0;
+                   const cClass = cRate > 10 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200';
+                   return (
+                     <div key={report.id} onClick={() => setSelectedReport(report)}
+                       className="p-4 hover:bg-[#F7F9FC] cursor-pointer transition-colors">
+                       <div className="flex justify-between items-start mb-3">
+                         <div className="flex items-center gap-2">
+                           <div className="w-7 h-7 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center font-black text-[10px] border border-[#2563EB]/10">
+                             {report.salesRepName?.charAt(0) || "U"}
+                           </div>
+                           <span className="font-bold text-[13px] text-[#1E293B]">{report.salesRepName}</span>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${report.platform === 'واتساب' ? 'bg-[#25D366]/10 text-[#25D366]' : 'bg-[#0084FF]/10 text-[#0084FF]'}`}>{report.platform}</span>
+                           <span className="text-[11px] font-bold text-[#64748B]" dir="ltr">{report.date}</span>
+                         </div>
+                       </div>
+                       <div className="grid grid-cols-4 gap-2 text-center">
+                         <div className="bg-[#F8FAFC] rounded-lg p-2">
+                           <p className="text-[9px] font-bold text-[#64748B] mb-0.5">الرسائل</p>
+                           <p className="text-[13px] font-black text-[#1E293B]">{report.parsedData?.summary?.totalMessages || 0}</p>
+                         </div>
+                         <div className="bg-rose-50 rounded-lg p-2">
+                           <p className="text-[9px] font-bold text-rose-500 mb-0.5">تسرب</p>
+                           <p className="text-[13px] font-black text-rose-600">{drops.greeting + drops.details + drops.price}</p>
+                         </div>
+                         <div className="bg-[#F8FAFC] rounded-lg p-2">
+                           <p className="text-[9px] font-bold text-[#64748B] mb-0.5">التفاعل</p>
+                           <p className="text-[13px] font-black text-[#1E293B]">{report.parsedData?.summary?.interactions || 0}</p>
+                         </div>
+                         <div className={`rounded-lg p-2 border ${cClass}`}>
+                           <p className="text-[9px] font-bold mb-0.5">التحويل</p>
+                           <p className="text-[13px] font-black">{cRate}%</p>
+                         </div>
+                       </div>
+                     </div>
+                   );
+                 })}
+               </div>
+
+               {/* Desktop: Table (>= md) */}
+               <div className="hidden md:block">
                  <table className="w-full text-right text-[12px]">
                      <thead>
                          <tr className="bg-[#F7F9FC] border-b border-[#E2E8F0]">
@@ -309,6 +358,7 @@ export default function ReportsPage() {
                          })}
                      </tbody>
                  </table>
+               </div>{/* end desktop table */}
              </div>
           )}
 

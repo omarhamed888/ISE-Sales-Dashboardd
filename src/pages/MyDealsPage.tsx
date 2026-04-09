@@ -11,7 +11,7 @@ const RANGE_LABELS: Record<Range, string> = {
 };
 
 function formatNumber(n: number) {
-  return n.toLocaleString("ar-EG");
+  return n.toLocaleString();
 }
 
 export default function MyDealsPage() {
@@ -72,57 +72,72 @@ export default function MyDealsPage() {
         ))}
       </div>
 
-      {/* Summary */}
-      <div className="bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] p-5">
-        <h3 className="font-black text-[#1E293B] text-sm mb-3">ملخص</h3>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white rounded-lg p-3 text-center border border-[#E2E8F0]">
-            <p className="text-xs text-[#64748B] font-bold">إجمالي الصفقات</p>
-            <p className="text-2xl font-black text-[#1E293B]">{filtered.length}</p>
+      {/* Summary KPI Cards */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-5 flex flex-col gap-2 border-r-4 border-r-[#2563EB] hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">الصفقات</p>
+            <span className="material-symbols-outlined text-[20px] text-[#2563EB]" style={{ fontVariationSettings: "'FILL' 1" }}>handshake</span>
           </div>
-          <div className="bg-white rounded-lg p-3 text-center border border-[#E2E8F0]">
-            <p className="text-xs text-[#64748B] font-bold">إجمالي الإيرادات</p>
-            <p className="text-xl font-black text-[#2563EB]">{formatNumber(totalRevenue)} ج.م</p>
+          <p className="text-3xl font-black text-[#0F172A]">{filtered.length}</p>
+        </div>
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-5 flex flex-col gap-2 border-r-4 border-r-[#10B981] hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">الإيرادات</p>
+            <span className="material-symbols-outlined text-[20px] text-[#10B981]" style={{ fontVariationSettings: "'FILL' 1" }}>payments</span>
           </div>
-          <div className="bg-white rounded-lg p-3 text-center border border-[#E2E8F0]">
-            <p className="text-xs text-[#64748B] font-bold">متوسط الصفقة</p>
-            <p className="text-xl font-black text-[#1E293B]">{formatNumber(avgDeal)} ج.م</p>
+          <p className="text-2xl font-black text-[#10B981]">{formatNumber(totalRevenue)} <span className="text-base font-bold">ج.م</span></p>
+        </div>
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-5 flex flex-col gap-2 border-r-4 border-r-[#8B5CF6] hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">متوسط الصفقة</p>
+            <span className="material-symbols-outlined text-[20px] text-[#8B5CF6]" style={{ fontVariationSettings: "'FILL' 1" }}>calculate</span>
           </div>
-          <div className="bg-white rounded-lg p-3 text-center border border-[#E2E8F0]">
-            <p className="text-xs text-[#64748B] font-bold">متوسط زمن الإغلاق</p>
-            <p className="text-xl font-black text-[#1E293B]">{avgCycle} يوم</p>
+          <p className="text-2xl font-black text-[#0F172A]">{formatNumber(avgDeal)} <span className="text-base font-bold text-[#64748B]">ج.م</span></p>
+        </div>
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-5 flex flex-col gap-2 border-r-4 border-r-[#F59E0B] hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">زمن الإغلاق</p>
+            <span className="material-symbols-outlined text-[20px] text-[#F59E0B]" style={{ fontVariationSettings: "'FILL' 1" }}>timer</span>
           </div>
+          <p className="text-2xl font-black text-[#0F172A]">{avgCycle} <span className="text-base font-bold text-[#64748B]">يوم</span></p>
         </div>
       </div>
 
       {/* Deals List */}
-      <div className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#F1F5F9]">
-          <h3 className="font-black text-[#1E293B] text-sm">الصفقات</h3>
-        </div>
+      <div>
+        <h3 className="text-base font-bold text-[#0F172A] mb-3">الصفقات</h3>
         {filtered.length === 0 ? (
-          <div className="py-12 text-center text-[#94A3B8]">
-            <span className="material-symbols-outlined text-4xl block mb-2">monetization_on</span>
-            <p className="text-sm font-bold">لا توجد صفقات في هذه الفترة</p>
+          <div className="bg-white rounded-2xl border border-[#E2E8F0] py-14 text-center flex flex-col items-center gap-3">
+            <span className="material-symbols-outlined text-[40px] text-[#CBD5E1]" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
+            <p className="text-base font-bold text-[#0F172A]">لا توجد صفقات</p>
+            <p className="text-sm text-[#64748B]">لا توجد صفقات مسجلة في هذه الفترة</p>
           </div>
         ) : (
-          <div className="divide-y divide-[#F1F5F9]">
-            {filtered.map((deal: any) => (
-              <div key={deal.id} className="px-5 py-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-bold text-[#1E293B] text-sm">{deal.customerName}</p>
-                    <p className="text-xs text-[#64748B] mt-0.5">{deal.adSource}</p>
+          <div className="space-y-3">
+            {filtered.map((deal: any, i: number) => (
+              <div key={deal.id} className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm p-5 hover:-translate-y-0.5 hover:shadow-md transition-all">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center font-black text-sm shrink-0">
+                      {i + 1}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-[#0F172A] text-sm truncate">{deal.customerName}</p>
+                      <p className="text-xs text-[#64748B] mt-0.5 truncate">{deal.adSource}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-black text-[#2563EB] text-sm">{formatNumber(deal.dealValue)} ج.م</p>
+                  <div className="text-left shrink-0">
+                    <p className="font-black text-[#2563EB] text-base">{formatNumber(deal.dealValue)} <span className="text-xs font-bold">ج.م</span></p>
                     <p className="text-xs text-[#94A3B8] mt-0.5">{deal.closeDate}</p>
                   </div>
                 </div>
-                <div className="flex gap-3 mt-2">
-                  <span className="inline-block bg-[#F1F5F9] text-[#64748B] text-xs px-2 py-0.5 rounded-md font-bold">{deal.programName}</span>
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  {deal.programName && (
+                    <span className="inline-block bg-[#F1F5F9] text-[#64748B] text-xs px-2.5 py-1 rounded-full font-bold border border-[#E2E8F0]">{deal.programName}</span>
+                  )}
                   {typeof deal.closingCycleDays === 'number' && (
-                    <span className="inline-block bg-[#EFF6FF] text-[#2563EB] text-xs px-2 py-0.5 rounded-md font-bold">{deal.closingCycleDays} يوم</span>
+                    <span className="inline-block bg-[#EFF6FF] text-[#2563EB] text-xs px-2.5 py-1 rounded-full font-bold border border-[#2563EB]/10">{deal.closingCycleDays} يوم إغلاق</span>
                   )}
                 </div>
               </div>

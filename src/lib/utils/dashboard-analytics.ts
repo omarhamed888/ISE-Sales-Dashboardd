@@ -22,23 +22,26 @@ export function formatReportDateArabicDayMonth(ymd: string): string {
   return `${d.getDate()} ${month}`;
 }
 
-export type PlatformKey = "whatsapp" | "messenger";
+export type PlatformKey = "whatsapp" | "messenger" | "tiktok";
 
 export function classifyPlatform(platformRaw: string | undefined): PlatformKey {
   const p = (platformRaw || "").toLowerCase();
   if (p.includes("واتساب") || p.includes("whatsapp")) return "whatsapp";
+  if (p.includes("تيك توك") || p.includes("tiktok")) return "tiktok";
   return "messenger";
 }
 
 export interface PlatformStats {
   whatsapp: { messages: number; interactions: number };
   messenger: { messages: number; interactions: number };
+  tiktok: { messages: number; interactions: number };
 }
 
 export function getPlatformStats(reports: any[]): PlatformStats {
   const out: PlatformStats = {
     whatsapp: { messages: 0, interactions: 0 },
     messenger: { messages: 0, interactions: 0 },
+    tiktok: { messages: 0, interactions: 0 },
   };
   reports.forEach((r) => {
     const pd = r.parsedData;

@@ -13,16 +13,16 @@ export function DashboardChartCard({
 }) {
   return (
     <div
-      className={`bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col ${fullWidth ? "lg:col-span-2" : ""}`}
+      className={`bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-6 flex flex-col ${fullWidth ? "lg:col-span-2" : ""}`}
       dir="rtl"
     >
-      <h3 className="text-lg font-semibold text-gray-800 mb-1 text-right">{title}</h3>
-      {subtitle ? (
-        <p className="text-sm text-gray-400 mb-4 text-right">{subtitle}</p>
-      ) : (
-        <div className="mb-4" />
-      )}
-      <div className="w-full" style={{ height: 300 }}>
+      <div className="mb-4">
+        <h3 className="text-base font-bold text-[#0F172A] text-right">{title}</h3>
+        {subtitle && (
+          <p className="text-xs font-semibold text-[#94A3B8] mt-0.5 text-right">{subtitle}</p>
+        )}
+      </div>
+      <div className="w-full h-[280px] pb-2">
         {children}
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 export interface Course {
@@ -13,14 +13,15 @@ export interface Course {
 export function useCourses(includeInactive = false) {
   const [courses, setCourses] = useState<Course[]>([]);
   useEffect(() => {
-    const constraints: any[] = includeInactive
-      ? [orderBy('order')]
-      : [where('isActive', '==', true), orderBy('order')];
-
-    const q = query(collection(db, 'courses'), ...constraints);
-    return onSnapshot(q, snap => {
-      setCourses(snap.docs.map(d => ({ id: d.id, ...d.data() })) as Course[]);
+    // Fetch all courses without compound query (avoids composite index requirement)
+    return onSnapshot(collection(db, 'courses'), snap => {
+      let all = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Course[];
+      // Filter & sort client-side
+      if (!includeInactive) all = all.filter(c => c.isActive);
+      all.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      setCourses(all);
     });
   }, [includeInactive]);
   return courses;
 }
+

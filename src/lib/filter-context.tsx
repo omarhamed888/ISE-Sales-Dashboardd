@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useAuth } from './auth-context';
 
 export type DateRange = "اليوم" | "الأسبوع" | "الشهر" | "الإجمالي";
-export type Platform = "all" | "whatsapp" | "messenger";
+export type Platform = "all" | "whatsapp" | "messenger" | "tiktok";
 
 export interface FilterState {
   dateRange: DateRange;
