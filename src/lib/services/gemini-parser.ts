@@ -1,14 +1,15 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export interface FunnelStage {
-  id: string; // generated client side
+  id: string;
   adName: string;
   count: number;
-  notes?: string;
+  notes?: string;        // الوظيفة بعد "/" في ماسنجر
+  leadNotes?: string[];  // ملاحظات فردية تحت كل عميل في "رد بعد السعر" (واتساب/تيك توك)
 }
 
 export interface ReportFunnel {
-  noReplyAfterGreeting: FunnelStage[];
+  noReplyAfterGreeting: FunnelStage[];   // ماسنجر فقط
   noReplyAfterDetails: FunnelStage[];
   noReplyAfterPrice: FunnelStage[];
   repliedAfterPrice: FunnelStage[];
@@ -17,7 +18,7 @@ export interface ReportFunnel {
 export interface RejectionReason {
   rawText: string;
   count: number;
-  category: string; // Gemini-classified
+  category: string;
 }
 
 export interface DetectedJob {
@@ -26,24 +27,6 @@ export interface DetectedJob {
   sector: string;
   count: number;
   stage: string;
-}
-
-export interface ParsedReportData {
-  totalMessages: number;       // رسائل + كومنتات combined
-  messagesCount: number;       // رسائل فقط (Messenger)
-  commentsCount: number;       // كومنتات فقط (Messenger)
-  interactions: number;
-  conversionRate: number;
-  funnel: ReportFunnel;                // combined رسائل + كومنتات
-  commentsFunnel: ReportFunnel;        // كومنتات only (Messenger), empty for other platforms
-  specialCases: string[];
-  jobConfusionCount: number;
-  rejectionReasons: RejectionReason[];
-  detectedJobs: DetectedJob[];
-  leadsByAd: Array<{ adName: string; leadCount: number }>;
-  salesNotes: string;
-  programTrack: string;
-  sourceType: string;                  // "واتساب" | "ماسنجر" | "تيك توك"
 }
 
 export interface DealInput {
@@ -61,56 +44,115 @@ export interface ParsedDealsOutput {
   totalRevenue: number;
 }
 
+export interface ParsedReportData {
+  totalMessages: number;
+  messagesCount: number;       // ماسنجر: رسائل فقط | واتساب/تيك توك: = totalMessages
+  commentsCount: number;       // ماسنجر: كومنتات | واتساب/تيك توك: 0
+  interactions: number;        // مجموع "رد بعد السعر"
+  conversionRate: number;
+  funnel: ReportFunnel;
+  commentsFunnel: ReportFunnel; // ماسنجر: كومنتات فقط | واتساب/تيك توك: فارغ
+  specialCases: string[];
+  jobConfusionCount: number;
+  rejectionReasons: RejectionReason[];
+  detectedJobs: DetectedJob[];
+  leadsByAd: Array<{ adName: string; leadCount: number }>;
+  salesNotes: string;
+  programTrack: string;
+  sourceType: string;
+  closedDeals: DealInput[];    // الصفقات المغلقة المدمجة في التقرير
+}
+
 const REJECTION_CATEGORIES = [
   'سعر', 'خلط وظيفي', 'عدم اهتمام', 'توقيت', 'صيغة الدراسة',
   'احتياج غير مطابق', 'سلطة قرار', 'عدم فهم', 'قطاع/وظيفة', 'أخرى'
 ];
 
 const SYSTEM_INSTRUCTION = `أنت محلل بيانات مبيعات متخصص في السوق العربي.
-ستستقبل تقرير مبيعات يومي مكتوب بالعربية كنص خام.
+ستستقبل تقرير مبيعات يومي كنص خام. مهمتك: استخرج البيانات وأرجع JSON صحيح فقط بدون أي نص إضافي.
 
-مهمتك: استخرج البيانات وأرجعها كـ JSON صحيح فقط بدون أي نص إضافي أو markdown.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+فورمات واتساب / تيك توك (نفس الشيء)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-━━━ فهم فورمات المنصات ━━━
+*اجمالى (N)*  →  totalMessages = N
 
-فورمات واتساب وتيك توك (نفس الشيء):
-  اجمالى (N)
-  مردش بعد أهلا (N)  → noReplyAfterGreeting
-  مردش بعد التفاصيل (N) → noReplyAfterDetails
-  مردش بعد السعر (N) → noReplyAfterPrice
-  رد بعد السعر (N) → repliedAfterPrice
+توزيع الليدز حسب الإعلان:
+- اسم_الإعلان: N   →  leadsByAd: [{adName, leadCount}]
 
-فورمات ماسنجر:
-  السطر الأول: "ماسنجر ( X رساله - Y كومنت )" → messagesCount=X, commentsCount=Y, totalMessages=X+Y
-  ━━━ رسائل ( X ) ━━━  ← قسم الرسائل
-  ━━━ كومنتات ( Y ) ━━━ ← قسم الكومنتات
-  كل قسم له نفس مراحل الفانل
+* مردش بعد التفاصيل (N)
+M (اسم_الإعلان)   →  noReplyAfterDetails: [{adName: "اسم_الإعلان", count: M}]
+M (اسم_الإعلان)
 
-قاعدة التفاصيل (لجميع المنصات):
-  "مردش بعد أهلا ( N )" يليه أسطر: "N اسم_الإعلان"
-    → كل سطر = entry في noReplyAfterGreeting: {adName: "اسم_الإعلان", count: N, job: ""}
-  "مردش بعد التفاصيل ( N )" يليه: "- اسم_الإعلان / الوظيفة"
-    → كل سطر = entry: {adName: "اسم_الإعلان", count: 1, job: "الوظيفة"}
-  "مردش بعد السعر ( N )" → نفس الطريقة
-  "رد بعد السعر ( N )" → نفس الطريقة
+* مردش بعد السعر (N)
+M (اسم_الإعلان)   →  noReplyAfterPrice: [{adName, count: M}]
 
-حساب messagesCount و commentsCount:
-  - واتساب/تيك توك: messagesCount = totalMessages, commentsCount = 0
-  - ماسنجر: استخرج X و Y من هيدر "ماسنجر ( X رساله - Y كومنت )"
+* رد بعد السعر (N)
+M (اسم_الإعلان)   →  repliedAfterPrice: [{adName, count: M, leadNotes: [ملاحظات تحته]}]
+هيفكر ويرد         ← هذه ملاحظات عميل تتراكم في leadNotes للـ entry السابق
+هيحضر اونلاين      ← نفس الشيء
+M (اسم_الإعلان)   →  entry جديد
+محتاج يتكلم مراته
 
-للماسنجر:
-  - funnel = دمج رسائل + كومنتات معاً (جمع الأرقام)
-  - commentsFunnel = كومنتات بمفردها
+قاعدة leadNotes: أي سطر يلي سطر "M (اسم)" وهو ليس "M (اسم)" آخر، يُضاف في leadNotes للـ entry السابق.
 
-عند استخراج أسباب الرفض، صنّف كل سبب في إحدى هذه الفئات فقط:
-سعر | خلط وظيفي | عدم اهتمام | توقيت | صيغة الدراسة | احتياج غير مطابق | سلطة قرار | عدم فهم | قطاع/وظيفة | أخرى
+أسباب الرفض:
+- السبب: N   →  rejectionReasons: [{rawText, count, category}]
 
-قواعد عامة:
-- interactions = مجموع أعداد "رد بعد السعر" فقط
-- jobConfusionCount = من ظنوا التقرير وظيفة
-- الوظيفة بعد "/" في السطر تذهب لحقل notes في الـ entry
-- الأرقام العربية (١٢٣) والإنجليزية (123) كلاهما صحيح، تعامل معهما نفس الشيء
-- لو مفيش بيانات لمرحلة أرجع []
+ملاحظات:
+[نص حر]   →  salesNotes
+
+الصفقات المغلقة: N
+1)
+الاسم: [اسم]      → customerName
+المصدر: [مصدر]    → adSource
+البرنامج: [برنامج] → programName
+عدد البرامج: N    → programCount
+دفع: N            → dealValue
+أول تواصل: تاريخ  → firstContactDate (YYYY-MM-DD)
+
+⚠️ واتساب/تيك توك: لا يوجد مرحلة "مردش بعد أهلا" → noReplyAfterGreeting = []
+⚠️ واتساب/تيك توك: commentsFunnel كله فارغ []
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+فورمات ماسنجر
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+السطر الأول: "ماسنجر ( X رساله - Y كومنت )"
+→ messagesCount = X, commentsCount = Y, totalMessages = X + Y
+
+━━━ رسائل ( X ) ━━━   ← بداية قسم الرسائل
+
+مردش بعد أهلا ( N )
+N اسم_الإعلان    →  noReplyAfterGreeting: [{adName: "اسم_الإعلان", count: N}]
+
+مردش بعد التفاصيل ( N )
+- اسم_الإعلان / الوظيفة  →  [{adName, count: 1, notes: "الوظيفة"}]
+
+مردش بعد السعر ( N )
+- اسم_الإعلان / الوظيفة
+
+رد بعد السعر ( N )
+- اسم_الإعلان / الوظيفة
+
+حالات خاصة رسائل:
+- وصف_الحالة / اسم_الإعلان  →  specialCases (كنص)
+
+━━━ كومنتات ( Y ) ━━━  ← بداية قسم الكومنتات (نفس هيكل رسائل)
+
+⚠️ للماسنجر:
+- funnel = دمج رسائل + كومنتات (اجمع الأعداد لنفس المراحل)
+- commentsFunnel = كومنتات فقط (بدون رسائل)
+- لا يوجد صفقات مدمجة في ماسنجر عادةً، لكن لو وُجدت استخرجها
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+قواعد عامة
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- interactions = مجموع count في repliedAfterPrice
+- jobConfusionCount = عدد من ظنوا التقرير وظيفة (من أسباب الرفض "فاكرها وظيفة")
+- الأرقام العربية (١٢٣) والإنجليزية (123) كلاهما مقبول
+- لو مفيش بيانات لمرحلة → []
 - لا تخترع بيانات غير موجودة
 - أرجع JSON صالح فقط`;
 
@@ -127,34 +169,42 @@ const USER_PROMPT = (text: string, courses: string[]) => `
   "sourceType": "واتساب" | "ماسنجر" | "تيك توك",
   "programTrack": string,
   "salesNotes": string,
+  "leadsByAd": [{ "adName": string, "leadCount": number }],
   "funnel": {
-    "noReplyAfterGreeting": [ { "adName": string, "count": number, "notes": string } ],
-    "noReplyAfterDetails": [ { "adName": string, "count": number, "notes": string } ],
-    "noReplyAfterPrice": [ { "adName": string, "count": number, "notes": string } ],
-    "repliedAfterPrice": [ { "adName": string, "count": number, "notes": string } ]
+    "noReplyAfterGreeting": [{ "adName": string, "count": number, "notes": string, "leadNotes": [string] }],
+    "noReplyAfterDetails":  [{ "adName": string, "count": number, "notes": string, "leadNotes": [string] }],
+    "noReplyAfterPrice":    [{ "adName": string, "count": number, "notes": string, "leadNotes": [string] }],
+    "repliedAfterPrice":    [{ "adName": string, "count": number, "notes": string, "leadNotes": [string] }]
   },
   "commentsFunnel": {
-    "noReplyAfterGreeting": [ { "adName": string, "count": number, "notes": string } ],
-    "noReplyAfterDetails": [ { "adName": string, "count": number, "notes": string } ],
-    "noReplyAfterPrice": [ { "adName": string, "count": number, "notes": string } ],
-    "repliedAfterPrice": [ { "adName": string, "count": number, "notes": string } ]
+    "noReplyAfterGreeting": [{ "adName": string, "count": number, "notes": string, "leadNotes": [string] }],
+    "noReplyAfterDetails":  [{ "adName": string, "count": number, "notes": string, "leadNotes": [string] }],
+    "noReplyAfterPrice":    [{ "adName": string, "count": number, "notes": string, "leadNotes": [string] }],
+    "repliedAfterPrice":    [{ "adName": string, "count": number, "notes": string, "leadNotes": [string] }]
   },
   "specialCases": [string],
-  "rejectionReasons": [
-    { "rawText": string, "count": number, "category": string }
-  ],
-  "detectedJobs": [
-    { "rawText": string, "normalizedLabel": string, "sector": string, "count": number, "stage": string }
-  ],
-  "leadsByAd": [
-    { "adName": string, "leadCount": number }
+  "rejectionReasons": [{ "rawText": string, "count": number, "category": string }],
+  "detectedJobs": [{ "rawText": string, "normalizedLabel": string, "sector": string, "count": number, "stage": string }],
+  "closedDeals": [
+    {
+      "customerName": string,
+      "adSource": string,
+      "programName": string,
+      "programCount": number,
+      "dealValue": number,
+      "firstContactDate": string
+    }
   ]
 }
 
 ملاحظات JSON:
-- notes في كل entry = الوظيفة المكتوبة بعد "/" في السطر (إن وُجدت)
-- للماسنجر: funnel = دمج رسائل + كومنتات، commentsFunnel = كومنتات فقط
-- للواتساب/تيك توك: commentsFunnel يكون فيه arrays فارغة
+- واتساب/تيك توك: noReplyAfterGreeting = [] دائماً
+- واتساب/تيك توك: commentsFunnel كل arrays فارغة []
+- ماسنجر: funnel = دمج رسائل + كومنتات، commentsFunnel = كومنتات فقط
+- leadNotes: الملاحظات الفردية اللي تحت كل "M (اسم_الإعلان)" في رد بعد السعر
+- notes: الوظيفة بعد "/" في ماسنجر
+- closedDeals: فارغ [] لو مفيش صفقات مغلقة
+- firstContactDate بصيغة YYYY-MM-DD أو "" لو غائب
 
 REPORT TEXT:
 ${text}
@@ -169,6 +219,7 @@ interface RawGeminiOutput {
   sourceType?: string;
   programTrack?: string;
   salesNotes?: string;
+  leadsByAd?: any[];
   funnel?: {
     noReplyAfterGreeting?: any[];
     noReplyAfterDetails?: any[];
@@ -184,27 +235,23 @@ interface RawGeminiOutput {
   specialCases?: string[];
   rejectionReasons?: any[];
   detectedJobs?: any[];
-  leadsByAd?: any[];
+  closedDeals?: any[];
 }
 
 function fallbackRegexExtraction(rawText: string): RawGeminiOutput {
-  const extractNumber = (pattern: RegExp, fallback: number) => {
+  const extractNumber = (pattern: RegExp) => {
     const match = rawText.match(pattern);
-    return match ? parseInt(match[1]) : fallback;
+    return match ? parseInt(match[1].replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))) : 0;
   };
 
   return {
-    totalMessages: extractNumber(/تم استلام (\d+)/, 0),
-    interactions: extractNumber(/(\d+) عميل/, 0),
-    funnel: {
-      noReplyAfterGreeting: [],
-      noReplyAfterDetails: [],
-      noReplyAfterPrice: [],
-      repliedAfterPrice: []
-    },
+    totalMessages: extractNumber(/اجمالى[^\d]*([\d٠-٩]+)/),
+    interactions: 0,
+    funnel: { noReplyAfterGreeting: [], noReplyAfterDetails: [], noReplyAfterPrice: [], repliedAfterPrice: [] },
+    commentsFunnel: { noReplyAfterGreeting: [], noReplyAfterDetails: [], noReplyAfterPrice: [], repliedAfterPrice: [] },
     messagesCount: 0,
     commentsCount: 0,
-    specialCases: ["استخراج احتياطي (Fallback Parser) عمل بسبب فشل اتصال Gemini."],
+    specialCases: ["استخراج احتياطي (Fallback) بسبب فشل اتصال Gemini."],
     jobConfusionCount: 0,
     rejectionReasons: [],
     detectedJobs: [],
@@ -212,12 +259,7 @@ function fallbackRegexExtraction(rawText: string): RawGeminiOutput {
     salesNotes: "",
     programTrack: "",
     sourceType: "واتساب",
-    commentsFunnel: {
-      noReplyAfterGreeting: [],
-      noReplyAfterDetails: [],
-      noReplyAfterPrice: [],
-      repliedAfterPrice: [],
-    }
+    closedDeals: [],
   };
 }
 
@@ -231,49 +273,49 @@ async function callGeminiApi(rawText: string, courses: string[]): Promise<RawGem
     systemInstruction: SYSTEM_INSTRUCTION
   });
 
-  const prompt = USER_PROMPT(rawText, courses);
-
-  const result = await model.generateContent(prompt);
+  const result = await model.generateContent(USER_PROMPT(rawText, courses));
   const responseText = result.response.text().trim();
-
-  // Clean potential markdown or extra characters
   const cleanJson = responseText.replace(/```json|```/gi, "").trim();
-
   return JSON.parse(cleanJson);
 }
 
 function validateAndCorrect(rawOutput: RawGeminiOutput): RawGeminiOutput {
   const out = { ...rawOutput };
 
-  // Ensure arrays exist
   if (!Array.isArray(out.specialCases)) out.specialCases = [];
   if (!Array.isArray(out.rejectionReasons)) out.rejectionReasons = [];
   if (!Array.isArray(out.detectedJobs)) out.detectedJobs = [];
   if (!Array.isArray(out.leadsByAd)) out.leadsByAd = [];
+  if (!Array.isArray(out.closedDeals)) out.closedDeals = [];
 
-  // Validate rejection reason categories
   out.rejectionReasons = out.rejectionReasons.map((r: any) => ({
     rawText: r.rawText || r.text || "",
     count: typeof r.count === 'number' ? r.count : 1,
     category: REJECTION_CATEGORIES.includes(r.category) ? r.category : 'أخرى'
   }));
 
-  // Validate detectedJobs
   out.detectedJobs = out.detectedJobs.map((j: any) => ({
-    rawText: j.rawText || j.text || "",
+    rawText: j.rawText || "",
     normalizedLabel: j.normalizedLabel || j.rawText || "",
     sector: j.sector || "",
     count: typeof j.count === 'number' ? j.count : 1,
     stage: j.stage || ""
   }));
 
-  // Validate leadsByAd
   out.leadsByAd = out.leadsByAd.map((l: any) => ({
     adName: l.adName || "عام",
     leadCount: typeof l.leadCount === 'number' ? l.leadCount : 0
   }));
 
-  // Ensure strings
+  out.closedDeals = out.closedDeals.map((d: any) => ({
+    customerName: d.customerName || "",
+    adSource: d.adSource || "",
+    programName: d.programName || "",
+    programCount: typeof d.programCount === 'number' ? d.programCount : 1,
+    dealValue: typeof d.dealValue === 'number' ? d.dealValue : 0,
+    firstContactDate: d.firstContactDate || "",
+  }));
+
   if (typeof out.salesNotes !== 'string') out.salesNotes = "";
   if (typeof out.programTrack !== 'string') out.programTrack = "";
   if (typeof out.sourceType !== 'string') out.sourceType = "واتساب";
@@ -287,38 +329,37 @@ export async function parseReport(
   courses: string[] = []
 ): Promise<{ parsedData: ParsedReportData; platform: string }> {
   if (rawText.trim().length < 20) {
-    throw new Error("النص المدخل أقصر من أن يكون تقريراً مفصلاً. يرجى إدخال تفاصيل أوفى.");
+    throw new Error("النص المدخل أقصر من أن يكون تقريراً. يرجى إدخال تفاصيل أوفى.");
   }
 
   let rawOutput: RawGeminiOutput;
-
   try {
     rawOutput = await callGeminiApi(rawText, courses);
     rawOutput = validateAndCorrect(rawOutput);
   } catch (error) {
-    console.warn("Gemini API parsing failed, engaging fallback regex parser:", error);
+    console.warn("Gemini API parsing failed, engaging fallback:", error);
     rawOutput = fallbackRegexExtraction(rawText);
   }
-
-  // NORMALIZATION LAYER
-  const rawFunnel = rawOutput.funnel || {};
 
   const normalizeStages = (arr: any[] | undefined, prefix: string): FunnelStage[] => {
     if (!Array.isArray(arr)) return [];
     return arr.map((s: any, i: number) => ({
       id: `${prefix}_${i}_${Date.now()}`,
-      adName: s.adName && s.adName.trim() ? s.adName : "عام",
+      adName: s.adName?.trim() || "عام",
       count: typeof s.count === 'number' && !isNaN(s.count) ? s.count : 0,
       notes: s.notes || "",
+      leadNotes: Array.isArray(s.leadNotes) ? s.leadNotes.filter(Boolean) : [],
     }));
   };
 
-  const noReplyAfterGreeting = normalizeStages(rawFunnel.noReplyAfterGreeting, "g");
-  const noReplyAfterDetails = normalizeStages(rawFunnel.noReplyAfterDetails, "d");
-  const noReplyAfterPrice = normalizeStages(rawFunnel.noReplyAfterPrice, "p");
-  const repliedAfterPrice = normalizeStages(rawFunnel.repliedAfterPrice, "r");
+  const rawFunnel = rawOutput.funnel || {};
+  const funnel: ReportFunnel = {
+    noReplyAfterGreeting: normalizeStages(rawFunnel.noReplyAfterGreeting, "g"),
+    noReplyAfterDetails: normalizeStages(rawFunnel.noReplyAfterDetails, "d"),
+    noReplyAfterPrice: normalizeStages(rawFunnel.noReplyAfterPrice, "p"),
+    repliedAfterPrice: normalizeStages(rawFunnel.repliedAfterPrice, "r"),
+  };
 
-  // commentsFunnel (Messenger only)
   const rawCommentsFunnel = rawOutput.commentsFunnel || {};
   const commentsFunnel: ReportFunnel = {
     noReplyAfterGreeting: normalizeStages(rawCommentsFunnel.noReplyAfterGreeting, "cg"),
@@ -330,32 +371,17 @@ export async function parseReport(
   const totalMessages = rawOutput.totalMessages || 0;
   const messagesCount = rawOutput.messagesCount ?? totalMessages;
   const commentsCount = rawOutput.commentsCount ?? 0;
-  const interactions = rawOutput.interactions || 0;
+  const interactions = rawOutput.interactions ||
+    funnel.repliedAfterPrice.reduce((s, st) => s + st.count, 0);
 
-  const specialCases = Array.isArray(rawOutput.specialCases) ? rawOutput.specialCases : [];
-  const jobConfusionCount = rawOutput.jobConfusionCount || 0;
-
-  const rejectionReasons: RejectionReason[] = Array.isArray(rawOutput.rejectionReasons)
-    ? rawOutput.rejectionReasons as RejectionReason[]
-    : [];
-  const detectedJobs: DetectedJob[] = Array.isArray(rawOutput.detectedJobs)
-    ? rawOutput.detectedJobs as DetectedJob[]
-    : [];
-  const leadsByAd: Array<{ adName: string; leadCount: number }> = Array.isArray(rawOutput.leadsByAd)
-    ? rawOutput.leadsByAd as Array<{ adName: string; leadCount: number }>
-    : [];
-  const salesNotes = rawOutput.salesNotes || "";
-  const programTrack = rawOutput.programTrack || "";
-  const sourceType = rawOutput.sourceType || platform;
-
-  // DERIVED METRICS
   let conversionRate = 0;
   if (totalMessages > 0 && interactions > 0) {
-      conversionRate = parseFloat(((interactions / totalMessages) * 100).toFixed(1));
-  } else if (interactions > 0 && repliedAfterPrice.length > 0) {
-      const repSum = repliedAfterPrice.reduce((sum, s) => sum + s.count, 0);
-      conversionRate = parseFloat(((repSum / interactions) * 100).toFixed(1));
+    conversionRate = parseFloat(((interactions / totalMessages) * 100).toFixed(1));
   }
+
+  const closedDeals: DealInput[] = Array.isArray(rawOutput.closedDeals)
+    ? rawOutput.closedDeals as DealInput[]
+    : [];
 
   return {
     parsedData: {
@@ -364,21 +390,17 @@ export async function parseReport(
       commentsCount,
       interactions,
       conversionRate,
-      funnel: {
-        noReplyAfterGreeting,
-        noReplyAfterDetails,
-        noReplyAfterPrice,
-        repliedAfterPrice,
-      },
+      funnel,
       commentsFunnel,
-      specialCases,
-      jobConfusionCount,
-      rejectionReasons,
-      detectedJobs,
-      leadsByAd,
-      salesNotes,
-      programTrack,
-      sourceType,
+      specialCases: rawOutput.specialCases || [],
+      jobConfusionCount: rawOutput.jobConfusionCount || 0,
+      rejectionReasons: (rawOutput.rejectionReasons || []) as RejectionReason[],
+      detectedJobs: (rawOutput.detectedJobs || []) as DetectedJob[],
+      leadsByAd: (rawOutput.leadsByAd || []) as Array<{ adName: string; leadCount: number }>,
+      salesNotes: rawOutput.salesNotes || "",
+      programTrack: rawOutput.programTrack || "",
+      sourceType: rawOutput.sourceType || platform,
+      closedDeals,
     },
     platform
   };
@@ -391,7 +413,7 @@ export async function parseDeals(rawText: string): Promise<ParsedDealsOutput> {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-  const prompt = `استخرج بيانات الصفقات المغلقة من النص. أرجع JSON فقط. لا تستنتج أي بيانات غير موجودة.
+  const prompt = `استخرج بيانات الصفقات المغلقة من النص. أرجع JSON فقط.
 
 ${rawText}
 
@@ -406,7 +428,7 @@ ${rawText}
 قواعد: dealValue رقم فقط، firstContactDate بصيغة YYYY-MM-DD أو "" إذا غائب.`;
 
   const result = await model.generateContent(prompt);
-  const cleanJson = result.response.text().trim().replace(/\`\`\`json|\`\`\`/gi, "").trim();
+  const cleanJson = result.response.text().trim().replace(/```json|```/gi, "").trim();
   const parsed = JSON.parse(cleanJson);
 
   return {
