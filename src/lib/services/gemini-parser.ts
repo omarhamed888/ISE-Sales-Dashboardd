@@ -253,20 +253,69 @@ function fallbackRegexExtraction(rawText: string): RawGeminiOutput {
   };
 }
 
-async function callGeminiApi(rawText: string, courses: string[]): Promise<RawGeminiOutput> {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  if (!apiKey) throw new Error("VITE_GEMINI_API_KEY is not configured.");
+// ── API Key Rotation ──────────────────────────────────────────────────────────
+function getApiKeys(): string[] {
+  const keys: string[] = [];
+  // Collect VITE_GEMINI_API_KEY_1, _2, _3, ...
+  for (let i = 1; i <= 10; i++) {
+    const key = (import.meta.env as Record<string, string>)[`VITE_GEMINI_API_KEY_${i}`];
+    if (key) keys.push(key);
+  }
+  // Fallback to legacy single key
+  if (keys.length === 0 && import.meta.env.VITE_GEMINI_API_KEY) {
+    keys.push(import.meta.env.VITE_GEMINI_API_KEY);
+  }
+  return keys;
+}
 
+let _keyIndex = 0;
+
+function nextApiKey(): string {
+  const keys = getApiKeys();
+  if (keys.length === 0) throw new Error("No Gemini API keys configured.");
+  const key = keys[_keyIndex % keys.length];
+  _keyIndex = (_keyIndex + 1) % keys.length;
+  return key;
+}
+
+async function callWithKey(apiKey: string, prompt: string): Promise<RawGeminiOutput> {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash",
     systemInstruction: SYSTEM_INSTRUCTION
   });
-
-  const result = await model.generateContent(USER_PROMPT(rawText, courses));
+  const result = await model.generateContent(prompt);
   const responseText = result.response.text().trim();
   const cleanJson = responseText.replace(/```json|```/gi, "").trim();
   return JSON.parse(cleanJson);
+}
+
+async function callGeminiApi(rawText: string, courses: string[]): Promise<RawGeminiOutput> {
+  const keys = getApiKeys();
+  if (keys.length === 0) throw new Error("No Gemini API keys configured.");
+
+  const prompt = USER_PROMPT(rawText, courses);
+  const startIndex = _keyIndex % keys.length;
+
+  // Try each key in rotation order, skip to next on quota/rate-limit errors
+  for (let attempt = 0; attempt < keys.length; attempt++) {
+    const key = keys[(_keyIndex + attempt) % keys.length];
+    try {
+      const result = await callWithKey(key, prompt);
+      // Advance rotation for next call
+      _keyIndex = (_keyIndex + attempt + 1) % keys.length;
+      return result;
+    } catch (err: any) {
+      const msg = String(err?.message || err).toLowerCase();
+      const isQuotaError = msg.includes('429') || msg.includes('quota') || msg.includes('rate') || msg.includes('resource exhausted');
+      if (isQuotaError && attempt < keys.length - 1) {
+        console.warn(`Gemini key ${startIndex + attempt + 1} hit quota, trying next key...`);
+        continue;
+      }
+      throw err; // Non-quota error or last key — propagate
+    }
+  }
+  throw new Error("All Gemini API keys exhausted.");
 }
 
 function validateAndCorrect(rawOutput: RawGeminiOutput): RawGeminiOutput {
@@ -393,8 +442,10 @@ export async function parseReport(
 }
 
 export async function parseDeals(rawText: string): Promise<ParsedDealsOutput> {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  if (!apiKey) throw new Error("VITE_GEMINI_API_KEY is not configured.");
+  const keys = getApiKeys();
+  if (keys.length === 0) throw new Error("No Gemini API keys configured.");
+  const apiKey = keys[_keyIndex % keys.length];
+  _keyIndex = (_keyIndex + 1) % keys.length;
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
