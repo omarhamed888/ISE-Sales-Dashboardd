@@ -95,9 +95,9 @@ export default function ReportsPage() {
   const tickerStats = useMemo(() => {
       let tMsgs = 0; let tInts = 0; let tConvs = 0;
       filteredReports.forEach(r => {
-          tMsgs += (r.parsedData?.summary?.totalMessages || 0);
-          tInts += (r.parsedData?.summary?.interactions || 0);
-          tConvs += (r.parsedData?.summary?.totalValidSubmissions || 0);
+          tMsgs += (r.parsedData?.totalMessages || 0);
+          tInts += (r.parsedData?.interactions || 0);
+          tConvs += (r.parsedData?.interactions || 0);
       });
       const convRate = tMsgs > 0 ? ((tConvs / tMsgs) * 100).toFixed(1) : 0;
       return { total: filteredReports.length, messages: tMsgs, integrations: tInts, convRate };
@@ -120,9 +120,9 @@ export default function ReportsPage() {
             r.date, 
             r.salesRepName, 
             r.platform, 
-            r.parsedData?.summary?.totalMessages || 0,
-            r.parsedData?.summary?.interactions || 0,
-            r.parsedData?.summary?.conversionRate || 0
+            r.parsedData?.totalMessages || 0,
+            r.parsedData?.interactions || 0,
+            r.parsedData?.conversionRate || 0
         ]);
         
         const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
@@ -259,7 +259,7 @@ export default function ReportsPage() {
                <div className="md:hidden divide-y divide-[#F1F5F9]">
                  {paginatedReports.map(report => {
                    const drops = calculateDeepStatsForColumn(report.parsedData);
-                   const cRate = report.parsedData?.summary?.conversionRate || 0;
+                   const cRate = report.parsedData?.conversionRate || 0;
                    const cClass = cRate > 10 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200';
                    return (
                      <div key={report.id} onClick={() => setSelectedReport(report)}
@@ -279,7 +279,7 @@ export default function ReportsPage() {
                        <div className="grid grid-cols-4 gap-2 text-center">
                          <div className="bg-[#F8FAFC] rounded-lg p-2">
                            <p className="text-[9px] font-bold text-[#64748B] mb-0.5">الرسائل</p>
-                           <p className="text-[13px] font-black text-[#1E293B]">{report.parsedData?.summary?.totalMessages || 0}</p>
+                           <p className="text-[13px] font-black text-[#1E293B]">{report.parsedData?.totalMessages || 0}</p>
                          </div>
                          <div className="bg-rose-50 rounded-lg p-2">
                            <p className="text-[9px] font-bold text-rose-500 mb-0.5">تسرب</p>
@@ -287,7 +287,7 @@ export default function ReportsPage() {
                          </div>
                          <div className="bg-[#F8FAFC] rounded-lg p-2">
                            <p className="text-[9px] font-bold text-[#64748B] mb-0.5">التفاعل</p>
-                           <p className="text-[13px] font-black text-[#1E293B]">{report.parsedData?.summary?.interactions || 0}</p>
+                           <p className="text-[13px] font-black text-[#1E293B]">{report.parsedData?.interactions || 0}</p>
                          </div>
                          <div className={`rounded-lg p-2 border ${cClass}`}>
                            <p className="text-[9px] font-bold mb-0.5">التحويل</p>
@@ -319,7 +319,7 @@ export default function ReportsPage() {
                      <tbody className="divide-y divide-[#E2E8F0]">
                          {paginatedReports.map(report => {
                              const drops = calculateDeepStatsForColumn(report.parsedData);
-                             const cRate = report.parsedData?.summary?.conversionRate || 0;
+                             const cRate = report.parsedData?.conversionRate || 0;
                              const cClass = cRate > 10 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200';
 
                              return (
@@ -338,11 +338,11 @@ export default function ReportsPage() {
                                             {report.platform}
                                         </span>
                                      </td>
-                                     <td className="px-5 py-4 font-black text-[#1E293B] text-center">{report.parsedData?.summary?.totalMessages || 0}</td>
+                                     <td className="px-5 py-4 font-black text-[#1E293B] text-center">{report.parsedData?.totalMessages || 0}</td>
                                      <td className="px-5 py-4 font-bold text-rose-600 text-center">{drops.greeting}</td>
                                      <td className="px-5 py-4 font-bold text-rose-600 text-center">{drops.details}</td>
                                      <td className="px-5 py-4 font-bold text-rose-600 text-center">{drops.price}</td>
-                                     <td className="px-5 py-4 font-black text-[#1E293B] text-center">{report.parsedData?.summary?.interactions || 0}</td>
+                                     <td className="px-5 py-4 font-black text-[#1E293B] text-center">{report.parsedData?.interactions || 0}</td>
                                      <td className="px-5 py-4 text-center">
                                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-black border ${cClass}`}>
                                             {cRate}%

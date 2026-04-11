@@ -13,6 +13,7 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: { is
     { href: "/ads", icon: "ads_click", label: "الإعلانات" },
     { href: "/reports", icon: "assessment", label: "التقارير" },
     { href: "/insights", icon: "auto_awesome", label: "الرؤى" },
+    { href: "/deals-analytics", icon: "handshake", label: "تحليل الصفقات" },
     { href: "/access", icon: "manage_accounts", label: "صلاحيات الوصول" },
   ];
 

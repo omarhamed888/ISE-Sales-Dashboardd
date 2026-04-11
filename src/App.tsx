@@ -14,6 +14,7 @@ import InsightsPage from '@/pages/InsightsPage';
 import DealsPage from '@/pages/DealsPage';
 import MyDealsPage from '@/pages/MyDealsPage';
 import AccessPage from '@/pages/AccessPage';
+import DealsAnalyticsPage from '@/pages/DealsAnalyticsPage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -80,6 +81,7 @@ export default function App() {
 
       {/* Access Management (admin + superadmin) */}
       <Route path="/access" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><AccessPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/deals-analytics" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><DealsAnalyticsPage /></AppLayout></ProtectedRoute>} />
 
       {/* Sales Routes */}
       <Route path="/submit-report" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><SubmitReportPage /></AppLayout></ProtectedRoute>} />
