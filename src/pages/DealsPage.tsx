@@ -80,7 +80,7 @@ export default function DealsPage() {
     if (!user || deals.length === 0) return;
     setSaving(true);
     try {
-      await saveDeals(deals, user.uid, user.name);
+      await saveDeals(deals, user.uid, user.name, user.teamName);
       setSavedDeals(deals);
       setSaved(true);
     } catch (e: any) {

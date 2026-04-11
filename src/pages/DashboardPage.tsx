@@ -11,6 +11,7 @@ import { ChartsGrid } from "@/components/dashboard/ChartsGrid";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { TeamStatusSummary } from "@/components/dashboard/TeamStatusSummary";
 import { RejectionAnalyticsSection } from "@/components/dashboard/RejectionAnalyticsSection";
+import { DealCycleSection } from "@/components/dashboard/DealCycleSection";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 
@@ -112,7 +113,18 @@ export default function DashboardPage() {
                 <RejectionAnalyticsSection reports={currentReports} />
               </>
 
-              {/* SECTION 5: Team Status */}
+              {/* SECTION 5: Deal Cycle Analytics */}
+              <div className="flex items-center gap-3 my-1">
+                <div className="flex-1 h-px bg-[#E2E8F0]" />
+                <div className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#E2E8F0] rounded-full shadow-sm">
+                  <span className="material-symbols-outlined text-[16px] text-[#64748B]" style={{ fontVariationSettings: "'FILL' 1" }}>timer</span>
+                  <span className="text-[11px] font-black text-[#64748B] uppercase tracking-widest">دورة إغلاق الصفقات</span>
+                </div>
+                <div className="flex-1 h-px bg-[#E2E8F0]" />
+              </div>
+              <DealCycleSection />
+
+              {/* SECTION 6: Team Status */}
               <div className="flex items-center gap-3 my-1">
                 <div className="flex-1 h-px bg-[#E2E8F0]" />
                 <div className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#E2E8F0] rounded-full shadow-sm">
