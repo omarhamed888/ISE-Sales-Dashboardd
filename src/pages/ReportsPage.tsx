@@ -268,7 +268,7 @@ export default function ReportsPage() {
                            <span className="font-bold text-[13px] text-[#1E293B]">{report.salesRepName}</span>
                          </div>
                          <div className="flex items-center gap-2">
-                           <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${report.platform === 'واتساب' ? 'bg-[#25D366]/10 text-[#25D366]' : 'bg-[#0084FF]/10 text-[#0084FF]'}`}>{report.platform}</span>
+                           <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${report.platform === 'واتساب' ? 'bg-[#25D366]/10 text-[#25D366]' : report.platform === 'تيك توك' ? 'bg-black/10 text-black' : 'bg-[#0084FF]/10 text-[#0084FF]'}`}>{report.platform}</span>
                            <span className="text-[11px] font-bold text-[#64748B]" dir="ltr">{report.date}</span>
                          </div>
                        </div>
@@ -330,7 +330,7 @@ export default function ReportsPage() {
                                         </div>
                                      </td>
                                      <td className="px-5 py-4 text-center whitespace-nowrap">
-                                        <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase ${report.platform === 'واتساب' ? 'bg-[#25D366]/10 text-[#25D366]' : 'bg-[#0084FF]/10 text-[#0084FF]'}`}>
+                                        <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase ${report.platform === 'واتساب' ? 'bg-[#25D366]/10 text-[#25D366]' : report.platform === 'تيك توك' ? 'bg-black/10 text-black' : 'bg-[#0084FF]/10 text-[#0084FF]'}`}>
                                             {report.platform}
                                         </span>
                                      </td>

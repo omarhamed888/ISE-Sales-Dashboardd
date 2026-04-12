@@ -129,7 +129,7 @@ export default function MyDealsPage() {
                   </div>
                   <div className="text-left shrink-0">
                     <p className="font-black text-[#2563EB] text-base">{formatNumber(deal.dealValue)} <span className="text-xs font-bold">ج.م</span></p>
-                    <p className="text-xs text-[#94A3B8] mt-0.5">{deal.closeDate}</p>
+                    <p className="text-xs text-[#94A3B8] mt-0.5">{deal.closeDate ? new Date(deal.closeDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}</p>
                   </div>
                 </div>
                 <div className="flex gap-2 mt-3 flex-wrap">

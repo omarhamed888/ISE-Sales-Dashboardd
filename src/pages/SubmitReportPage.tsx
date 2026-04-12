@@ -3,6 +3,7 @@ import { parseReport } from "@/lib/services/gemini-parser";
 import { useCourses } from "@/lib/hooks/useCourses";
 import type { ParsedReportData, ReportFunnel, FunnelStage } from "@/lib/services/gemini-parser";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { saveDeals } from "@/lib/services/deals-service";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { Link } from "react-router-dom";
@@ -140,6 +141,12 @@ export default function SubmitReportPage() {
         confirmed: true,
         createdAt: serverTimestamp(),
       });
+
+      // Auto-save any closed deals embedded in the report
+      if (parsedData.closedDeals && parsedData.closedDeals.length > 0) {
+        await saveDeals(parsedData.closedDeals, user.uid, user.name, user.teamName);
+      }
+
       setAppState("success");
       setIsConfirmed(false);
       setForcedDate(null); // Clear block if we saved!

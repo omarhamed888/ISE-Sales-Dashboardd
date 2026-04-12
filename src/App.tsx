@@ -6,7 +6,6 @@ import DashboardPage from '@/pages/DashboardPage';
 import SubmitReportPage from '@/pages/SubmitReportPage';
 import ReportsPage from '@/pages/ReportsPage';
 import AdsAnalysisPage from '@/pages/AdsAnalysisPage';
-import AdvancedMetricsPage from '@/pages/AdvancedMetricsPage';
 import TeamPage from '@/pages/TeamPage';
 import SettingsPage from '@/pages/SettingsPage';
 import MyReportsPage from '@/pages/MyReportsPage';
@@ -73,7 +72,7 @@ export default function App() {
       <Route path="/team" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><TeamPage /></AppLayout></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><ReportsPage /></AppLayout></ProtectedRoute>} />
       <Route path="/ads" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><AdsAnalysisPage /></AppLayout></ProtectedRoute>} />
-      <Route path="/metrics" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><AdvancedMetricsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/metrics" element={<Navigate to="/dashboard" replace />} />
       <Route path="/insights" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><InsightsPage /></AppLayout></ProtectedRoute>} />
       
       {/* Superadmin Only Routes */}
