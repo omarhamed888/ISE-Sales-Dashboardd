@@ -108,8 +108,8 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: { is
               <span className="material-symbols-outlined text-[22px]">campaign</span>
               {!isCollapsed && (
                 <>
-                  <span className="text-[14px] font-semibold flex-1">Marketing Dashboard</span>
-                  <span className="text-[8px] font-black bg-[#EFF6FF] text-[#2563EB] px-1.5 py-0.5 rounded-full whitespace-nowrap">Coming Soon</span>
+                  <span className="text-[14px] font-semibold flex-1">لوحة التسويق</span>
+                  <span className="text-[8px] font-black bg-[#EFF6FF] text-[#2563EB] px-1.5 py-0.5 rounded-full whitespace-nowrap">قريباً</span>
                 </>
               )}
             </div>

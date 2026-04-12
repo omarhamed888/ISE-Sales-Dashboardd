@@ -168,9 +168,13 @@ export default function MyReportsPage() {
                               <p className="text-[9px] font-bold text-[#64748B]">التفاعل</p>
                               <p className="text-[13px] font-black text-[#1E293B]">{calcInteractionsFromParsedData(report.parsedData)}</p>
                             </div>
-                            <div className="bg-emerald-50 rounded-lg p-2">
-                              <p className="text-[9px] font-bold text-emerald-700">الحالة</p>
-                              <p className="text-[11px] font-black text-emerald-600">مؤكد</p>
+                            <div className="bg-[#F8FAFC] rounded-lg p-2">
+                              <p className="text-[9px] font-bold text-[#64748B]">التحويل</p>
+                              <p className="text-[11px] font-black text-[#1E293B]">
+                                {report.parsedData?.totalMessages > 0
+                                  ? ((calcInteractionsFromParsedData(report.parsedData) / report.parsedData.totalMessages) * 100).toFixed(1) + '%'
+                                  : '—'}
+                              </p>
                             </div>
                           </div>
                         </div>

@@ -54,6 +54,7 @@ export function DealCycleSection() {
         <h3 className="text-[15px] font-black text-[#1E293B] mb-6 flex items-center gap-2">
           <span className="material-symbols-outlined text-[#2563EB]">timer</span>
           متوسط دورة الإغلاق — الشركة كلها
+          <span className="text-[11px] font-bold text-[#94A3B8] mr-1">(كل الوقت)</span>
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-6 divide-x divide-x-reverse divide-[#E2E8F0]">
           <CycleStat

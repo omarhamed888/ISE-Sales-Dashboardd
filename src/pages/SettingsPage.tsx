@@ -13,7 +13,7 @@ export default function SettingsPage() {
     // System Settings
     const [savingSettings, setSavingSettings] = useState(false);
     const [settings, setSettings] = useState({
-        companyName: "ISE Sales Intelligence",
+        companyName: "BDI Sales Intelligence",
         workingDays: ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"],
         reminderTime: "16:00"
     });

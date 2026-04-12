@@ -14,7 +14,6 @@ export default function ReportsPage() {
   const [filterPlatform, setFilterPlatform] = useState("الكل");
   const [filterRep, setFilterRep] = useState("الكل");
   const [filterAd, setFilterAd] = useState("الكل");
-  const [filterStatus, setFilterStatus] = useState("الكل");
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,8 +74,6 @@ export default function ReportsPage() {
       const matchesPlatform = filterPlatform === "الكل" || report.platform === filterPlatform;
       const matchesRep = filterRep === "الكل" || report.salesRepName === filterRep;
 
-      // 4. Status (mocking status behavior since everything currently is stored as implicit confirmed in DB structure)
-      const matchesStatus = filterStatus === "الكل" || true;
 
       // 5. Ad Matching
       let matchesAd = filterAd === "الكل";
@@ -87,9 +84,9 @@ export default function ReportsPage() {
          }
       }
 
-      return matchesSearch && matchesDate && matchesPlatform && matchesRep && matchesStatus && matchesAd;
+      return matchesSearch && matchesDate && matchesPlatform && matchesRep && matchesAd;
     });
-  }, [reports, searchTerm, dateFrom, dateTo, filterPlatform, filterRep, filterAd, filterStatus]);
+  }, [reports, searchTerm, dateFrom, dateTo, filterPlatform, filterRep, filterAd]);
 
   // Derived Stats Ticker info
   const tickerStats = useMemo(() => {
@@ -109,7 +106,7 @@ export default function ReportsPage() {
 
   const resetFilters = () => {
       setSearchTerm(""); setDateFrom(""); setDateTo("");
-      setFilterPlatform("الكل"); setFilterRep("الكل"); setFilterAd("الكل"); setFilterStatus("الكل");
+      setFilterPlatform("الكل"); setFilterRep("الكل"); setFilterAd("الكل");
       setCurrentPage(1);
   };
 
@@ -199,10 +196,9 @@ export default function ReportsPage() {
           {/* Row 2: Dropdowns */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                  { label: "المنصة", state: filterPlatform, set: setFilterPlatform, opts: ["الكل", "واتساب", "ماسنجر"] },
+                  { label: "المنصة", state: filterPlatform, set: setFilterPlatform, opts: ["الكل", "واتساب", "ماسنجر", "تيك توك"] },
                   { label: "الموظف", state: filterRep, set: setFilterRep, opts: salesReps },
-                  { label: "الإعلان", state: filterAd, set: setFilterAd, opts: adNames },
-                  { label: "الحالة", state: filterStatus, set: setFilterStatus, opts: ["الكل", "مؤكد", "قيد المراجعة"] }
+                  { label: "الإعلان", state: filterAd, set: setFilterAd, opts: adNames }
               ].map((f, i) => (
                   <div key={i} className="border border-[#E2E8F0] rounded-xl bg-[#F7F9FC] relative flex items-center px-3 focus-within:border-[#2563EB]">
                       <span className="text-[11px] font-bold text-[#64748B] whitespace-nowrap pl-2">{f.label}:</span>

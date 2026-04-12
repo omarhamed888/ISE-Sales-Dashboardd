@@ -33,7 +33,6 @@ export default function AdsAnalysisPage() {
      const currentReports = filterReports(allReports, filter);
      const processedStats = getAdsDeepStats(currentReports);
 
-     console.log("Processed Stats:", processedStats);
 
      const displayStats = processedStats.filter(ad => {
          if (localFilter === "الكل") return true;
