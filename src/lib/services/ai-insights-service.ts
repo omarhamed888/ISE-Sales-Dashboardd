@@ -458,7 +458,15 @@ export async function generateAIInsights(params: {
     return { ok: false, code: "no_reports" };
   }
 
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  // Key rotation: try VITE_GEMINI_API_KEY_1, _2, ... then fall back to legacy key
+  const apiKey = (() => {
+    for (let i = 1; i <= 10; i++) {
+      const k = (import.meta.env as Record<string, string>)[`VITE_GEMINI_API_KEY_${i}`];
+      if (k) return k;
+    }
+    return import.meta.env.VITE_GEMINI_API_KEY || null;
+  })();
+
   if (!apiKey) {
     return { ok: false, code: "no_api_key" };
   }

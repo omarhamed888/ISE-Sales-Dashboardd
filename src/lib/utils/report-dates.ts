@@ -61,7 +61,7 @@ export function isReportDateInDashboardRange(
 
   if (dateRange === "اليوم") {
     const yesterday = addDaysYmd(todayKey, -1);
-    return key >= yesterday && key <= todayKey && key >= DASHBOARD_DATA_QUALITY_FROM_DATE;
+    return key === yesterday && key >= DASHBOARD_DATA_QUALITY_FROM_DATE;
   }
 
   if (dateRange === "الأسبوع") {

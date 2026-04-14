@@ -231,6 +231,14 @@ export default function SubmitReportPage() {
                     </div>
                 </div>
 
+                {/* Date reminder banner */}
+                <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                    <span className="material-symbols-outlined text-amber-500 text-[18px] mt-0.5 flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>calendar_today</span>
+                    <p className="text-[12px] font-bold text-amber-700 leading-relaxed">
+                        تأكد أن تاريخ التقرير صحيح قبل الرفع — الداشبورد يعرض بيانات <span className="underline">أمس</span> فقط بشكل افتراضي.
+                    </p>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl p-3 flex flex-col justify-center">
                         <span className="text-[10px] font-bold text-[#64748B] mb-1">تاريخ التقرير:</span>
