@@ -244,17 +244,62 @@ export default function InsightsPage() {
       )}
 
       {!isLoading && error && (
-        <div className="text-center py-12">
-          <span className="text-4xl">⚠️</span>
-          <p className="text-[#334155] font-medium mt-3">{error}</p>
-          <button
-            type="button"
-            onClick={handleGenerate}
-            className="mt-4 bg-[#2563EB] text-white px-6 py-2 rounded-lg font-bold text-sm"
-          >
-            حاول مرة أخرى
-          </button>
-        </div>
+        error === "مفتاح Gemini غير مضبوط (VITE_GEMINI_API_KEY)" ? (
+          /* ── no_api_key: admin setup card ── */
+          <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-8 max-w-xl mx-auto text-right" dir="rtl">
+            <div className="flex flex-col items-center gap-3 mb-6">
+              <div className="w-16 h-16 bg-[#FFF7ED] rounded-2xl flex items-center justify-center">
+                <span className="material-symbols-outlined text-[32px] text-[#F59E0B]" style={{ fontVariationSettings: "'FILL' 1" }}>settings</span>
+              </div>
+              <h3 className="text-[18px] font-black text-[#1E293B] text-center">تحليل الذكاء الاصطناعي غير متاح حالياً</h3>
+              <p className="text-[13px] text-[#64748B] font-bold text-center">مفتاح Gemini API غير مضبوط في البيئة</p>
+            </div>
+            <div className="bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl p-5 space-y-4 mb-6">
+              <div className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-[#2563EB] text-white text-[11px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                <p className="text-[13px] font-bold text-[#334155]">
+                  احصل على مفتاح API من{" "}
+                  <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-[#2563EB] underline">Google AI Studio</a>
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-[#2563EB] text-white text-[11px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                <div className="flex-1">
+                  <p className="text-[13px] font-bold text-[#334155] mb-2">أضف المتغير في ملف <code className="bg-[#E2E8F0] px-1.5 py-0.5 rounded text-[11px]">.env.local</code></p>
+                  <div className="flex items-center gap-2 bg-[#1E293B] rounded-lg px-3 py-2">
+                    <code className="text-[11px] text-emerald-400 flex-1 font-mono" dir="ltr">VITE_GEMINI_API_KEY_1=your_key_here</code>
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard?.writeText("VITE_GEMINI_API_KEY_1=your_key_here")}
+                      className="text-[#94A3B8] hover:text-white transition-colors flex-shrink-0"
+                      title="نسخ"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">content_copy</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-[#2563EB] text-white text-[11px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+                <p className="text-[13px] font-bold text-[#334155]">أعد تشغيل الخادم ثم انشر التطبيق من جديد</p>
+              </div>
+            </div>
+            <p className="text-[11px] text-[#94A3B8] font-bold text-center">في هذه الأثناء يمكنك الاطلاع على لوحة القيادة، تحليل الصفقات، والتقارير</p>
+          </div>
+        ) : (
+          /* ── other errors: generic with retry ── */
+          <div className="text-center py-12">
+            <span className="text-4xl">⚠️</span>
+            <p className="text-[#334155] font-medium mt-3">{error}</p>
+            <button
+              type="button"
+              onClick={handleGenerate}
+              className="mt-4 bg-[#2563EB] text-white px-6 py-2 rounded-lg font-bold text-sm"
+            >
+              حاول مرة أخرى
+            </button>
+          </div>
+        )
       )}
 
       {!isLoading && !error && showEmptyPeriod && (

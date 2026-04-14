@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { getAllDeals } from '@/lib/services/deals-service';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const COLORS = ['#2563EB','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#06B6D4','#F97316','#14B8A6','#6366F1'];
 
@@ -65,15 +65,22 @@ export default function DealsAnalyticsPage() {
     })).sort((a, b) => b.revenue - a.revenue);
   }, [filtered]);
 
-  // Program distribution for pie
+  // Program distribution — top 7 + "أخرى"
   const programDist = useMemo(() => {
     const map = new Map<string, number>();
     for (const d of filtered) {
       const p = d.programName || 'غير محدد';
       map.set(p, (map.get(p) || 0) + 1);
     }
-    return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+    const sorted = Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+    if (sorted.length <= 7) return sorted;
+    const top7 = sorted.slice(0, 7);
+    const rest = sorted.slice(7).reduce((s, x) => s + x.value, 0);
+    return [...top7, { name: 'أخرى', value: rest }];
   }, [filtered]);
+
+  // Data validation
+  const suspiciousReps = useMemo(() => repStats.filter(r => r.avgCycleDays > 365), [repStats]);
 
   // Ad source distribution
   const adDist = useMemo(() => {
@@ -162,19 +169,22 @@ export default function DealsAnalyticsPage() {
           </ResponsiveContainer>
         </div>
 
-        {/* Program distribution pie */}
+        {/* Program distribution — horizontal bar */}
         <div className="bg-white border border-[#E2E8F0] rounded-[24px] p-6 shadow-sm">
           <h3 className="text-[15px] font-black text-[#1E293B] mb-5 flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#8B5CF6]">donut_large</span>
+            <span className="material-symbols-outlined text-[#8B5CF6]">bar_chart_4_bars</span>
             توزيع البرامج المباعة
           </h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              <Pie data={programDist} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
+          <ResponsiveContainer width="100%" height={Math.max(180, programDist.length * 34)}>
+            <BarChart data={programDist} layout="vertical" margin={{ right: 40, left: 0, top: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+              <XAxis type="number" tick={{ fontSize: 11, fontWeight: 700, fill: '#64748B' }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} axisLine={false} tickLine={false} />
+              <Tooltip formatter={(v) => [v + ' صفقة', 'العدد']} contentStyle={{ borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '12px', fontWeight: 700, fontFamily: 'inherit' }} />
+              <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={26} label={{ position: 'right', fontSize: 11, fontWeight: 700, fill: '#64748B' }}>
                 {programDist.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-              </Pie>
-              <Tooltip formatter={(v) => [v + ' صفقة', '']} contentStyle={{ borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '12px', fontWeight: 700, fontFamily: 'inherit' }} />
-            </PieChart>
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
         </div>
 
@@ -199,6 +209,19 @@ export default function DealsAnalyticsPage() {
           </div>
         )}
       </div>
+
+      {/* Validation warning */}
+      {suspiciousReps.length > 0 && (
+        <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          <span className="material-symbols-outlined text-amber-500 text-[20px] flex-shrink-0 mt-0.5">warning</span>
+          <div>
+            <p className="text-[13px] font-bold text-amber-800">
+              تحذير: {suspiciousReps.length > 1 ? 'بعض الموظفين لديهم' : `${suspiciousReps[0].name} لديه`} متوسط إغلاق يتجاوز 365 يوم
+            </p>
+            <p className="text-[11px] font-bold text-amber-600 mt-0.5">يرجى مراجعة تاريخ أول تواصل المُدخل في التقارير — قد يكون غير دقيق</p>
+          </div>
+        </div>
+      )}
 
       {/* Per-rep detailed table */}
       <div className="bg-white border border-[#E2E8F0] rounded-[24px] overflow-hidden shadow-sm">
@@ -247,7 +270,7 @@ export default function DealsAnalyticsPage() {
                         <div className="text-[10px] font-bold text-[#94A3B8]">{revenueShare}% من الإجمالي</div>
                       </td>
                       <td className="p-4 text-center">
-                        <span className="font-black text-[#F59E0B]">{rep.avgCycleDays}</span>
+                        <span className={`font-black ${rep.avgCycleDays > 365 ? 'text-[#EF4444]' : rep.avgCycleDays > 90 ? 'text-[#F59E0B]' : 'text-[#10B981]'}`}>{rep.avgCycleDays}</span>
                         <span className="text-[11px] font-bold text-[#64748B]"> يوم</span>
                       </td>
                       <td className="p-4 text-center">
