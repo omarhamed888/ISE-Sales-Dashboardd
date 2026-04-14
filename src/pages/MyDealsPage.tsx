@@ -18,12 +18,20 @@ export default function MyDealsPage() {
   const { user } = useAuth();
   const [deals, setDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [range, setRange] = useState<Range>("month");
 
   useEffect(() => {
     if (!user) return;
-    getMyDeals(user.uid)
+    setLoading(true);
+    setError(null);
+    getMyDeals(user.uid, user.name)
       .then(setDeals)
+      .catch((e: unknown) => {
+        console.error("Failed to load my deals:", e);
+        setDeals([]);
+        setError("تعذر تحميل صفقاتك حالياً. تأكد من الصلاحيات أو حاول مرة أخرى.");
+      })
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -51,6 +59,17 @@ export default function MyDealsPage() {
     return (
       <div className="flex items-center justify-center min-h-[40vh]" dir="rtl">
         <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-[#2563EB]" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-2xl mx-auto py-8 px-4 font-body" dir="rtl">
+        <div className="bg-white rounded-2xl border border-red-200 py-12 text-center flex flex-col items-center gap-3">
+          <span className="material-symbols-outlined text-[40px] text-red-500">error</span>
+          <p className="text-base font-bold text-[#0F172A]">{error}</p>
+        </div>
       </div>
     );
   }

@@ -48,14 +48,46 @@ export async function saveDeals(
   await batch.commit();
 }
 
-export async function getMyDeals(salesRepId: string): Promise<any[]> {
-  const q = query(
-    collection(db, 'deals'),
-    where('salesRepId', '==', salesRepId),
-    orderBy('createdAt', 'desc')
+function toMs(value: unknown): number {
+  if (!value) return 0;
+  if (typeof value === "string") {
+    const ms = new Date(value).getTime();
+    return Number.isFinite(ms) ? ms : 0;
+  }
+  if (typeof value === "object" && value && "toDate" in (value as Record<string, unknown>)) {
+    const dt = (value as { toDate: () => Date }).toDate();
+    return dt.getTime();
+  }
+  return 0;
+}
+
+export async function getMyDeals(
+  salesRepId: string,
+  salesRepName?: string
+): Promise<any[]> {
+  const byIdSnap = await getDocs(
+    query(collection(db, "deals"), where("salesRepId", "==", salesRepId))
   );
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  const byId: any[] = byIdSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  // Backward compatibility: older records may have salesRepName but missing salesRepId.
+  if (byId.length === 0 && salesRepName?.trim()) {
+    const byNameSnap = await getDocs(
+      query(collection(db, "deals"), where("salesRepName", "==", salesRepName.trim()))
+    );
+    const byName: any[] = byNameSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return byName.sort((a, b) => {
+      const aMs = toMs(a.createdAt) || toMs(a.closeDate) || toMs(a.date);
+      const bMs = toMs(b.createdAt) || toMs(b.closeDate) || toMs(b.date);
+      return bMs - aMs;
+    });
+  }
+
+  return byId.sort((a, b) => {
+    const aMs = toMs(a.createdAt) || toMs(a.closeDate) || toMs(a.date);
+    const bMs = toMs(b.createdAt) || toMs(b.closeDate) || toMs(b.date);
+    return bMs - aMs;
+  });
 }
 
 export async function getAllDeals(): Promise<any[]> {
