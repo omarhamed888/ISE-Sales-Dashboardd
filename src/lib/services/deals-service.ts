@@ -19,11 +19,13 @@ export async function saveDeals(
   deals.forEach(deal => {
     const dealRef = doc(collection(db, 'deals'));
 
-    let cycleDays = 0;
-    if (deal.firstContactDate) {
-      const firstContact = new Date(deal.firstContactDate);
-      const closeDate = new Date(today);
-      cycleDays = Math.max(0, Math.round((closeDate.getTime() - firstContact.getTime()) / (1000 * 60 * 60 * 24)));
+    let cycleDays: number | null = null;
+    if (deal.firstContactDate && deal.firstContactDate.trim()) {
+      const firstContact = new Date(deal.firstContactDate.trim());
+      if (!isNaN(firstContact.getTime())) {
+        const closeDate = new Date(today);
+        cycleDays = Math.max(0, Math.round((closeDate.getTime() - firstContact.getTime()) / (1000 * 60 * 60 * 24)));
+      }
     }
 
     batch.set(dealRef, {
@@ -36,7 +38,7 @@ export async function saveDeals(
       programName: deal.programName,
       programCount: deal.programCount,
       dealValue: deal.dealValue,
-      firstContactDate: deal.firstContactDate,
+      firstContactDate: deal.firstContactDate || null,
       closeDate: today,
       closingCycleDays: cycleDays,
       createdAt: serverTimestamp(),
@@ -84,7 +86,9 @@ export function computeDealCycleStats(deals: any[]): {
   }
 
   function statsFor(label: string, group: any[]): DealCycleStats {
-    const cycles = group.map(d => typeof d.closingCycleDays === 'number' ? d.closingCycleDays : 0);
+    const cycles = group
+      .map(d => d.closingCycleDays)
+      .filter((v): v is number => typeof v === 'number' && v !== null);
     const revenue = group.reduce((s, d) => s + (d.dealValue || 0), 0);
     const avg = cycles.length > 0 ? Math.round(cycles.reduce((a, b) => a + b, 0) / cycles.length) : 0;
     return {

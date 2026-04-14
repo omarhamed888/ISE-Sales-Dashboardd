@@ -41,8 +41,9 @@ export default function DealsAnalyticsPage() {
   // Company totals
   const totalDeals = filtered.length;
   const totalRevenue = filtered.reduce((s, d) => s + (d.dealValue || 0), 0);
-  const avgCycle = totalDeals > 0
-    ? Math.round(filtered.reduce((s, d) => s + (d.closingCycleDays || 0), 0) / totalDeals)
+  const dealsWithCycle = filtered.filter(d => typeof d.closingCycleDays === 'number' && d.closingCycleDays !== null);
+  const avgCycle = dealsWithCycle.length > 0
+    ? Math.round(dealsWithCycle.reduce((s, d) => s + d.closingCycleDays, 0) / dealsWithCycle.length)
     : 0;
   const totalPrograms = filtered.reduce((s, d) => s + (d.programCount || 1), 0);
 

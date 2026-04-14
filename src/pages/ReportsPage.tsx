@@ -94,7 +94,11 @@ export default function ReportsPage() {
       filteredReports.forEach(r => {
           tMsgs += (r.parsedData?.totalMessages || 0);
           tInts += (r.parsedData?.interactions || 0);
-          tConvs += (r.parsedData?.interactions || 0);
+          // closed = sum of repliedAfterPrice counts (actual funnel closures)
+          const rap = r.parsedData?.funnel?.repliedAfterPrice;
+          tConvs += Array.isArray(rap)
+            ? rap.reduce((s: number, e: any) => s + (Number(e?.count) || 0), 0)
+            : (r.parsedData?.interactions || 0);
       });
       const convRate = tMsgs > 0 ? ((tConvs / tMsgs) * 100).toFixed(1) : 0;
       return { total: filteredReports.length, messages: tMsgs, integrations: tInts, convRate };
@@ -234,7 +238,7 @@ export default function ReportsPage() {
           <span className="w-1 h-1 bg-[#475569] rounded-full"></span>
           <span className="text-[13px] font-bold"><span className="text-[#94A3B8] font-medium ml-1">التفاعل:</span> {tickerStats.integrations.toLocaleString()}</span>
           <span className="w-1 h-1 bg-[#475569] rounded-full"></span>
-          <span className="text-[13px] font-bold"><span className="text-[#94A3B8] font-medium ml-1">معدل التحويل:</span> <span className="text-emerald-400">{tickerStats.convRate}%</span></span>
+          <span className="text-[13px] font-bold"><span className="text-[#94A3B8] font-medium ml-1">معدل الإغلاق:</span> <span className="text-emerald-400">{tickerStats.convRate}%</span></span>
       </div>
 
       {/* REPORTS TABLE */}

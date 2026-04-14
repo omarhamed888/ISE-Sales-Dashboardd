@@ -56,11 +56,11 @@ export function KPICards({ reports }: { reports: any[] }) {
         iconColor="text-[#2563EB]"
       />
 
-      {/* Card 2: الصفقات المغلقة */}
+      {/* Card 2: استجابة بعد السعر */}
       <KPICard
-        label="الصفقات المغلقة"
+        label="استجابة بعد السعر"
         value={cur.interactions.toLocaleString()}
-        icon="handshake"
+        icon="price_check"
         accentColor="border-r-[#10B981]"
         bgTint="bg-[#ECFDF5]"
         iconColor="text-[#10B981]"

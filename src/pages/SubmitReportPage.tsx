@@ -10,6 +10,16 @@ import { Link } from "react-router-dom";
 
 
 type AppState = "input" | "processing" | "review" | "success";
+type InputMode = "template" | "form";
+
+interface FormAd {
+  id: string;
+  adName: string;
+  greeting: number;
+  details: number;
+  price: number;
+  closed: number;
+}
 
 function TableSection({ title, defaultExpanded, data, onChange }: { title: string, defaultExpanded: boolean, data: FunnelStage[], onChange: (data: FunnelStage[]) => void }) {
     const [expanded, setExpanded] = useState(defaultExpanded || data.length > 0);
@@ -74,10 +84,17 @@ export default function SubmitReportPage() {
 
   // States
   const [appState, setAppState] = useState<AppState>("input");
+  const [inputMode, setInputMode] = useState<InputMode>("template");
+  const [wasDirectEntry, setWasDirectEntry] = useState(false);
   const [reportText, setReportText] = useState("");
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
+
+  // Direct form state
+  const [formTotalMessages, setFormTotalMessages] = useState<number>(0);
+  const [formAds, setFormAds] = useState<FormAd[]>([{ id: 'ad-1', adName: '', greeting: 0, details: 0, price: 0, closed: 0 }]);
+  const [formJobConfusion, setFormJobConfusion] = useState<number>(0);
 
   // Inputs
   const [formDate, setFormDate] = useState(() => {

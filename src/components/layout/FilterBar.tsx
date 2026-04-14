@@ -18,6 +18,7 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
   if (!isAdminRoute || !isAdmin) return null;
 
   const ranges: DateRange[] = ["اليوم", "الأسبوع", "الشهر", "الإجمالي"];
+  const rangeLabels: Record<DateRange, string> = { "اليوم": "أمس", "الأسبوع": "الأسبوع", "الشهر": "الشهر", "الإجمالي": "الإجمالي" };
   const [salesReps, setSalesReps] = useState<{uid: string, name: string}[]>([]);
   const [uniqueAds, setUniqueAds] = useState<string[]>([]);
   const [isLoadingProps, setIsLoadingProps] = useState(true);
@@ -70,7 +71,7 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
                 : "text-[#64748B] hover:text-[#1E293B] hover:bg-black/5 scale-95"
             }`}
           >
-            {range}
+            {rangeLabels[range]}
           </button>
         ))}
       </div>

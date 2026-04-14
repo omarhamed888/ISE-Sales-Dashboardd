@@ -41,7 +41,7 @@ function passesHookDateAndQuality(r: any, range: string): boolean {
   const dr = mapHookDateRange(range);
 
   if (dr === "الإجمالي") {
-    if (!key) return true;
+    if (!key) return false;
     return key >= DASHBOARD_DATA_QUALITY_FROM_DATE;
   }
 

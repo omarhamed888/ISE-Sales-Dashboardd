@@ -31,7 +31,7 @@ function passesDateAndQuality(r: any, filter: FilterState): boolean {
   const key = normalizeReportDateKey(r);
 
   if (filter.dateRange === "الإجمالي") {
-    if (!key) return true;
+    if (!key) return false;
     return key >= DASHBOARD_DATA_QUALITY_FROM_DATE;
   }
 
