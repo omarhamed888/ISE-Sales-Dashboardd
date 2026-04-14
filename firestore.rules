@@ -67,7 +67,7 @@ service cloud.firestore {
     match /deals/{dealId} {
       allow read: if isAdmin() || (isAuth() && resource.data.salesRepId == request.auth.uid);
       allow create: if isAuth();
-      allow update: if isAdmin();
+      allow update: if isAdmin() || (isAuth() && resource.data.salesRepId == request.auth.uid);
       allow delete: if isSuperAdmin();
     }
   }

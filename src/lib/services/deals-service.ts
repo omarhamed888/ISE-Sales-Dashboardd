@@ -1,4 +1,4 @@
-import { collection, doc, writeBatch, serverTimestamp, query, where, orderBy, getDocs } from "firebase/firestore";
+import { collection, doc, writeBatch, serverTimestamp, query, where, orderBy, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { DealInput } from "./gemini-parser";
 
@@ -94,6 +94,42 @@ export async function getAllDeals(): Promise<any[]> {
   const q = query(collection(db, 'deals'), orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function updateDeal(
+  dealId: string,
+  patch: {
+    customerName: string;
+    adSource: string;
+    programName: string;
+    programCount: number;
+    dealValue: number;
+    firstContactDate: string;
+    closeDate: string;
+  }
+): Promise<void> {
+  let cycleDays: number | null = null;
+  if (patch.firstContactDate?.trim()) {
+    const first = new Date(patch.firstContactDate.trim());
+    const close = new Date(patch.closeDate);
+    if (!isNaN(first.getTime()) && !isNaN(close.getTime())) {
+      cycleDays = Math.max(
+        0,
+        Math.round((close.getTime() - first.getTime()) / (1000 * 60 * 60 * 24))
+      );
+    }
+  }
+
+  await updateDoc(doc(db, "deals", dealId), {
+    customerName: patch.customerName.trim(),
+    adSource: patch.adSource.trim(),
+    programName: patch.programName.trim(),
+    programCount: Math.max(1, Number(patch.programCount) || 1),
+    dealValue: Math.max(0, Number(patch.dealValue) || 0),
+    firstContactDate: patch.firstContactDate?.trim() || null,
+    closingCycleDays: cycleDays,
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export interface DealCycleStats {
