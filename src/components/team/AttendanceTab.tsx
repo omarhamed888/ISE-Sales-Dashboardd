@@ -29,17 +29,40 @@ export function AttendanceTab({ users, reports }: { users: any[], reports: any[]
         return days;
     }, [weekOffset]);
 
-    const getCellStatus = (userId: string, targetDate: Date, ymd: string) => {
+    const normalizeReportDate = (report: any): string | null => {
+        const rawDate = typeof report?.date === "string" ? report.date.trim() : "";
+        if (rawDate) {
+            if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) return rawDate;
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(rawDate)) {
+                const [day, month, year] = rawDate.split("/");
+                return `${year}-${month}-${day}`;
+            }
+        }
+
+        const createdAt = report?.createdAt;
+        if (!createdAt) return null;
+
+        const parsedDate =
+            typeof createdAt?.toDate === "function"
+                ? createdAt.toDate()
+                : createdAt instanceof Date
+                  ? createdAt
+                  : typeof createdAt?.seconds === "number"
+                    ? new Date(createdAt.seconds * 1000)
+                    : new Date(createdAt);
+
+        if (!(parsedDate instanceof Date) || Number.isNaN(parsedDate.getTime())) return null;
+        return `${parsedDate.getFullYear()}-${String(parsedDate.getMonth() + 1).padStart(2, '0')}-${String(parsedDate.getDate()).padStart(2, '0')}`;
+    };
+
+    const getCellStatus = (user: any, targetDate: Date, ymd: string) => {
         const now = new Date();
         const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const userIds = new Set([user?.id, user?.uid].filter(Boolean));
         
-        // Mapped dates from reports logic
         const hasReport = reports.some(r => {
-             if (r.salesRepId !== userId) return false;
-             // Match date logic
-             const rDate = r.createdAt ? new Date(r.createdAt) : new Date((r.date || "").split('/').reverse().join('-'));
-             const rYmd = `${rDate.getFullYear()}-${String(rDate.getMonth() + 1).padStart(2, '0')}-${String(rDate.getDate()).padStart(2, '0')}`;
-             return rYmd === ymd;
+             if (!userIds.has(r?.salesRepId)) return false;
+             return normalizeReportDate(r) === ymd;
         });
 
         if (hasReport) return { type: "report", icon: "check_circle", color: "text-emerald-500", bg: "bg-emerald-50", tooltip: "تم تسليم التقرير" };
@@ -104,7 +127,7 @@ export function AttendanceTab({ users, reports }: { users: any[], reports: any[]
                                    </div>
                                 </td>
                                 {weekDays.map(d => {
-                                    const status = getCellStatus(user.id, d.dateObj, d.ymd);
+                                    const status = getCellStatus(user, d.dateObj, d.ymd);
                                     return (
                                         <td key={d.ymd} className="px-4 py-4 text-center cursor-pointer hover:bg-black/5 transition-colors group/cell" title={status.tooltip}>
                                             <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl transition-all ${status.bg} border-transparent border hover:border-black/10`}>

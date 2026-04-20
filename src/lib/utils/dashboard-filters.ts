@@ -97,3 +97,17 @@ export function getDashboardPreviousPeriodReports(
   if (!range) return [];
   return filterReportsByYmdRange(allReports, filter, range.from, range.to);
 }
+
+/** Closed deals whose closeDate falls in the same dashboard window as reports (اليوم / الأسبوع / الشهر / الإجمالي). */
+export function filterDealsByDashboardDate(deals: any[], filter: FilterState): any[] {
+  return deals.filter((d) => {
+    const raw =
+      typeof d.closeDate === "string" && d.closeDate.trim()
+        ? d.closeDate.trim()
+        : typeof d.date === "string"
+          ? d.date.trim()
+          : "";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return false;
+    return isReportDateInDashboardRange(raw, filter.dateRange);
+  });
+}

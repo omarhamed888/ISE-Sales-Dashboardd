@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useFilter } from '@/lib/filter-context';
-import { filterReports } from '@/lib/utils/dashboard-filters';
+import { filterReports, filterDealsByDashboardDate } from '@/lib/utils/dashboard-filters';
 
 import { PerformanceTab } from '@/components/team/PerformanceTab';
 import { AttendanceTab } from '@/components/team/AttendanceTab';
@@ -12,6 +12,7 @@ import { EditMemberModal } from '@/components/team/EditMemberModal';
 export default function TeamPage() {
     const [users, setUsers] = useState<any[]>([]);
     const [reports, setReports] = useState<any[]>([]);
+    const [deals, setDeals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const { filter } = useFilter();
 
@@ -29,16 +30,21 @@ export default function TeamPage() {
             setLoading(false);
         });
 
+        const dSub = onSnapshot(query(collection(db, "deals"), orderBy("createdAt", "desc")), snap => {
+            setDeals(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        });
+
         // timeout fallback if excuses collection doesn't exist yet
         const t = setTimeout(() => setLoading(false), 2000);
 
-        return () => { uSub(); rSub(); clearTimeout(t); };
+        return () => { uSub(); rSub(); dSub(); clearTimeout(t); };
     }, []);
 
     const activeUsersCount = users.filter(u => u.isActive !== false).length;
 
     // We apply global filters to reports to calculate specific performance accurately
     const filteredReports = filterReports(reports, filter);
+    const filteredDeals = filterDealsByDashboardDate(deals, filter);
 
     if (loading && users.length === 0) {
         return (
@@ -107,6 +113,7 @@ export default function TeamPage() {
                     <PerformanceTab 
                         users={users.filter(u => u.isActive !== false)} 
                         reports={filteredReports} 
+                        deals={filteredDeals}
                         allReports={reports}
                         onEdit={setEditUser} 
                     />

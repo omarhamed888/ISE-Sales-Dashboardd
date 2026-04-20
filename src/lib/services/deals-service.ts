@@ -1,6 +1,8 @@
-import { collection, doc, writeBatch, serverTimestamp, query, where, orderBy, getDocs, updateDoc } from "firebase/firestore";
+import { collection, doc, writeBatch, serverTimestamp, query, where, orderBy, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { DealInput } from "./gemini-parser";
+import { getOrCreateCustomerId } from "./customers-service";
+import { normalizeDealInput } from "@/lib/utils/normalize-course-names";
 
 function getTodayString(): string {
   const now = new Date();
@@ -16,34 +18,47 @@ export async function saveDeals(
   const today = getTodayString();
   const batch = writeBatch(db);
 
-  deals.forEach(deal => {
-    const dealRef = doc(collection(db, 'deals'));
+  for (const deal of deals) {
+    const nd = normalizeDealInput(deal, true);
+    const dealRef = doc(collection(db, "deals"));
 
     let cycleDays: number | null = null;
-    if (deal.firstContactDate && deal.firstContactDate.trim()) {
-      const firstContact = new Date(deal.firstContactDate.trim());
+    if (nd.firstContactDate && nd.firstContactDate.trim()) {
+      const firstContact = new Date(nd.firstContactDate.trim());
       if (!isNaN(firstContact.getTime())) {
         const closeDate = new Date(today);
-        cycleDays = Math.max(0, Math.round((closeDate.getTime() - firstContact.getTime()) / (1000 * 60 * 60 * 24)));
+        cycleDays = Math.max(
+          0,
+          Math.round(
+            (closeDate.getTime() - firstContact.getTime()) / (1000 * 60 * 60 * 24)
+          )
+        );
       }
     }
+
+    const customerId =
+      nd.customerId?.trim() ||
+      (await getOrCreateCustomerId(nd.customerName));
 
     batch.set(dealRef, {
       salesRepId,
       salesRepName,
       teamName: teamName || null,
       date: today,
-      customerName: deal.customerName,
-      adSource: deal.adSource,
-      programName: deal.programName,
-      programCount: deal.programCount,
-      dealValue: deal.dealValue,
-      firstContactDate: deal.firstContactDate || null,
+      customerId,
+      customerName: nd.customerName,
+      adSource: nd.adSource,
+      programName: nd.programName,
+      programCount: nd.programCount,
+      dealValue: nd.dealValue,
+      firstContactDate: nd.firstContactDate || null,
       closeDate: today,
       closingCycleDays: cycleDays,
+      products: nd.products ?? [],
+      closureType: nd.closureType ?? "call",
       createdAt: serverTimestamp(),
     });
-  });
+  }
 
   await batch.commit();
 }
@@ -106,11 +121,27 @@ export async function updateDeal(
     dealValue: number;
     firstContactDate: string;
     closeDate: string;
+    products?: string[];
+    closureType?: "call" | "self";
   }
 ): Promise<void> {
   let cycleDays: number | null = null;
-  if (patch.firstContactDate?.trim()) {
-    const first = new Date(patch.firstContactDate.trim());
+  const nd = normalizeDealInput(
+    {
+      customerName: patch.customerName,
+      adSource: patch.adSource,
+      programName: patch.programName,
+      programCount: patch.programCount,
+      dealValue: patch.dealValue,
+      firstContactDate: patch.firstContactDate,
+      products: patch.products ?? [],
+      closureType: patch.closureType ?? "call",
+    },
+    patch.products !== undefined
+  );
+
+  if (nd.firstContactDate?.trim()) {
+    const first = new Date(nd.firstContactDate.trim());
     const close = new Date(patch.closeDate);
     if (!isNaN(first.getTime()) && !isNaN(close.getTime())) {
       cycleDays = Math.max(
@@ -120,16 +151,29 @@ export async function updateDeal(
     }
   }
 
-  await updateDoc(doc(db, "deals", dealId), {
-    customerName: patch.customerName.trim(),
-    adSource: patch.adSource.trim(),
-    programName: patch.programName.trim(),
-    programCount: Math.max(1, Number(patch.programCount) || 1),
-    dealValue: Math.max(0, Number(patch.dealValue) || 0),
-    firstContactDate: patch.firstContactDate?.trim() || null,
+  const payload: Record<string, unknown> = {
+    customerName: nd.customerName.trim(),
+    adSource: nd.adSource.trim(),
+    programName: nd.programName.trim(),
+    programCount: Math.max(1, Number(nd.programCount) || 1),
+    dealValue: Math.max(0, Number(nd.dealValue) || 0),
+    firstContactDate: nd.firstContactDate?.trim() || null,
     closingCycleDays: cycleDays,
     updatedAt: serverTimestamp(),
-  });
+  };
+
+  if (patch.products !== undefined) {
+    payload.products = nd.products ?? [];
+  }
+  if (patch.closureType !== undefined) {
+    payload.closureType = nd.closureType ?? "call";
+  }
+
+  await updateDoc(doc(db, "deals", dealId), payload);
+}
+
+export async function deleteDeal(dealId: string): Promise<void> {
+  await deleteDoc(doc(db, "deals", dealId));
 }
 
 export interface DealCycleStats {

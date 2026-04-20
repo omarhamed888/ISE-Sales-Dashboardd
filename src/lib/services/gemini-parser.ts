@@ -1,4 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { PRODUCTS } from "@/lib/constants/products";
+
+const VALID_PRODUCT_IDS = new Set(PRODUCTS.map((p) => p.id));
 
 export interface FunnelStage {
   id: string;
@@ -36,6 +39,10 @@ export interface DealInput {
   programCount: number;
   dealValue: number;
   firstContactDate: string;
+  products?: string[];       // product IDs from PRODUCTS constant
+  closureType?: "call" | "self"; // مكالمة مبيعات أو حجز ذاتي
+  /** When set (e.g. upgrade), skip customer lookup by name */
+  customerId?: string;
 }
 
 export interface ParsedDealsOutput {
@@ -182,7 +189,16 @@ const USER_PROMPT = (text: string, courses: string[]) => `
   "rejectionReasons": [{ "rawText": string, "count": number, "category": string }],
   "detectedJobs": [{ "rawText": string, "normalizedLabel": string, "sector": string, "count": number, "stage": string }],
   "closedDeals": [
-    { "customerName": string, "adSource": string, "programName": string, "programCount": number, "dealValue": number, "firstContactDate": string }
+    {
+      "customerName": string,
+      "adSource": string,
+      "programName": string,
+      "programCount": number,
+      "dealValue": number,
+      "firstContactDate": string,
+      "products": ["bdp_online"|"bdp_offline"|"negotiation"|"ifp"|"ibn_souq"|"bds"|"book"],
+      "closureType": "call"|"self"
+    }
   ]
 }
 
@@ -194,6 +210,8 @@ const USER_PROMPT = (text: string, courses: string[]) => `
 - closedDeals = [] لو مفيش مبيعات
 - firstContactDate بصيغة YYYY-MM-DD أو "" لو غائب
 - dealValue رقم فقط بدون عملة
+- products: إن أمكن اربط كل صفقة بمعرفات المنتجات من القائمة أعلاه (bdp_online، bdp_offline، …)، أو اتركها [] إن لم تستطع
+- closureType: "call" إذا أغلقها مندوب مبيعات، "self" إذا حجز العميل ذاتياً عبر الموقع؛ إن لم يكن واضحاً استخدم "call"
 
 REPORT TEXT:
 ${text}
@@ -346,14 +364,24 @@ function validateAndCorrect(rawOutput: RawGeminiOutput): RawGeminiOutput {
     leadCount: typeof l.leadCount === 'number' ? l.leadCount : 0
   }));
 
-  out.closedDeals = out.closedDeals.map((d: any) => ({
-    customerName: d.customerName || "",
-    adSource: d.adSource || "",
-    programName: d.programName || "",
-    programCount: typeof d.programCount === 'number' ? d.programCount : 1,
-    dealValue: typeof d.dealValue === 'number' ? d.dealValue : 0,
-    firstContactDate: d.firstContactDate || "",
-  }));
+  out.closedDeals = out.closedDeals.map((d: any) => {
+    const rawProducts = Array.isArray(d.products)
+      ? d.products.filter((x: unknown) => typeof x === "string" && VALID_PRODUCT_IDS.has(x as string))
+      : [];
+    const closureRaw = d.closureType;
+    const closureType: "call" | "self" | undefined =
+      closureRaw === "self" ? "self" : closureRaw === "call" ? "call" : undefined;
+    return {
+      customerName: d.customerName || "",
+      adSource: d.adSource || "",
+      programName: d.programName || "",
+      programCount: typeof d.programCount === "number" ? d.programCount : 1,
+      dealValue: typeof d.dealValue === "number" ? d.dealValue : 0,
+      firstContactDate: d.firstContactDate || "",
+      ...(rawProducts.length > 0 ? { products: rawProducts } : {}),
+      ...(closureType ? { closureType } : {}),
+    };
+  });
 
   if (typeof out.salesNotes !== 'string') out.salesNotes = "";
   if (typeof out.programTrack !== 'string') out.programTrack = "";
@@ -457,26 +485,47 @@ ${rawText}
 أرجع:
 {
   "deals": [
-    { "customerName": "الاسم", "adSource": "المصدر", "programName": "البرنامج", "programCount": N, "dealValue": N, "firstContactDate": "YYYY-MM-DD" }
+    {
+      "customerName": "الاسم",
+      "adSource": "المصدر",
+      "programName": "البرنامج",
+      "programCount": N,
+      "dealValue": N,
+      "firstContactDate": "YYYY-MM-DD",
+      "products": ["bdp_online"|"bdp_offline"|"negotiation"|"ifp"|"ibn_souq"|"bds"|"book"],
+      "closureType": "call"|"self"
+    }
   ],
   "totalDeals": N,
   "totalRevenue": N
 }
-قواعد: dealValue رقم فقط، firstContactDate بصيغة YYYY-MM-DD أو "" إذا غائب.`;
+قواعد: dealValue رقم فقط، firstContactDate بصيغة YYYY-MM-DD أو "" إذا غائب. products و closureType اختياريان إن وُجدت في النص.`;
 
   const result = await model.generateContent(prompt);
   const cleanJson = result.response.text().trim().replace(/```json|```/gi, "").trim();
   const parsed = JSON.parse(cleanJson);
 
   return {
-    deals: Array.isArray(parsed.deals) ? parsed.deals.map((d: any) => ({
-      customerName: d.customerName || "",
-      adSource: d.adSource || "",
-      programName: d.programName || "",
-      programCount: typeof d.programCount === "number" ? d.programCount : 1,
-      dealValue: typeof d.dealValue === "number" ? d.dealValue : 0,
-      firstContactDate: d.firstContactDate || "",
-    })) : [],
+    deals: Array.isArray(parsed.deals)
+      ? parsed.deals.map((d: any) => {
+          const rawProducts = Array.isArray(d.products)
+            ? d.products.filter((x: unknown) => typeof x === "string" && VALID_PRODUCT_IDS.has(x as string))
+            : [];
+          const closureRaw = d.closureType;
+          const closureType: "call" | "self" | undefined =
+            closureRaw === "self" ? "self" : closureRaw === "call" ? "call" : undefined;
+          return {
+            customerName: d.customerName || "",
+            adSource: d.adSource || "",
+            programName: d.programName || "",
+            programCount: typeof d.programCount === "number" ? d.programCount : 1,
+            dealValue: typeof d.dealValue === "number" ? d.dealValue : 0,
+            firstContactDate: d.firstContactDate || "",
+            ...(rawProducts.length > 0 ? { products: rawProducts } : {}),
+            ...(closureType ? { closureType } : {}),
+          };
+        })
+      : [],
     totalDeals: parsed.totalDeals || 0,
     totalRevenue: parsed.totalRevenue || 0,
   };

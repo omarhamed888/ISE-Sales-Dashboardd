@@ -4,6 +4,8 @@ import { parseDeals } from "@/lib/services/gemini-parser";
 import { saveDeals } from "@/lib/services/deals-service";
 import type { DealInput } from "@/lib/services/gemini-parser";
 import { Link } from "react-router-dom";
+import { ProductPicker } from "@/components/ProductPicker";
+import { productLabels } from "@/lib/constants/products";
 
 type Tab = "text" | "manual";
 
@@ -14,6 +16,7 @@ const emptyDeal = (): DealInput => ({
   programCount: 1,
   dealValue: 0,
   firstContactDate: "",
+  products: [],
 });
 
 function formatNumber(n: number) {
@@ -52,7 +55,12 @@ export default function DealsPage() {
     try {
       const result = await parseDeals(rawText);
       if (result.deals.length > 0) {
-        setDeals(result.deals);
+        setDeals(
+          result.deals.map((d) => ({
+            ...d,
+            products: Array.isArray(d.products) ? d.products : [],
+          }))
+        );
         setTab("manual");
       } else {
         setParseError("لم يتم العثور على صفقات في النص.");
@@ -64,8 +72,27 @@ export default function DealsPage() {
     }
   }
 
-  function updateDeal(i: number, field: keyof DealInput, value: string | number) {
-    setDeals(prev => prev.map((d, idx) => idx === i ? { ...d, [field]: value } : d));
+  function updateDeal(i: number, field: keyof DealInput, value: string | number | string[]) {
+    setDeals((prev) =>
+      prev.map((d, idx) => (idx === i ? { ...d, [field]: value } : d))
+    );
+  }
+
+  function setDealProducts(i: number, ids: string[]) {
+    setDeals((prev) =>
+      prev.map((d, idx) => {
+        if (idx !== i) return d;
+        const next = { ...d, products: ids };
+        if (ids.length > 0) {
+          next.programName = productLabels(ids);
+          next.programCount = ids.length;
+        } else {
+          next.programName = "";
+          next.programCount = 1;
+        }
+        return next;
+      })
+    );
   }
 
   function addDeal() {
@@ -210,24 +237,20 @@ export default function DealsPage() {
                     className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
                   />
                 </div>
-                <div>
-                  <label className="text-xs font-bold text-[#64748B] block mb-1">البرنامج</label>
-                  <input
-                    value={deal.programName}
-                    onChange={e => updateDeal(i, "programName", e.target.value)}
-                    placeholder="اسم البرنامج"
-                    className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-bold text-[#64748B] block mb-2">
+                    الدبلومات / الكورسات{" "}
+                    <span className="text-[#94A3B8] font-normal">(اختياري — اختر من القائمة)</span>
+                  </label>
+                  <ProductPicker
+                    selected={deal.products ?? []}
+                    onChange={(ids) => setDealProducts(i, ids)}
                   />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-[#64748B] block mb-1">عدد البرامج</label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={deal.programCount}
-                    onChange={e => updateDeal(i, "programCount", parseInt(e.target.value) || 1)}
-                    className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
-                  />
+                  {(!deal.products || deal.products.length === 0) && (
+                    <p className="text-[11px] text-[#94A3B8] font-bold mt-2">
+                      يمكنك ترك الاختيار فارغاً؛ سيُعرض «غير محدد» عند الحفظ.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs font-bold text-[#64748B] block mb-1">المبلغ (ج.م)</label>

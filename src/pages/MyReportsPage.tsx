@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
+import { Link } from "react-router-dom";
 import {
   calcInteractionsFromParsedData,
   calcConversionRate,
@@ -66,6 +67,19 @@ export default function MyReportsPage() {
 
         fetchMyData();
     }, [user]);
+
+    const handleDeleteReport = async (reportId: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!window.confirm("حذف هذا التقرير نهائياً؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+        try {
+            await deleteDoc(doc(db, "reports", reportId));
+            setReports((prev) => prev.filter((r) => r.id !== reportId));
+        } catch (err) {
+            console.error(err);
+            alert("تعذر حذف التقرير. حاول مرة أخرى.");
+        }
+    };
 
     if (loading) return (
         <div className="flex justify-center items-center h-screen">
@@ -177,6 +191,23 @@ export default function MyReportsPage() {
                               </p>
                             </div>
                           </div>
+                          <div className="flex gap-2 pt-2 border-t border-[#F1F5F9]">
+                            <Link
+                              to={`/submit-report?edit=${report.id}`}
+                              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-[#EFF6FF] text-[#2563EB] text-[12px] font-black"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">edit</span>
+                              تعديل
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={(e) => handleDeleteReport(report.id, e)}
+                              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-red-50 text-red-600 text-[12px] font-black"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">delete</span>
+                              حذف
+                            </button>
+                          </div>
                         </div>
                       ))}
                       {reports.length === 0 && <p className="p-8 text-center text-[#64748B] font-bold text-[13px]">لا توجد تقارير مرفوعة حتى الآن.</p>}
@@ -190,6 +221,7 @@ export default function MyReportsPage() {
                                 <th className="p-4 font-bold text-[#64748B] text-center w-24">الرسائل</th>
                                 <th className="p-4 font-bold text-[#64748B] text-center w-24">التفاعل</th>
                                 <th className="p-4 font-bold text-[#64748B] w-32">الحالة</th>
+                                <th className="p-4 font-bold text-[#64748B] w-36 text-center">إجراءات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -211,11 +243,31 @@ export default function MyReportsPage() {
                                             <span className="font-bold text-[11px]">مؤكد</span>
                                         </div>
                                     </td>
+                                    <td className="p-4 text-center">
+                                        <div className="flex items-center justify-center gap-1">
+                                            <Link
+                                                to={`/submit-report?edit=${report.id}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="inline-flex items-center justify-center p-2 rounded-lg text-[#2563EB] hover:bg-[#EFF6FF]"
+                                                title="تعديل"
+                                            >
+                                                <span className="material-symbols-outlined text-[20px]">edit</span>
+                                            </Link>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => handleDeleteReport(report.id, e)}
+                                                className="inline-flex items-center justify-center p-2 rounded-lg text-red-500 hover:bg-red-50"
+                                                title="حذف"
+                                            >
+                                                <span className="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             ))}
                             {reports.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="p-12 text-center text-[#64748B] font-bold text-[13px]">لا توجد تقارير مرفوعة حتى الآن.</td>
+                                    <td colSpan={6} className="p-12 text-center text-[#64748B] font-bold text-[13px]">لا توجد تقارير مرفوعة حتى الآن.</td>
                                 </tr>
                             )}
                         </tbody>

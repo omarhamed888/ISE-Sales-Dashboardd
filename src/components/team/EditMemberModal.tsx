@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useCourses } from "@/lib/hooks/useCourses";
 
@@ -16,6 +16,7 @@ export function EditMemberModal({ user, isOpen, onClose }: EditMemberModalProps)
   const [teamName, setTeamName] = useState(user?.teamName || "");
   const [programTrack, setProgramTrack] = useState(user?.programTrack || "");
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -46,6 +47,22 @@ export function EditMemberModal({ user, isOpen, onClose }: EditMemberModalProps)
       setError("حدث خطأ أثناء تعديل الصلاحية. " + err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(`هل متأكد من حذف ${user?.name || "هذا العضو"} نهائياً؟`);
+    if (!confirmed) return;
+
+    setError("");
+    setDeleting(true);
+    try {
+      await deleteDoc(doc(db, "users", user.id));
+      onClose();
+    } catch (err: any) {
+      setError("حدث خطأ أثناء حذف العضو. " + err.message);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -129,10 +146,19 @@ export function EditMemberModal({ user, isOpen, onClose }: EditMemberModalProps)
           <div className="pt-4">
              <button
                type="submit"
-               disabled={loading}
+               disabled={loading || deleting}
                className="w-full bg-[#1E293B] text-white py-3.5 rounded-xl font-bold hover:bg-[#0F172A] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
              >
                {loading ? <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span> : "حفظ التعديلات"}
+             </button>
+             <button
+               type="button"
+               onClick={handleDelete}
+               disabled={loading || deleting}
+               className="w-full mt-3 bg-white text-error py-3 rounded-xl font-bold border border-error/30 hover:bg-error/5 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+             >
+               {deleting ? <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span> : <span className="material-symbols-outlined text-[20px]">delete</span>}
+               حذف العضو
              </button>
           </div>
         </form>

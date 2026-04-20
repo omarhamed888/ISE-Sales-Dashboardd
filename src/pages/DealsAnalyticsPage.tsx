@@ -4,6 +4,20 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 const COLORS = ['#2563EB','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#06B6D4','#F97316','#14B8A6','#6366F1'];
 
+/** Keeps SVG category labels inside the card; full text in native tooltip via <title> */
+function CategoryAxisTick({ x, y, payload, maxLen = 20 }: { x?: number; y?: number; payload?: { value?: string }; maxLen?: number }) {
+  const raw = String(payload?.value ?? "");
+  const shown = raw.length > maxLen ? `${raw.slice(0, maxLen)}…` : raw;
+  return (
+    <g transform={`translate(${x ?? 0},${y ?? 0})`}>
+      <title>{raw}</title>
+      <text dy={4} textAnchor="end" fill="#1E293B" fontSize={10} fontWeight={700} className="fill-[#1E293B]">
+        {shown}
+      </text>
+    </g>
+  );
+}
+
 interface RepStats {
   name: string;
   teamName: string;
@@ -148,65 +162,93 @@ export default function DealsAnalyticsPage() {
         ))}
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
+      {/* Charts — min-w-0 prevents grid items from overflowing and overlapping siblings */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
         {/* Revenue per rep bar chart */}
-        <div className="bg-white border border-[#E2E8F0] rounded-[24px] p-6 shadow-sm">
-          <h3 className="text-[15px] font-black text-[#1E293B] mb-5 flex items-center gap-2">
+        <div className="min-w-0 flex flex-col overflow-hidden bg-white border border-[#E2E8F0] rounded-[24px] p-5 sm:p-6 shadow-sm relative box-border">
+          <h3 className="text-[15px] font-black text-[#1E293B] mb-4 flex items-center gap-2 shrink-0">
             <span className="material-symbols-outlined text-[#2563EB]">bar_chart</span>
             الإيرادات لكل موظف
           </h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={repStats} margin={{ right: 8, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-              <XAxis dataKey="name" tick={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fontWeight: 700, fill: '#64748B' }} axisLine={false} tickLine={false} tickFormatter={v => (v/1000)+'k'} />
-              <Tooltip formatter={(v) => [Number(v).toLocaleString() + ' ج', 'الإيراد']} contentStyle={{ borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '12px', fontWeight: 700, fontFamily: 'inherit' }} />
-              <Bar dataKey="revenue" radius={[6,6,0,0]} maxBarSize={48}>
-                {repStats.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="w-full min-w-0 min-h-[240px] h-[280px] sm:h-[300px]" dir="ltr">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={repStats} margin={{ top: 8, right: 12, left: 4, bottom: 52 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="name"
+                  interval={0}
+                  angle={-32}
+                  textAnchor="end"
+                  height={56}
+                  tick={{ fontSize: 10, fontWeight: 700, fill: "#1E293B" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis tick={{ fontSize: 10, fontWeight: 700, fill: "#64748B" }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v / 1000}k`} />
+                <Tooltip formatter={(v) => [Number(v).toLocaleString() + " ج", "الإيراد"]} contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: "12px", fontWeight: 700, fontFamily: "inherit" }} />
+                <Bar dataKey="revenue" radius={[6, 6, 0, 0]} maxBarSize={48}>
+                  {repStats.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Program distribution — horizontal bar */}
-        <div className="bg-white border border-[#E2E8F0] rounded-[24px] p-6 shadow-sm">
-          <h3 className="text-[15px] font-black text-[#1E293B] mb-5 flex items-center gap-2">
+        <div className="min-w-0 flex flex-col overflow-hidden bg-white border border-[#E2E8F0] rounded-[24px] p-5 sm:p-6 shadow-sm relative box-border">
+          <h3 className="text-[15px] font-black text-[#1E293B] mb-4 flex items-center gap-2 shrink-0">
             <span className="material-symbols-outlined text-[#8B5CF6]">bar_chart_4_bars</span>
             توزيع البرامج المباعة
           </h3>
-          <ResponsiveContainer width="100%" height={Math.max(180, programDist.length * 34)}>
-            <BarChart data={programDist} layout="vertical" margin={{ right: 40, left: 0, top: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
-              <XAxis type="number" tick={{ fontSize: 11, fontWeight: 700, fill: '#64748B' }} axisLine={false} tickLine={false} allowDecimals={false} />
-              <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} axisLine={false} tickLine={false} />
-              <Tooltip formatter={(v) => [v + ' صفقة', 'العدد']} contentStyle={{ borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '12px', fontWeight: 700, fontFamily: 'inherit' }} />
-              <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={26} label={{ position: 'right', fontSize: 11, fontWeight: 700, fill: '#64748B' }}>
-                {programDist.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="w-full min-w-0 overflow-x-auto">
+            <div
+              className="min-w-[300px]"
+              dir="ltr"
+              style={{ height: Math.max(200, programDist.length * 36 + 44) }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={programDist} layout="vertical" margin={{ right: 44, left: 8, top: 8, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                  <XAxis type="number" tick={{ fontSize: 10, fontWeight: 700, fill: "#64748B" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <YAxis type="category" dataKey="name" width={148} tick={<CategoryAxisTick maxLen={22} />} axisLine={false} tickLine={false} />
+                  <Tooltip formatter={(v) => [v + " صفقة", "العدد"]} contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: "12px", fontWeight: 700, fontFamily: "inherit" }} />
+                  <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={26}>
+                    {programDist.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
 
         {/* Ad source bar */}
         {adDist.length > 0 && (
-          <div className="bg-white border border-[#E2E8F0] rounded-[24px] p-6 shadow-sm lg:col-span-2">
-            <h3 className="text-[15px] font-black text-[#1E293B] mb-5 flex items-center gap-2">
+          <div className="min-w-0 flex flex-col overflow-hidden bg-white border border-[#E2E8F0] rounded-[24px] p-5 sm:p-6 shadow-sm lg:col-span-2 relative box-border">
+            <h3 className="text-[15px] font-black text-[#1E293B] mb-4 flex items-center gap-2 shrink-0">
               <span className="material-symbols-outlined text-[#F59E0B]">ads_click</span>
               أفضل الإعلانات في إغلاق الصفقات
             </h3>
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={adDist} layout="vertical" margin={{ right: 16, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
-                <XAxis type="number" tick={{ fontSize: 11, fontWeight: 700, fill: '#64748B' }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="adName" width={160} tick={{ fontSize: 11, fontWeight: 700, fill: '#1E293B' }} axisLine={false} tickLine={false} />
-                <Tooltip formatter={(v) => [v + ' صفقة', 'العدد']} contentStyle={{ borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '12px', fontWeight: 700, fontFamily: 'inherit' }} />
-                <Bar dataKey="count" radius={[0,6,6,0]} maxBarSize={28}>
-                  {adDist.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="w-full min-w-0 overflow-x-auto">
+              <div className="min-w-0 h-[200px]" dir="ltr">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={adDist} layout="vertical" margin={{ right: 24, left: 8, top: 8, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                    <XAxis type="number" tick={{ fontSize: 10, fontWeight: 700, fill: "#64748B" }} axisLine={false} tickLine={false} />
+                    <YAxis type="category" dataKey="adName" width={168} tick={<CategoryAxisTick maxLen={24} />} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={(v) => [v + " صفقة", "العدد"]} contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: "12px", fontWeight: 700, fontFamily: "inherit" }} />
+                    <Bar dataKey="count" radius={[0, 6, 6, 0]} maxBarSize={28}>
+                      {adDist.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -319,7 +361,7 @@ export default function DealsAnalyticsPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.slice(0, 50).map((deal, i) => (
+              {filtered.map((deal, i) => (
                 <tr key={deal.id} className={`border-b border-[#E2E8F0] last:border-0 hover:bg-[#EFF6FF]/30 ${i%2===0?'bg-white':'bg-[#FAFBFC]'}`}>
                   <td className="p-4 font-bold text-[#0F172A]">{deal.customerName || '—'}</td>
                   <td className="p-4 font-bold text-[#64748B]">{deal.salesRepName}</td>
@@ -338,9 +380,6 @@ export default function DealsAnalyticsPage() {
               ))}
             </tbody>
           </table>
-          {filtered.length > 50 && (
-            <p className="text-center text-[12px] font-bold text-[#94A3B8] py-4">يتم عرض أول 50 صفقة فقط</p>
-          )}
         </div>
       </div>
 
