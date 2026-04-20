@@ -8,6 +8,7 @@ export interface Product {
 export const PRODUCTS: Product[] = [
   { id: "bdp_online",    label: "BDP Online",   type: "course", group: "bdp" },
   { id: "bdp_offline",   label: "BDP Offline",  type: "course", group: "bdp" },
+  { id: "bdp_recorded",  label: "BDP Recorded", type: "course", group: "bdp" },
   { id: "negotiation",   label: "Negotiation",  type: "course" },
   { id: "ifp",           label: "IFP",          type: "course" },
   { id: "ibn_souq",      label: "Ibn Souq",     type: "course" },
@@ -17,7 +18,7 @@ export const PRODUCTS: Product[] = [
 
 /** BDP Online and BDP Offline are mutually exclusive — selecting one deselects the other */
 export const EXCLUSIVE_GROUPS: Record<string, string[]> = {
-  bdp: ["bdp_online", "bdp_offline"],
+  bdp: ["bdp_online", "bdp_offline", "bdp_recorded"],
 };
 
 export function toggleProduct(selected: string[], productId: string): string[] {

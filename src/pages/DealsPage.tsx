@@ -16,6 +16,7 @@ const emptyDeal = (): DealInput => ({
   programCount: 1,
   dealValue: 0,
   firstContactDate: "",
+  closeDate: new Date().toISOString().split("T")[0],
   products: [],
 });
 
@@ -34,15 +35,14 @@ export default function DealsPage() {
   const [saved, setSaved] = useState(false);
   const [savedDeals, setSavedDeals] = useState<DealInput[]>([]);
 
-  const today = new Date().toISOString().split("T")[0];
-
   const totalRevenue = deals.reduce((s, d) => s + (d.dealValue || 0), 0);
   const avgDeal = deals.length > 0 ? Math.round(totalRevenue / deals.length) : 0;
   const avgCycle = (() => {
     const withDates = deals.filter(d => d.firstContactDate);
     if (!withDates.length) return 0;
     const sum = withDates.reduce((s, d) => {
-      const diff = Math.max(0, Math.round((new Date(today).getTime() - new Date(d.firstContactDate).getTime()) / 86400000));
+      const closeDate = d.closeDate || new Date().toISOString().split("T")[0];
+      const diff = Math.max(0, Math.round((new Date(closeDate).getTime() - new Date(d.firstContactDate).getTime()) / 86400000));
       return s + diff;
     }, 0);
     return Math.round(sum / withDates.length);
@@ -58,6 +58,7 @@ export default function DealsPage() {
         setDeals(
           result.deals.map((d) => ({
             ...d,
+            closeDate: d.closeDate || new Date().toISOString().split("T")[0],
             products: Array.isArray(d.products) ? d.products : [],
           }))
         );
@@ -159,7 +160,7 @@ export default function DealsPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-[#1E293B]">💰 الصفقات المغلقة</h1>
-        <p className="text-[#64748B] text-sm mt-1">تاريخ الإغلاق التلقائي: {today}</p>
+        <p className="text-[#64748B] text-sm mt-1">اختر تاريخ الإغلاق لكل صفقة بسهولة (الافتراضي: اليوم)</p>
       </div>
 
       {/* Tabs — pill style */}
@@ -269,6 +270,15 @@ export default function DealsPage() {
                     type="date"
                     value={deal.firstContactDate}
                     onChange={e => updateDeal(i, "firstContactDate", e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-[#64748B] block mb-1">تاريخ الإغلاق</label>
+                  <input
+                    type="date"
+                    value={deal.closeDate || new Date().toISOString().split("T")[0]}
+                    onChange={e => updateDeal(i, "closeDate", e.target.value)}
                     className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
                   />
                 </div>

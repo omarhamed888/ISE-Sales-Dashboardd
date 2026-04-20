@@ -3,6 +3,7 @@ import { db } from "@/lib/firebase";
 import type { DealInput } from "./gemini-parser";
 import { getOrCreateCustomerId } from "./customers-service";
 import { normalizeDealInput } from "@/lib/utils/normalize-course-names";
+import type { Deal } from "@/lib/types";
 
 function getTodayString(): string {
   const now = new Date();
@@ -15,18 +16,18 @@ export async function saveDeals(
   salesRepName: string,
   teamName?: string
 ): Promise<void> {
-  const today = getTodayString();
   const batch = writeBatch(db);
 
   for (const deal of deals) {
     const nd = normalizeDealInput(deal, true);
     const dealRef = doc(collection(db, "deals"));
 
+    const closeDateStr = (deal.closeDate && deal.closeDate.trim()) || getTodayString();
     let cycleDays: number | null = null;
     if (nd.firstContactDate && nd.firstContactDate.trim()) {
       const firstContact = new Date(nd.firstContactDate.trim());
       if (!isNaN(firstContact.getTime())) {
-        const closeDate = new Date(today);
+        const closeDate = new Date(closeDateStr);
         cycleDays = Math.max(
           0,
           Math.round(
@@ -44,7 +45,7 @@ export async function saveDeals(
       salesRepId,
       salesRepName,
       teamName: teamName || null,
-      date: today,
+      date: closeDateStr,
       customerId,
       customerName: nd.customerName,
       adSource: nd.adSource,
@@ -52,7 +53,7 @@ export async function saveDeals(
       programCount: nd.programCount,
       dealValue: nd.dealValue,
       firstContactDate: nd.firstContactDate || null,
-      closeDate: today,
+      closeDate: closeDateStr,
       closingCycleDays: cycleDays,
       products: nd.products ?? [],
       closureType: nd.closureType ?? "call",
@@ -79,18 +80,18 @@ function toMs(value: unknown): number {
 export async function getMyDeals(
   salesRepId: string,
   salesRepName?: string
-): Promise<any[]> {
+): Promise<Deal[]> {
   const byIdSnap = await getDocs(
     query(collection(db, "deals"), where("salesRepId", "==", salesRepId))
   );
-  const byId: any[] = byIdSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const byId: Deal[] = byIdSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Deal));
 
   // Backward compatibility: older records may have salesRepName but missing salesRepId.
   if (byId.length === 0 && salesRepName?.trim()) {
     const byNameSnap = await getDocs(
       query(collection(db, "deals"), where("salesRepName", "==", salesRepName.trim()))
     );
-    const byName: any[] = byNameSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const byName: Deal[] = byNameSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Deal));
     return byName.sort((a, b) => {
       const aMs = toMs(a.createdAt) || toMs(a.closeDate) || toMs(a.date);
       const bMs = toMs(b.createdAt) || toMs(b.closeDate) || toMs(b.date);
@@ -105,10 +106,10 @@ export async function getMyDeals(
   });
 }
 
-export async function getAllDeals(): Promise<any[]> {
+export async function getAllDeals(): Promise<Deal[]> {
   const q = query(collection(db, 'deals'), orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Deal));
 }
 
 export async function updateDeal(
@@ -185,11 +186,11 @@ export interface DealCycleStats {
   totalRevenue: number;
 }
 
-export function computeDealCycleStats(deals: any[]): {
+export function computeDealCycleStats(deals: Deal[]): {
   company: DealCycleStats;
   byTeam: DealCycleStats[];
 } {
-  const teamMap = new Map<string, any[]>();
+  const teamMap = new Map<string, Deal[]>();
 
   for (const deal of deals) {
     const team = deal.teamName || 'غير محدد';
@@ -197,7 +198,7 @@ export function computeDealCycleStats(deals: any[]): {
     teamMap.get(team)!.push(deal);
   }
 
-  function statsFor(label: string, group: any[]): DealCycleStats {
+  function statsFor(label: string, group: Deal[]): DealCycleStats {
     const cycles = group
       .map(d => d.closingCycleDays)
       .filter((v): v is number => typeof v === 'number' && v !== null);

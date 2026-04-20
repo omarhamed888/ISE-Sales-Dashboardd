@@ -2,6 +2,10 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { PRODUCTS } from "@/lib/constants/products";
 
 const VALID_PRODUCT_IDS = new Set(PRODUCTS.map((p) => p.id));
+const PARSE_CACHE_PREFIX = "gemini_parse_cache_v1:";
+const PARSE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const KEY_STATE_STORAGE = "gemini_key_cooldown_state_v1";
+const KEY_COOLDOWN_MS = 60_000;
 
 export interface FunnelStage {
   id: string;
@@ -39,6 +43,7 @@ export interface DealInput {
   programCount: number;
   dealValue: number;
   firstContactDate: string;
+  closeDate?: string;
   products?: string[];       // product IDs from PRODUCTS constant
   closureType?: "call" | "self"; // مكالمة مبيعات أو حجز ذاتي
   /** When set (e.g. upgrade), skip customer lookup by name */
@@ -245,6 +250,79 @@ interface RawGeminiOutput {
   closedDeals?: any[];
 }
 
+type ParseProgressStep = "send" | "analyze" | "extract";
+type KeyState = Record<string, number>;
+
+function hashString(input: string): string {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = (Math.imul(31, hash) + input.charCodeAt(i)) | 0;
+  }
+  return `h${(hash >>> 0).toString(16)}`;
+}
+
+function getParseCacheKey(rawText: string, platform: string, courses: string[]): string {
+  const normalized = `${rawText.trim()}|${platform}|${courses.slice().sort().join(",")}`;
+  return `${PARSE_CACHE_PREFIX}${hashString(normalized)}`;
+}
+
+function readCache(rawText: string, platform: string, courses: string[]): RawGeminiOutput | null {
+  try {
+    const key = getParseCacheKey(rawText, platform, courses);
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { expiry: number; data: RawGeminiOutput };
+    if (Date.now() > parsed.expiry) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(rawText: string, platform: string, courses: string[], data: RawGeminiOutput) {
+  try {
+    const key = getParseCacheKey(rawText, platform, courses);
+    localStorage.setItem(
+      key,
+      JSON.stringify({
+        expiry: Date.now() + PARSE_CACHE_TTL_MS,
+        data,
+      })
+    );
+  } catch {
+    // ignore cache write errors
+  }
+}
+
+export function clearParseCache(rawText: string, platform = "واتساب", courses: string[] = []) {
+  try {
+    localStorage.removeItem(getParseCacheKey(rawText, platform, courses));
+  } catch {
+    // ignore
+  }
+}
+
+function loadKeyState(): KeyState {
+  try {
+    const raw = localStorage.getItem(KEY_STATE_STORAGE);
+    if (!raw) return {};
+    return JSON.parse(raw) as KeyState;
+  } catch {
+    return {};
+  }
+}
+
+function saveKeyState(state: KeyState) {
+  try {
+    localStorage.setItem(KEY_STATE_STORAGE, JSON.stringify(state));
+  } catch {
+    // ignore
+  }
+}
+
 function fallbackRegexExtraction(rawText: string): RawGeminiOutput {
   const toEn = (s: string) => s.replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
   const extractNumber = (pattern: RegExp) => {
@@ -313,27 +391,35 @@ async function callGeminiApi(rawText: string, courses: string[]): Promise<RawGem
   if (keys.length === 0) throw new Error("No Gemini API keys configured.");
 
   const prompt = USER_PROMPT(rawText, courses);
-  const startIndex = _keyIndex % keys.length;
+  const keyState = loadKeyState();
+  const now = Date.now();
+  const availableKeys = keys.filter((k) => !keyState[k] || keyState[k] <= now);
+  const orderedKeys = availableKeys.length > 0 ? availableKeys : keys;
 
-  // Try each key in rotation order, skip to next on quota/rate-limit errors
-  for (let attempt = 0; attempt < keys.length; attempt++) {
-    const key = keys[(_keyIndex + attempt) % keys.length];
+  for (let attempt = 0; attempt < orderedKeys.length; attempt++) {
+    const key = orderedKeys[(_keyIndex + attempt) % orderedKeys.length];
     try {
       const result = await callWithKey(key, prompt);
-      // Advance rotation for next call
-      _keyIndex = (_keyIndex + attempt + 1) % keys.length;
+      _keyIndex = (_keyIndex + attempt + 1) % orderedKeys.length;
       return result;
     } catch (err: any) {
       const msg = String(err?.message || err).toLowerCase();
       const isQuotaError = msg.includes('429') || msg.includes('quota') || msg.includes('rate') || msg.includes('resource exhausted');
-      if (isQuotaError && attempt < keys.length - 1) {
-        console.warn(`Gemini key ${startIndex + attempt + 1} hit quota, trying next key...`);
+      if (isQuotaError) {
+        keyState[key] = Date.now() + KEY_COOLDOWN_MS;
+        saveKeyState(keyState);
+      }
+      if (isQuotaError && attempt < orderedKeys.length - 1) {
         continue;
       }
-      throw err; // Non-quota error or last key — propagate
+      throw err;
     }
   }
-  throw new Error("All Gemini API keys exhausted.");
+  throw new Error("all_keys_exhausted");
+}
+
+function validateRequiredShape(output: RawGeminiOutput): boolean {
+  return typeof output.totalMessages === "number" && !!output.funnel;
 }
 
 function validateAndCorrect(rawOutput: RawGeminiOutput): RawGeminiOutput {
@@ -378,6 +464,7 @@ function validateAndCorrect(rawOutput: RawGeminiOutput): RawGeminiOutput {
       programCount: typeof d.programCount === "number" ? d.programCount : 1,
       dealValue: typeof d.dealValue === "number" ? d.dealValue : 0,
       firstContactDate: d.firstContactDate || "",
+      closeDate: d.closeDate || "",
       ...(rawProducts.length > 0 ? { products: rawProducts } : {}),
       ...(closureType ? { closureType } : {}),
     };
@@ -393,19 +480,42 @@ function validateAndCorrect(rawOutput: RawGeminiOutput): RawGeminiOutput {
 export async function parseReport(
   rawText: string,
   platform: string = "واتساب",
-  courses: string[] = []
+  courses: string[] = [],
+  options: { forceRefresh?: boolean; onProgress?: (step: ParseProgressStep) => void } = {}
 ): Promise<{ parsedData: ParsedReportData; platform: string }> {
   if (rawText.trim().length < 20) {
     throw new Error("النص المدخل أقصر من أن يكون تقريراً. يرجى إدخال تفاصيل أوفى.");
   }
 
   let rawOutput: RawGeminiOutput;
-  try {
+  const cached = options.forceRefresh ? null : readCache(rawText, platform, courses);
+  if (cached) {
+    rawOutput = validateAndCorrect(cached);
+  } else {
+    try {
+    options.onProgress?.("send");
     rawOutput = await callGeminiApi(rawText, courses);
+    options.onProgress?.("analyze");
+    if (!validateRequiredShape(rawOutput)) {
+      rawOutput = await callGeminiApi(`${rawText}\n\nIMPORTANT: RETURN REQUIRED FIELDS totalMessages and funnel in valid JSON.`, courses);
+    }
     rawOutput = validateAndCorrect(rawOutput);
-  } catch (error) {
-    console.warn("Gemini API parsing failed, engaging fallback:", error);
-    rawOutput = fallbackRegexExtraction(rawText);
+    options.onProgress?.("extract");
+    writeCache(rawText, platform, courses, rawOutput);
+    } catch (error) {
+      const msg = String((error as Error)?.message || error || "").toLowerCase();
+      if (msg.includes("all_keys_exhausted") || msg.includes("429") || msg.includes("quota")) {
+        throw new Error("الخدمة مشغولة حالياً، حاول مرة أخرى بعد دقيقة");
+      }
+      if (msg.includes("network") || msg.includes("failed to fetch")) {
+        throw new Error("تحقق من اتصال الإنترنت");
+      }
+      if (msg.includes("api key") || msg.includes("invalid key")) {
+        console.error("Gemini invalid API key detected:", error);
+        throw new Error("مفتاح API غير صالح");
+      }
+      rawOutput = fallbackRegexExtraction(rawText);
+    }
   }
 
   const normalizeStages = (arr: any[] | undefined, prefix: string): FunnelStage[] => {
@@ -521,6 +631,7 @@ ${rawText}
             programCount: typeof d.programCount === "number" ? d.programCount : 1,
             dealValue: typeof d.dealValue === "number" ? d.dealValue : 0,
             firstContactDate: d.firstContactDate || "",
+            closeDate: d.closeDate || "",
             ...(rawProducts.length > 0 ? { products: rawProducts } : {}),
             ...(closureType ? { closureType } : {}),
           };
