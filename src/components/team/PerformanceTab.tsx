@@ -256,13 +256,13 @@ export function PerformanceTab({ users, reports, deals, allReports, onEdit }: Pe
                                 </div>
                                 <div className="rounded-[14px] border border-[#e2e8f0] bg-[#f8fafc] px-2 py-3.5 text-center transition-all hover:border-[#bdd4f0] hover:bg-[#eef5ff]">
                                     <p className="text-[22px] font-extrabold leading-none tabular-nums text-[#1e3a5f]">
-                                        {user.dealCount.toLocaleString()}
+                                        {user.dealCount.toLocaleString('en-US')}
                                     </p>
                                     <p className="mt-1 text-[10px] font-semibold leading-snug text-[#64748b]">صفقات</p>
                                 </div>
                                 <div className="rounded-[14px] border border-[#e2e8f0] bg-[#f8fafc] px-2 py-3.5 text-center transition-all hover:border-[#bdd4f0] hover:bg-[#eef5ff]">
                                     <p className="text-[22px] font-extrabold leading-none tabular-nums text-[#1e3a5f]">
-                                        {user.agg.totalMessages.toLocaleString()}
+                                        {user.agg.totalMessages.toLocaleString('en-US')}
                                     </p>
                                     <p className="mt-1 text-[10px] font-semibold leading-snug text-[#64748b]">الرسائل</p>
                                 </div>

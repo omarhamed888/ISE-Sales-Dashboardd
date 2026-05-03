@@ -234,9 +234,9 @@ export default function ReportsPage() {
       <div className="bg-[#1E293B] rounded-xl p-4 flex items-center overflow-x-auto hide-scrollbar whitespace-nowrap text-white gap-6 shadow-xl w-full mx-auto justify-center select-none">
           <span className="text-[12px] font-black text-amber-400 bg-amber-400/10 px-3 py-1 rounded-lg">عرض {tickerStats.total} تقرير</span>
           <span className="w-1 h-1 bg-[#475569] rounded-full"></span>
-          <span className="text-[13px] font-bold"><span className="text-[#94A3B8] font-medium ml-1">إجمالي الرسائل:</span> {tickerStats.messages.toLocaleString()}</span>
+          <span className="text-[13px] font-bold"><span className="text-[#94A3B8] font-medium ml-1">إجمالي الرسائل:</span> {tickerStats.messages.toLocaleString('en-US')}</span>
           <span className="w-1 h-1 bg-[#475569] rounded-full"></span>
-          <span className="text-[13px] font-bold"><span className="text-[#94A3B8] font-medium ml-1">التفاعل:</span> {tickerStats.integrations.toLocaleString()}</span>
+          <span className="text-[13px] font-bold"><span className="text-[#94A3B8] font-medium ml-1">التفاعل:</span> {tickerStats.integrations.toLocaleString('en-US')}</span>
           <span className="w-1 h-1 bg-[#475569] rounded-full"></span>
           <span className="text-[13px] font-bold"><span className="text-[#94A3B8] font-medium ml-1">معدل الإغلاق:</span> <span className="text-emerald-400">{tickerStats.convRate}%</span></span>
       </div>

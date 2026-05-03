@@ -63,7 +63,7 @@ export function LeakCausesPieChart({ data }: { data: LeakPieSlice[] }) {
               textAlign: "right",
               fontWeight: 600,
             }}
-            formatter={(value) => [Number(value ?? 0).toLocaleString(), ""]}
+            formatter={(value) => [Number(value ?? 0).toLocaleString('en-US'), ""]}
           />
           <Legend content={renderLegend} verticalAlign="bottom" />
         </PieChart>

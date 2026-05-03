@@ -33,7 +33,7 @@ export function SmartInsightsSection({ reports }: { reports: any[] }) {
     if (msMsgs > 0 && msIntr === 0) {
       issueList.push({
         variant: "critical",
-        text: `🚫 فشل ماسنجر الكامل: ${msMsgs.toLocaleString()} رسائل بدون أي تفاعل (0%) - يجب إيقاف الإنفاق فوراً`,
+        text: `🚫 فشل ماسنجر الكامل: ${msMsgs.toLocaleString('en-US')} رسائل بدون أي تفاعل (0%) - يجب إيقاف الإنفاق فوراً`,
       });
     }
 
@@ -47,7 +47,7 @@ export function SmartInsightsSection({ reports }: { reports: any[] }) {
     if (cur.jobConfusionCount > 0) {
       issueList.push({
         variant: "critical",
-        text: `🔀 الخلط مع إعلان الوظيفة: ${cur.jobConfusionCount.toLocaleString()} شخص (${jobY}%) ظنوا أنه إعلان توظيف`,
+        text: `🔀 الخلط مع إعلان الوظيفة: ${cur.jobConfusionCount.toLocaleString('en-US')} شخص (${jobY}%) ظنوا أنه إعلان توظيف`,
       });
     }
 

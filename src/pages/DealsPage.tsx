@@ -1,13 +1,12 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { parseDeals } from "@/lib/services/gemini-parser";
 import { saveDeals } from "@/lib/services/deals-service";
 import type { DealInput } from "@/lib/services/gemini-parser";
 import { Link } from "react-router-dom";
 import { ProductPicker } from "@/components/ProductPicker";
-import { productLabels } from "@/lib/constants/products";
-
-type Tab = "text" | "manual";
+import { useCourses } from "@/lib/hooks/useCourses";
+import { classifyDealCategory } from "@/lib/utils/normalize-course-names";
+import { AdSelectDropdown } from "@/components/ads/AdSelectDropdown";
 
 const emptyDeal = (): DealInput => ({
   customerName: "",
@@ -16,28 +15,37 @@ const emptyDeal = (): DealInput => ({
   programCount: 1,
   dealValue: 0,
   firstContactDate: "",
+  contactAttempts: 1,
+  bookingType: "self_booking",
   closeDate: new Date().toISOString().split("T")[0],
   products: [],
+  dealCategory: "core",
 });
 
 function formatNumber(n: number) {
-  return n.toLocaleString();
+  return n.toLocaleString('en-US');
 }
 
 export default function DealsPage() {
   const { user } = useAuth();
-  const [tab, setTab] = useState<Tab>("text");
-  const [rawText, setRawText] = useState("");
-  const [parsing, setParsing] = useState(false);
-  const [parseError, setParseError] = useState("");
+  const courses = useCourses();
   const [deals, setDeals] = useState<DealInput[]>([emptyDeal()]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [savedDeals, setSavedDeals] = useState<DealInput[]>([]);
 
-  const totalRevenue = deals.reduce((s, d) => s + (d.dealValue || 0), 0);
-  const avgDeal = deals.length > 0 ? Math.round(totalRevenue / deals.length) : 0;
-  const avgCycle = (() => {
+  const courseItems = useMemo(() => courses.reduce<Array<{ id: string; label: string }>>((acc, c) => {
+    const key = c.name.trim().toLowerCase().replace(/\s+/g, " ");
+    if (!key) return acc;
+    if (acc.some((x) => x.label.trim().toLowerCase().replace(/\s+/g, " ") === key)) return acc;
+    acc.push({ id: c.id, label: c.name });
+    return acc;
+  }, []), [courses]);
+  const courseLabelMap = useMemo(() => new Map(courseItems.map((c) => [c.id, c.label])), [courseItems]);
+
+  const totalRevenue = useMemo(() => deals.reduce((s, d) => s + (d.dealValue || 0), 0), [deals]);
+  const avgDeal = useMemo(() => (deals.length > 0 ? Math.round(totalRevenue / deals.length) : 0), [deals.length, totalRevenue]);
+  const avgCycle = useMemo(() => {
     const withDates = deals.filter(d => d.firstContactDate);
     if (!withDates.length) return 0;
     const sum = withDates.reduce((s, d) => {
@@ -46,66 +54,54 @@ export default function DealsPage() {
       return s + diff;
     }, 0);
     return Math.round(sum / withDates.length);
-  })();
+  }, [deals]);
+  const avgAttempts = useMemo(() =>
+    deals.length > 0
+      ? (deals.reduce((s, d) => s + (Number(d.contactAttempts) || 0), 0) / deals.length).toFixed(1)
+      : "0.0", [deals]);
 
-  async function handleParse() {
-    if (!rawText.trim()) return;
-    setParsing(true);
-    setParseError("");
-    try {
-      const result = await parseDeals(rawText);
-      if (result.deals.length > 0) {
-        setDeals(
-          result.deals.map((d) => ({
-            ...d,
-            closeDate: d.closeDate || new Date().toISOString().split("T")[0],
-            products: Array.isArray(d.products) ? d.products : [],
-          }))
-        );
-        setTab("manual");
-      } else {
-        setParseError("لم يتم العثور على صفقات في النص.");
-      }
-    } catch (e: any) {
-      setParseError("فشل التحليل: " + e.message);
-    } finally {
-      setParsing(false);
-    }
-  }
-
-  function updateDeal(i: number, field: keyof DealInput, value: string | number | string[]) {
+  const updateDeal = useCallback((i: number, field: keyof DealInput, value: string | number | string[]) => {
     setDeals((prev) =>
       prev.map((d, idx) => (idx === i ? { ...d, [field]: value } : d))
     );
-  }
+  }, []);
 
-  function setDealProducts(i: number, ids: string[]) {
+  const setDealProducts = useCallback((i: number, ids: string[]) => {
     setDeals((prev) =>
       prev.map((d, idx) => {
         if (idx !== i) return d;
         const next = { ...d, products: ids };
         if (ids.length > 0) {
-          next.programName = productLabels(ids);
+          const labels = ids.map((id) => courseLabelMap.get(id)).filter((x): x is string => Boolean(x));
+          next.programName = labels.join("، ");
           next.programCount = ids.length;
         } else {
           next.programName = "";
           next.programCount = 1;
         }
+        next.dealCategory = classifyDealCategory(next);
         return next;
       })
     );
-  }
+  }, [courseLabelMap]);
 
-  function addDeal() {
+  const addDeal = useCallback(() => {
     setDeals(prev => [...prev, emptyDeal()]);
-  }
+  }, []);
 
-  function removeDeal(i: number) {
+  const removeDeal = useCallback((i: number) => {
     setDeals(prev => prev.filter((_, idx) => idx !== i));
-  }
+  }, []);
 
   async function handleSave() {
     if (!user || deals.length === 0) return;
+    const hasInvalidAttempts = deals.some(
+      (d) => !Number.isFinite(Number(d.contactAttempts)) || Number(d.contactAttempts) < 1
+    );
+    if (hasInvalidAttempts) {
+      alert("فضلاً أدخل عدد مرات التواصل لكل صفقة (رقم صحيح يبدأ من 1).");
+      return;
+    }
     setSaving(true);
     try {
       await saveDeals(deals, user.uid, user.name, user.teamName);
@@ -138,7 +134,7 @@ export default function DealsPage() {
           </div>
           <div className="flex gap-3 justify-center">
             <button
-              onClick={() => { setSaved(false); setDeals([emptyDeal()]); setRawText(""); setTab("text"); }}
+              onClick={() => { setSaved(false); setDeals([emptyDeal()]); }}
               className="px-6 py-3 bg-[#2563EB] text-white font-bold rounded-xl hover:bg-[#1D4ED8] transition-colors"
             >
               إضافة صفقات أخرى
@@ -163,46 +159,6 @@ export default function DealsPage() {
         <p className="text-[#64748B] text-sm mt-1">اختر تاريخ الإغلاق لكل صفقة بسهولة (الافتراضي: اليوم)</p>
       </div>
 
-      {/* Tabs — pill style */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setTab("text")}
-          className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all border ${tab === "text" ? "bg-[#2563EB] text-white border-[#2563EB] shadow-md shadow-[#2563EB]/20" : "bg-white text-[#64748B] border-[#E2E8F0] hover:border-[#2563EB] hover:text-[#2563EB]"}`}
-        >
-          نص حر
-        </button>
-        <button
-          onClick={() => setTab("manual")}
-          className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all border ${tab === "manual" ? "bg-[#2563EB] text-white border-[#2563EB] shadow-md shadow-[#2563EB]/20" : "bg-white text-[#64748B] border-[#E2E8F0] hover:border-[#2563EB] hover:text-[#2563EB]"}`}
-        >
-          إدخال يدوي
-        </button>
-      </div>
-
-      {/* Tab: Free Text */}
-      {tab === "text" && (
-        <div className="space-y-4">
-          <textarea
-            value={rawText}
-            onChange={e => setRawText(e.target.value)}
-            placeholder={"الصق الصفقات هنا...\n\n💰 الصفقات المغلقة: 3\n\n1)\nالاسم: محمد علي\nالمصدر: اعلان فيديو...\n..."}
-            className="w-full h-56 rounded-xl border border-[#E2E8F0] p-4 text-sm text-[#1E293B] resize-none focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
-          />
-          {parseError && <p className="text-red-500 text-sm">{parseError}</p>}
-          <button
-            onClick={handleParse}
-            disabled={parsing || !rawText.trim()}
-            className="w-full py-3 bg-[#2563EB] text-white font-bold rounded-xl hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-          >
-            {parsing ? (
-              <><span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block" /> جاري التحليل...</>
-            ) : "استخراج الصفقات"}
-          </button>
-        </div>
-      )}
-
-      {/* Tab: Manual */}
-      {tab === "manual" && (
         <div className="space-y-4">
           {deals.map((deal, i) => (
             <div key={i} className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm p-5 space-y-3">
@@ -212,6 +168,9 @@ export default function DealsPage() {
                     {i + 1}
                   </div>
                   <span className="font-bold text-[#0F172A] text-sm">صفقة {i + 1}</span>
+                  <span className={`text-[11px] px-2 py-0.5 rounded-full font-black ${classifyDealCategory(deal) === "side" ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}`}>
+                    {classifyDealCategory(deal) === "side" ? "Side" : "Core"}
+                  </span>
                 </div>
                 {deals.length > 1 && (
                   <button onClick={() => removeDeal(i)} className="text-red-400 hover:text-red-600 transition-colors">
@@ -231,21 +190,21 @@ export default function DealsPage() {
                 </div>
                 <div>
                   <label className="text-xs font-bold text-[#64748B] block mb-1">المصدر</label>
-                  <input
+                  <AdSelectDropdown
                     value={deal.adSource}
-                    onChange={e => updateDeal(i, "adSource", e.target.value)}
-                    placeholder="الإعلان / المصدر"
-                    className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
+                    onChange={(name) => updateDeal(i, "adSource", name)}
+                    placeholder="اختر إعلان أو اكتب المصدر..."
                   />
                 </div>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-bold text-[#64748B] block mb-2">
-                    الدبلومات / الكورسات{" "}
+                    المنتجات / الكورسات{" "}
                     <span className="text-[#94A3B8] font-normal">(اختياري — اختر من القائمة)</span>
                   </label>
                   <ProductPicker
                     selected={deal.products ?? []}
                     onChange={(ids) => setDealProducts(i, ids)}
+                    items={courseItems}
                   />
                   {(!deal.products || deal.products.length === 0) && (
                     <p className="text-[11px] text-[#94A3B8] font-bold mt-2">
@@ -263,6 +222,34 @@ export default function DealsPage() {
                     placeholder="0"
                     className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
                   />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-[#64748B] block mb-1">نوع الحجز</label>
+                  <select
+                    value={deal.bookingType ?? "self_booking"}
+                    onChange={e => updateDeal(i, "bookingType", e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
+                  >
+                    <option value="self_booking">حجز ذاتي</option>
+                    <option value="call_booking">حجز عبر مكالمة</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-[#64748B] block mb-1">
+                    عدد مرات التواصل
+                    <span className="text-[#94A3B8] font-normal mr-1">(إجباري)</span>
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={deal.contactAttempts || 1}
+                    onChange={e => updateDeal(i, "contactAttempts", Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/30"
+                  />
+                  <p className="text-[11px] text-[#94A3B8] font-bold mt-1">
+                    كل مكالمة أو متابعة واتساب/رسالة = محاولة واحدة.
+                  </p>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-[#64748B] block mb-1">أول تواصل</label>
@@ -293,10 +280,9 @@ export default function DealsPage() {
             + إضافة صفقة
           </button>
         </div>
-      )}
 
       {/* Summary */}
-      {(tab === "manual" || deals.some(d => d.dealValue > 0)) && (
+      {deals.length > 0 && (
         <div className="bg-gradient-to-r from-[#EFF6FF] to-[#F0FDF4] rounded-2xl border border-[#E2E8F0] p-5 space-y-2">
           <h3 className="font-black text-[#1E293B] text-sm mb-3">ملخص</h3>
           <div className="grid grid-cols-2 gap-3">
@@ -316,27 +302,29 @@ export default function DealsPage() {
               <p className="text-xs text-[#64748B] font-bold">متوسط زمن الإغلاق</p>
               <p className="text-xl font-black text-[#1E293B]">{avgCycle} يوم</p>
             </div>
+            <div className="bg-white rounded-lg p-3 text-center border border-[#E2E8F0] col-span-2">
+              <p className="text-xs text-[#64748B] font-bold">متوسط مرات التواصل</p>
+              <p className="text-xl font-black text-[#1E293B]">{avgAttempts}</p>
+            </div>
           </div>
         </div>
       )}
 
       {/* Save Button */}
-      {tab === "manual" && (
-        <button
-          onClick={handleSave}
-          disabled={saving || deals.length === 0}
-          className="w-full py-4 bg-[#2563EB] text-white font-black rounded-2xl hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-base flex items-center justify-center gap-3 shadow-lg shadow-[#2563EB]/20 hover:shadow-xl hover:shadow-[#2563EB]/30 hover:-translate-y-0.5"
-        >
-          {saving ? (
-            <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white inline-block" /> جاري الحفظ...</>
-          ) : (
-            <>
-              <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-              حفظ الصفقات
-            </>
-          )}
-        </button>
-      )}
+      <button
+        onClick={handleSave}
+        disabled={saving || deals.length === 0}
+        className="w-full py-4 bg-[#2563EB] text-white font-black rounded-2xl hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-base flex items-center justify-center gap-3 shadow-lg shadow-[#2563EB]/20 hover:shadow-xl hover:shadow-[#2563EB]/30 hover:-translate-y-0.5"
+      >
+        {saving ? (
+          <><span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white inline-block" /> جاري الحفظ...</>
+        ) : (
+          <>
+            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+            حفظ الصفقات
+          </>
+        )}
+      </button>
     </div>
   );
 }

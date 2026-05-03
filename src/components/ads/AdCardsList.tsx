@@ -78,11 +78,11 @@ export function AdCardsList({ ads }: { ads: any[] }) {
                             <div className="grid grid-cols-4 gap-2 text-center mb-6">
                                 <div>
                                     <p className="text-[10px] font-bold text-[#64748B] mb-1">الوصول</p>
-                                    <p className="text-[15px] font-black text-[#1E293B]">{ad.total.toLocaleString()}</p>
+                                    <p className="text-[15px] font-black text-[#1E293B]">{ad.total.toLocaleString('en-US')}</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-bold text-[#64748B] mb-1">التفاعل</p>
-                                    <p className="text-[15px] font-black text-[#1E293B]">{ad.interactions.toLocaleString()}</p>
+                                    <p className="text-[15px] font-black text-[#1E293B]">{ad.interactions.toLocaleString('en-US')}</p>
                                 </div>
                                 <div className="bg-[#EFF6FF] rounded-lg -m-1 p-1">
                                     <p className="text-[10px] font-bold text-[#2563EB]/70 mb-1">التحويل</p>

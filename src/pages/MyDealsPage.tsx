@@ -3,7 +3,9 @@ import { useAuth } from "@/lib/auth-context";
 import { getMyDeals, updateDeal, saveDeals, deleteDeal } from "@/lib/services/deals-service";
 import { normalizeCustomerName } from "@/lib/services/customers-service";
 import { ProductPicker } from "@/components/ProductPicker";
-import { productLabels, PRODUCTS } from "@/lib/constants/products";
+import { useCourses } from "@/lib/hooks/useCourses";
+import { logRuntimeError } from "@/lib/services/runtime-logging-service";
+import { classifyDealCategory } from "@/lib/utils/normalize-course-names";
 
 type Range = "month" | "week" | "all";
 
@@ -14,7 +16,7 @@ const RANGE_LABELS: Record<Range, string> = {
 };
 
 function formatNumber(n: number) {
-  return n.toLocaleString();
+  return n.toLocaleString('en-US');
 }
 
 function collectPurchasedProductIds(allDeals: any[], deal: any): Set<string> {
@@ -34,13 +36,26 @@ function collectPurchasedProductIds(allDeals: any[], deal: any): Set<string> {
   return set;
 }
 
-function hasUpgradeableProducts(allDeals: any[], deal: any): boolean {
+function hasUpgradeableProducts(allDeals: any[], deal: any, allCourseIds: string[]): boolean {
   const purchased = collectPurchasedProductIds(allDeals, deal);
-  return PRODUCTS.some((p) => !purchased.has(p.id));
+  return allCourseIds.some((id) => !purchased.has(id));
 }
 
 export default function MyDealsPage() {
   const { user } = useAuth();
+  const courses = useCourses();
+  const courseItems = useMemo(
+    () =>
+      courses.reduce<Array<{ id: string; label: string }>>((acc, c) => {
+        const key = c.name.trim().toLowerCase().replace(/\s+/g, " ");
+        if (!key) return acc;
+        if (acc.some((x) => x.label.trim().toLowerCase().replace(/\s+/g, " ") === key)) return acc;
+        acc.push({ id: c.id, label: c.name });
+        return acc;
+      }, []),
+    [courses]
+  );
+  const courseMap = useMemo(() => new Map(courseItems.map((c) => [c.id, c.label])), [courseItems]);
   const [deals, setDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,9 +67,10 @@ export default function MyDealsPage() {
     adSource: "",
     dealValue: 0,
     firstContactDate: "",
+    contactAttempts: 1,
     closeDate: "",
     products: [] as string[],
-    closureType: "call" as "call" | "self",
+    bookingType: "self_booking" as "self_booking" | "call_booking",
   });
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
@@ -64,6 +80,7 @@ export default function MyDealsPage() {
   const [upgradeFirstContact, setUpgradeFirstContact] = useState("");
   const [upgradeSaving, setUpgradeSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(20);
 
   const loadDeals = useCallback(() => {
     if (!user) return;
@@ -73,6 +90,7 @@ export default function MyDealsPage() {
       .then(setDeals)
       .catch((e: unknown) => {
         console.error("Failed to load my deals:", e);
+        void logRuntimeError({ source: "MyDealsPage.loadDeals", message: String((e as Error)?.message || e) });
         setDeals([]);
         setError("تعذر تحميل صفقاتك حالياً. تأكد من الصلاحيات أو حاول مرة أخرى.");
       })
@@ -94,6 +112,7 @@ export default function MyDealsPage() {
       return date && date >= cutoff;
     });
   }, [deals, range]);
+  const visibleDeals = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
 
   const totalRevenue = filtered.reduce((s: number, d: any) => s + (d.dealValue || 0), 0);
   const avgDeal = filtered.length > 0 ? Math.round(totalRevenue / filtered.length) : 0;
@@ -106,10 +125,10 @@ export default function MyDealsPage() {
   })();
 
   const upgradeAvailableProducts = useMemo(() => {
-    if (!upgradeForDeal) return [] as typeof PRODUCTS;
+    if (!upgradeForDeal) return [] as Array<{ id: string; label: string }>;
     const purchased = collectPurchasedProductIds(deals, upgradeForDeal);
-    return PRODUCTS.filter((p) => !purchased.has(p.id));
-  }, [upgradeForDeal, deals]);
+    return courseItems.filter((p) => !purchased.has(p.id));
+  }, [upgradeForDeal, deals, courseItems]);
 
   if (loading) {
     return (
@@ -138,9 +157,18 @@ export default function MyDealsPage() {
       adSource: deal.adSource || "",
       dealValue: Number(deal.dealValue) || 0,
       firstContactDate: deal.firstContactDate || "",
+      contactAttempts:
+        typeof deal.contactAttempts === "number" && deal.contactAttempts >= 1
+          ? Math.round(deal.contactAttempts)
+          : 1,
       closeDate: deal.closeDate || deal.date || "",
       products: Array.isArray(deal.products) ? [...deal.products] : [],
-      closureType: deal.closureType === "self" ? "self" : "call",
+      bookingType:
+        deal.bookingType === "call_booking"
+          ? "call_booking"
+          : deal.closureType === "call"
+            ? "call_booking"
+            : "self_booking",
     });
   };
 
@@ -151,11 +179,18 @@ export default function MyDealsPage() {
 
   const saveEdit = async () => {
     if (!editingDealId) return;
+    if (!Number.isFinite(Number(editForm.contactAttempts)) || Number(editForm.contactAttempts) < 1) {
+      setSaveMsg("عدد مرات التواصل يجب أن يكون رقمًا صحيحًا يبدأ من 1.");
+      return;
+    }
     setIsSavingEdit(true);
     setSaveMsg(null);
     try {
+      const selectedLabels = editForm.products
+        .map((id) => courseMap.get(id))
+        .filter((v): v is string => Boolean(v));
       const progName =
-        editForm.products.length > 0 ? productLabels(editForm.products) : "غير محدد";
+        selectedLabels.length > 0 ? selectedLabels.join("، ") : "غير محدد";
       const progCount = editForm.products.length > 0 ? editForm.products.length : 1;
       await updateDeal(editingDealId, {
         customerName: editForm.customerName,
@@ -164,9 +199,11 @@ export default function MyDealsPage() {
         programCount: Math.max(1, progCount),
         dealValue: editForm.dealValue,
         firstContactDate: editForm.firstContactDate,
+        contactAttempts: editForm.contactAttempts,
         closeDate: editForm.closeDate,
         products: editForm.products,
-        closureType: editForm.closureType,
+        bookingType: editForm.bookingType,
+        dealCategory: classifyDealCategory({ products: editForm.products, programName: progName }),
       });
       setDeals((prev) =>
         prev.map((d) => {
@@ -190,9 +227,13 @@ export default function MyDealsPage() {
             programCount: Math.max(1, progCount),
             dealValue: Math.max(0, Number(editForm.dealValue) || 0),
             firstContactDate: editForm.firstContactDate?.trim() || null,
+            contactAttempts: Math.max(1, Math.round(Number(editForm.contactAttempts) || 1)),
+            closeDate: editForm.closeDate?.trim() || null,
+            date: editForm.closeDate?.trim() || null,
             closingCycleDays: cycle,
             products: editForm.products,
-            closureType: editForm.closureType,
+            bookingType: editForm.bookingType,
+            dealCategory: classifyDealCategory({ products: editForm.products, programName: progName }),
           };
         })
       );
@@ -200,6 +241,7 @@ export default function MyDealsPage() {
       setSaveMsg("تم تحديث الصفقة في قاعدة البيانات بنجاح");
     } catch (e) {
       console.error("Update deal failed:", e);
+      void logRuntimeError({ source: "MyDealsPage.saveEdit", message: String((e as Error)?.message || e) });
       setSaveMsg("فشل تحديث الصفقة. تأكد من الصلاحيات ثم حاول مرة أخرى.");
     } finally {
       setIsSavingEdit(false);
@@ -235,17 +277,22 @@ export default function MyDealsPage() {
     setUpgradeSaving(true);
     setSaveMsg(null);
     try {
+      const selectedLabels = upgradeSelected
+        .map((id) => courseMap.get(id))
+        .filter((v): v is string => Boolean(v));
       await saveDeals(
         [
           {
             customerName: upgradeForDeal.customerName,
             adSource: upgradeForDeal.adSource || "",
-            programName: productLabels(upgradeSelected),
+            programName: selectedLabels.join("، "),
             programCount: upgradeSelected.length,
             dealValue: upgradeValue,
             firstContactDate: upgradeFirstContact || "",
+            contactAttempts: 1,
             products: upgradeSelected,
-            closureType: "call",
+            bookingType: "call_booking",
+            dealCategory: classifyDealCategory({ products: upgradeSelected, programName: selectedLabels.join("، ") }),
             customerId: upgradeForDeal.customerId,
           },
         ],
@@ -258,6 +305,7 @@ export default function MyDealsPage() {
       loadDeals();
     } catch (e) {
       console.error("Upgrade save failed:", e);
+      void logRuntimeError({ source: "MyDealsPage.saveUpgrade", message: String((e as Error)?.message || e) });
       setSaveMsg("فشل حفظ الترقية. حاول مرة أخرى.");
     } finally {
       setUpgradeSaving(false);
@@ -280,7 +328,8 @@ export default function MyDealsPage() {
       setSaveMsg("تم حذف الصفقة.");
     } catch (e) {
       console.error("Delete deal failed:", e);
-      setSaveMsg("تعذر حذف الصفقة. تأكد من الصلاحيات أو أن الصفقة مسجّلة باسمك.");
+      void logRuntimeError({ source: "MyDealsPage.delete", message: String((e as Error)?.message || e) });
+      setSaveMsg("تعذر حذف الصفقة. يمكنك حذف صفقاتك فقط أو حاول مرة أخرى.");
     } finally {
       setDeletingId(null);
     }
@@ -382,7 +431,7 @@ export default function MyDealsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {filtered.map((deal: any, i: number) => (
+            {visibleDeals.map((deal: any, i: number) => (
               <div
                 key={deal.id}
                 className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm p-5 hover:-translate-y-0.5 hover:shadow-md transition-all"
@@ -420,7 +469,7 @@ export default function MyDealsPage() {
                   >
                     تعديل
                   </button>
-                  {hasUpgradeableProducts(deals, deal) && (
+                  {hasUpgradeableProducts(deals, deal, courseItems.map((c) => c.id)) && (
                     <button
                       type="button"
                       onClick={() => openUpgrade(deal)}
@@ -444,7 +493,7 @@ export default function MyDealsPage() {
                       {deal.programName}
                     </span>
                   )}
-                  {deal.closureType === "self" ? (
+                  {deal.bookingType === "self_booking" ? (
                     <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2.5 py-1 rounded-full font-bold">
                       حجز ذاتي
                     </span>
@@ -453,9 +502,17 @@ export default function MyDealsPage() {
                       مكالمة مبيعات
                     </span>
                   )}
+                  <span className={`inline-block text-xs px-2.5 py-1 rounded-full font-bold border ${((deal.dealCategory || classifyDealCategory(deal)) === "side") ? "bg-amber-50 text-amber-800 border-amber-200" : "bg-emerald-50 text-emerald-800 border-emerald-200"}`}>
+                    {(deal.dealCategory || classifyDealCategory(deal)) === "side" ? "Side Deal" : "Core Deal"}
+                  </span>
                   {typeof deal.closingCycleDays === "number" && (
                     <span className="inline-block bg-[#EFF6FF] text-[#2563EB] text-xs px-2.5 py-1 rounded-full font-bold border border-[#2563EB]/10">
                       {deal.closingCycleDays} يوم إغلاق
+                    </span>
+                  )}
+                  {typeof deal.contactAttempts === "number" && deal.contactAttempts >= 1 && (
+                    <span className="inline-block bg-[#FEF9C3] text-[#854D0E] text-xs px-2.5 py-1 rounded-full font-bold border border-[#FDE68A]">
+                      {deal.contactAttempts} محاولة تواصل
                     </span>
                   )}
                 </div>
@@ -464,12 +521,13 @@ export default function MyDealsPage() {
                   <div className="mt-4 border border-[#E2E8F0] rounded-xl p-4 bg-[#F8FAFC] space-y-3">
                     <div>
                       <p className="text-[11px] font-bold text-[#64748B] mb-2">
-                        الدبلومات / الكورسات{" "}
+                        المنتجات / الكورسات{" "}
                         <span className="text-[#94A3B8] font-normal">(اختياري)</span>
                       </p>
                       <ProductPicker
                         selected={editForm.products}
                         onChange={(ids) => setEditForm((p) => ({ ...p, products: ids }))}
+                        items={courseItems}
                       />
                       {editForm.products.length === 0 && (
                         <p className="text-[10px] text-[#94A3B8] font-bold mt-1">
@@ -480,15 +538,15 @@ export default function MyDealsPage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={() => setEditForm((p) => ({ ...p, closureType: "call" }))}
-                        className={`flex-1 py-2 text-[12px] font-black rounded-xl border ${editForm.closureType === "call" ? "bg-[#2563EB] text-white border-[#2563EB]" : "bg-white text-[#64748B] border-[#E2E8F0]"}`}
+                        onClick={() => setEditForm((p) => ({ ...p, bookingType: "call_booking" }))}
+                        className={`flex-1 py-2 text-[12px] font-black rounded-xl border ${editForm.bookingType === "call_booking" ? "bg-[#2563EB] text-white border-[#2563EB]" : "bg-white text-[#64748B] border-[#E2E8F0]"}`}
                       >
                         مكالمة مبيعات
                       </button>
                       <button
                         type="button"
-                        onClick={() => setEditForm((p) => ({ ...p, closureType: "self" }))}
-                        className={`flex-1 py-2 text-[12px] font-black rounded-xl border ${editForm.closureType === "self" ? "bg-[#8B5CF6] text-white border-[#8B5CF6]" : "bg-white text-[#64748B] border-[#E2E8F0]"}`}
+                        onClick={() => setEditForm((p) => ({ ...p, bookingType: "self_booking" }))}
+                        className={`flex-1 py-2 text-[12px] font-black rounded-xl border ${editForm.bookingType === "self_booking" ? "bg-[#8B5CF6] text-white border-[#8B5CF6]" : "bg-white text-[#64748B] border-[#E2E8F0]"}`}
                       >
                         حجز ذاتي
                       </button>
@@ -517,10 +575,29 @@ export default function MyDealsPage() {
                         className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                       />
                       <input
+                        type="number"
+                        min={1}
+                        max={50}
+                        value={editForm.contactAttempts}
+                        onChange={(e) =>
+                          setEditForm((p) => ({ ...p, contactAttempts: Math.max(1, Number(e.target.value) || 1) }))
+                        }
+                        placeholder="مرات التواصل"
+                        className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
+                      />
+                      <input
                         type="date"
                         value={editForm.firstContactDate}
                         onChange={(e) =>
                           setEditForm((p) => ({ ...p, firstContactDate: e.target.value }))
+                        }
+                        className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
+                      />
+                      <input
+                        type="date"
+                        value={editForm.closeDate}
+                        onChange={(e) =>
+                          setEditForm((p) => ({ ...p, closeDate: e.target.value }))
                         }
                         className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm"
                       />
@@ -547,6 +624,15 @@ export default function MyDealsPage() {
                 )}
               </div>
             ))}
+            {visibleCount < filtered.length && (
+              <button
+                type="button"
+                onClick={() => setVisibleCount((v) => v + 20)}
+                className="w-full py-2.5 rounded-xl border border-[#E2E8F0] bg-white text-[#334155] text-sm font-bold hover:bg-[#F8FAFC]"
+              >
+                تحميل المزيد ({filtered.length - visibleCount} متبقي)
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -579,6 +665,7 @@ export default function MyDealsPage() {
                   selected={upgradeSelected}
                   onChange={setUpgradeSelected}
                   allowedIds={upgradeAvailableProducts.map((p) => p.id)}
+                  items={courseItems}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>

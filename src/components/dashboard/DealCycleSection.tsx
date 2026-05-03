@@ -76,7 +76,7 @@ export function DealCycleSection() {
           />
           <CycleStat
             label="إجمالي الإيرادات"
-            value={company.totalRevenue.toLocaleString()}
+            value={company.totalRevenue.toLocaleString('en-US')}
             sub="جنيه"
           />
         </div>
@@ -150,7 +150,7 @@ export function DealCycleSection() {
                   </td>
                   <td className="p-4 text-center font-bold text-[#10B981]">{team.minCycleDays} يوم</td>
                   <td className="p-4 text-center font-bold text-[#EF4444]">{team.maxCycleDays} يوم</td>
-                  <td className="p-4 text-center font-bold text-[#0F172A]">{team.totalRevenue.toLocaleString()}</td>
+                  <td className="p-4 text-center font-bold text-[#0F172A]">{team.totalRevenue.toLocaleString('en-US')}</td>
                 </tr>
               ))}
             </tbody>

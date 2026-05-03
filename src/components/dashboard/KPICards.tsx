@@ -1,4 +1,6 @@
 import { calculateAggregates } from "@/lib/utils/dashboard-aggregations";
+import { getDashboardPreviousPeriodReports } from "@/lib/utils/dashboard-filters";
+import { useFilter } from "@/lib/filter-context";
 
 interface KPICardProps {
   label: string;
@@ -26,8 +28,16 @@ function KPICard({ label, value, icon, accentColor, bgTint, iconColor, valueColo
   );
 }
 
-export function KPICards({ reports }: { reports: any[] }) {
+export function KPICards({ reports, allReports }: { reports: any[]; allReports: any[] }) {
+  const { filter } = useFilter();
   const cur = calculateAggregates(reports);
+  const prevReports = getDashboardPreviousPeriodReports(allReports, filter);
+  const prev = calculateAggregates(prevReports);
+  const pctDelta = (current: number, previous: number) => {
+    if (!previous) return 0;
+    return ((current - previous) / previous) * 100;
+  };
+  const conversionDelta = pctDelta(cur.conversionRate, prev.conversionRate);
 
   // معدل الرد = (totalMessages - noReplyAfterGreeting) / totalMessages
   const responded = cur.totalMessages - cur.funnel.greeting;
@@ -49,7 +59,7 @@ export function KPICards({ reports }: { reports: any[] }) {
       {/* Card 1: إجمالي الرسائل */}
       <KPICard
         label="إجمالي الرسائل"
-        value={cur.totalMessages.toLocaleString()}
+        value={cur.totalMessages.toLocaleString('en-US')}
         icon="forum"
         accentColor="border-r-[#2563EB]"
         bgTint="bg-[#EFF6FF]"
@@ -59,7 +69,7 @@ export function KPICards({ reports }: { reports: any[] }) {
       {/* Card 2: استجابة بعد السعر */}
       <KPICard
         label="استجابة بعد السعر"
-        value={cur.interactions.toLocaleString()}
+        value={cur.interactions.toLocaleString('en-US')}
         icon="price_check"
         accentColor="border-r-[#10B981]"
         bgTint="bg-[#ECFDF5]"
@@ -86,6 +96,11 @@ export function KPICards({ reports }: { reports: any[] }) {
         iconColor="text-[#F59E0B]"
         valueColor={closeRateColor}
       />
+      {prevReports.length > 0 && (
+        <div className={`sm:col-span-2 lg:col-span-4 text-[12px] font-black ${conversionDelta >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+          {conversionDelta >= 0 ? "↑" : "↓"} {Math.abs(conversionDelta).toFixed(1)}% عن الفترة السابقة
+        </div>
+      )}
     </div>
   );
 }
