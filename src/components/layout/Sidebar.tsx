@@ -79,14 +79,17 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: { is
         {/* ── Brand header ─────────────────────────────────────── */}
         <div className={`flex items-center h-[64px] shrink-0 border-b border-white/8
           ${isCollapsed ? "justify-center px-2" : "px-4 gap-3"}`}>
-          <img
-            src={config.companyLogo || "/logo.png"}
-            alt="logo"
-            className="h-9 w-9 object-contain rounded-lg shrink-0"
-          />
+          {/* Logo — white background so it's visible on dark sidebar */}
+          <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+            <img
+              src={config.companyLogo || "/logo.png"}
+              alt="logo"
+              className="h-7 w-7 object-contain"
+            />
+          </div>
           {!isCollapsed && (
             <div className="flex flex-col min-w-0">
-              <span className="text-[13px] font-black text-white leading-tight truncate">{config.companyName}</span>
+              <span className="text-[14px] font-black text-white leading-tight truncate">{config.companyName}</span>
               <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Sales Intelligence</span>
             </div>
           )}
