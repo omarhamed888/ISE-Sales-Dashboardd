@@ -1,7 +1,4 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { PRODUCTS } from "@/lib/constants/products";
-
-const VALID_PRODUCT_IDS = new Set(PRODUCTS.map((p) => p.id));
 const PARSE_CACHE_PREFIX = "gemini_parse_cache_v1:";
 const PARSE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const KEY_STATE_STORAGE = "gemini_key_cooldown_state_v1";
@@ -10,6 +7,7 @@ const KEY_COOLDOWN_MS = 60_000;
 export interface FunnelStage {
   id: string;
   adName: string;
+  adId?: string;
   count: number;
   notes?: string;       // الوظائف (comma-separated)
   leadNotes?: string[]; // الحالة (من "رد بعد السعر" أو ماسنجر)
@@ -43,9 +41,12 @@ export interface DealInput {
   programCount: number;
   dealValue: number;
   firstContactDate: string;
+  contactAttempts: number;
+  dealCategory?: "core" | "side";
   closeDate?: string;
-  products?: string[];       // product IDs from PRODUCTS constant
-  closureType?: "call" | "self"; // مكالمة مبيعات أو حجز ذاتي
+  products?: string[];       // dynamic product IDs from Firestore courses collection
+  bookingType?: "self_booking" | "call_booking";
+  closureType?: "call" | "self"; // legacy compatibility
   /** When set (e.g. upgrade), skip customer lookup by name */
   customerId?: string;
 }
@@ -54,6 +55,12 @@ export interface ParsedDealsOutput {
   deals: DealInput[];
   totalDeals: number;
   totalRevenue: number;
+}
+
+export interface GeminiObjection {
+  id: string;
+  text: string;
+  count: number;
 }
 
 export interface ParsedReportData {
@@ -73,6 +80,7 @@ export interface ParsedReportData {
   programTrack: string;
   sourceType: string;
   closedDeals: DealInput[];
+  objections: GeminiObjection[];
 }
 
 const REJECTION_CATEGORIES = [
@@ -162,7 +170,9 @@ leadsByAd: اجمع مجموع الليدز لكل إعلان عبر كل الم
 - الأرقام العربية (١٢٣) والإنجليزية (123) كلاهما مقبول
 - لو مفيش بيانات → []
 - لا تخترع بيانات غير موجودة
-- أرجع JSON صالح فقط`;
+- أرجع JSON صالح فقط
+
+الاعتراضات (objections): اعتراضات العملاء الذين ردوا ولكنهم أبدوا تحفظات أو رفضاً (مثال: "السعر غالي"، "مش وقتي"، "هفكر"، "مش محتاج دلوقتي"). هذه مختلفة عن أسباب عدم الرد. إن لم توجد → []`;
 
 const USER_PROMPT = (text: string, courses: string[]) => `
 الكورسات المتاحة للإسناد: ${courses.length > 0 ? courses.join('، ') : 'غير محدد'}
@@ -201,10 +211,13 @@ const USER_PROMPT = (text: string, courses: string[]) => `
       "programCount": number,
       "dealValue": number,
       "firstContactDate": string,
-      "products": ["bdp_online"|"bdp_offline"|"negotiation"|"ifp"|"ibn_souq"|"bds"|"book"],
-      "closureType": "call"|"self"
+      "contactAttempts": number,
+      "dealCategory": "core"|"side",
+      "products": [string],
+      "bookingType": "self_booking"|"call_booking"
     }
-  ]
+  ],
+  "objections": [{ "id": string, "text": string, "count": number }]
 }
 
 قواعد JSON:
@@ -214,9 +227,12 @@ const USER_PROMPT = (text: string, courses: string[]) => `
 - leadNotes = الحالة فقط (بعد "|" في واتساب، أو الجزء الثالث "/" في ماسنجر)
 - closedDeals = [] لو مفيش مبيعات
 - firstContactDate بصيغة YYYY-MM-DD أو "" لو غائب
+- contactAttempts عدد المحاولات، ولو غير متاح استخدم 1
+- dealCategory تصنيف الصفقة: core أو side (لو غير واضح استخدم core)
 - dealValue رقم فقط بدون عملة
-- products: إن أمكن اربط كل صفقة بمعرفات المنتجات من القائمة أعلاه (bdp_online، bdp_offline، …)، أو اتركها [] إن لم تستطع
-- closureType: "call" إذا أغلقها مندوب مبيعات، "self" إذا حجز العميل ذاتياً عبر الموقع؛ إن لم يكن واضحاً استخدم "call"
+- products: إن أمكن اربط كل صفقة بمعرفات المنتجات من البيانات المتاحة، أو اتركها [] إن لم تستطع
+- bookingType: "self_booking" أو "call_booking". إن لم يكن واضحاً استخدم "self_booking"
+- objections: استخرج الاعتراضات الصريحة من العملاء الذين ردوا. count = عدد العملاء الذين ذكروا هذا الاعتراض. id = uuid عشوائي. إن لم توجد → []
 
 REPORT TEXT:
 ${text}
@@ -248,6 +264,7 @@ interface RawGeminiOutput {
   rejectionReasons?: any[];
   detectedJobs?: any[];
   closedDeals?: any[];
+  objections?: any[];
 }
 
 type ParseProgressStep = "send" | "analyze" | "extract";
@@ -346,6 +363,7 @@ function fallbackRegexExtraction(rawText: string): RawGeminiOutput {
     programTrack: "",
     sourceType: "واتساب",
     closedDeals: [],
+    objections: [],
   };
 }
 
@@ -452,11 +470,20 @@ function validateAndCorrect(rawOutput: RawGeminiOutput): RawGeminiOutput {
 
   out.closedDeals = out.closedDeals.map((d: any) => {
     const rawProducts = Array.isArray(d.products)
-      ? d.products.filter((x: unknown) => typeof x === "string" && VALID_PRODUCT_IDS.has(x as string))
+      ? d.products.filter((x: unknown) => typeof x === "string")
       : [];
+    const bookingRaw = d.bookingType;
     const closureRaw = d.closureType;
-    const closureType: "call" | "self" | undefined =
-      closureRaw === "self" ? "self" : closureRaw === "call" ? "call" : undefined;
+    const bookingType: "self_booking" | "call_booking" =
+      bookingRaw === "call_booking"
+        ? "call_booking"
+        : bookingRaw === "self_booking"
+          ? "self_booking"
+          : closureRaw === "call"
+            ? "call_booking"
+            : "self_booking";
+    const dealCategory: "core" | "side" =
+      d.dealCategory === "side" ? "side" : "core";
     return {
       customerName: d.customerName || "",
       adSource: d.adSource || "",
@@ -464,15 +491,27 @@ function validateAndCorrect(rawOutput: RawGeminiOutput): RawGeminiOutput {
       programCount: typeof d.programCount === "number" ? d.programCount : 1,
       dealValue: typeof d.dealValue === "number" ? d.dealValue : 0,
       firstContactDate: d.firstContactDate || "",
+      contactAttempts:
+        typeof d.contactAttempts === "number" && Number.isFinite(d.contactAttempts)
+          ? Math.max(1, Math.round(d.contactAttempts))
+          : 1,
       closeDate: d.closeDate || "",
+      dealCategory,
       ...(rawProducts.length > 0 ? { products: rawProducts } : {}),
-      ...(closureType ? { closureType } : {}),
+      bookingType,
     };
   });
 
   if (typeof out.salesNotes !== 'string') out.salesNotes = "";
   if (typeof out.programTrack !== 'string') out.programTrack = "";
   if (typeof out.sourceType !== 'string') out.sourceType = "واتساب";
+
+  if (!Array.isArray(out.objections)) out.objections = [];
+  out.objections = out.objections.map((o: any) => ({
+    id: typeof o.id === 'string' && o.id ? o.id : crypto.randomUUID(),
+    text: typeof o.text === 'string' ? o.text.trim() : String(o.text || ""),
+    count: typeof o.count === 'number' && o.count > 0 ? o.count : 1,
+  })).filter((o: GeminiObjection) => o.text !== "");
 
   return out;
 }
@@ -545,6 +584,7 @@ export async function parseReport(
     repliedAfterPrice: normalizeStages(rawCommentsFunnel.repliedAfterPrice, "cr"),
   };
 
+  // Keep KPI behavior: Messenger "مردش بعد أهلاً" remains part of totalMessages via parsed total.
   const totalMessages = rawOutput.totalMessages || 0;
   const messagesCount = rawOutput.messagesCount ?? totalMessages;
   const commentsCount = rawOutput.commentsCount ?? 0;
@@ -574,6 +614,7 @@ export async function parseReport(
       programTrack: rawOutput.programTrack || "",
       sourceType: rawOutput.sourceType || platform,
       closedDeals: (rawOutput.closedDeals || []) as DealInput[],
+      objections: (rawOutput.objections || []) as GeminiObjection[],
     },
     platform
   };
@@ -602,14 +643,16 @@ ${rawText}
       "programCount": N,
       "dealValue": N,
       "firstContactDate": "YYYY-MM-DD",
-      "products": ["bdp_online"|"bdp_offline"|"negotiation"|"ifp"|"ibn_souq"|"bds"|"book"],
-      "closureType": "call"|"self"
+      "contactAttempts": N,
+      "dealCategory": "core"|"side",
+      "products": [string],
+      "bookingType": "self_booking"|"call_booking"
     }
   ],
   "totalDeals": N,
   "totalRevenue": N
 }
-قواعد: dealValue رقم فقط، firstContactDate بصيغة YYYY-MM-DD أو "" إذا غائب. products و closureType اختياريان إن وُجدت في النص.`;
+قواعد: dealValue رقم فقط، firstContactDate بصيغة YYYY-MM-DD أو "" إذا غائب، contactAttempts رقم صحيح >= 1 (لو غير متاح استخدم 1). products اختياري. bookingType اختياري وقيمته self_booking أو call_booking. dealCategory اختياري (core أو side) والافتراضي core.`;
 
   const result = await model.generateContent(prompt);
   const cleanJson = result.response.text().trim().replace(/```json|```/gi, "").trim();
@@ -619,11 +662,20 @@ ${rawText}
     deals: Array.isArray(parsed.deals)
       ? parsed.deals.map((d: any) => {
           const rawProducts = Array.isArray(d.products)
-            ? d.products.filter((x: unknown) => typeof x === "string" && VALID_PRODUCT_IDS.has(x as string))
+            ? d.products.filter((x: unknown) => typeof x === "string")
             : [];
+          const bookingRaw = d.bookingType;
           const closureRaw = d.closureType;
-          const closureType: "call" | "self" | undefined =
-            closureRaw === "self" ? "self" : closureRaw === "call" ? "call" : undefined;
+          const bookingType: "self_booking" | "call_booking" =
+            bookingRaw === "call_booking"
+              ? "call_booking"
+              : bookingRaw === "self_booking"
+                ? "self_booking"
+                : closureRaw === "call"
+                  ? "call_booking"
+                  : "self_booking";
+          const dealCategory: "core" | "side" =
+            d.dealCategory === "side" ? "side" : "core";
           return {
             customerName: d.customerName || "",
             adSource: d.adSource || "",
@@ -631,9 +683,14 @@ ${rawText}
             programCount: typeof d.programCount === "number" ? d.programCount : 1,
             dealValue: typeof d.dealValue === "number" ? d.dealValue : 0,
             firstContactDate: d.firstContactDate || "",
+            contactAttempts:
+              typeof d.contactAttempts === "number" && Number.isFinite(d.contactAttempts)
+                ? Math.max(1, Math.round(d.contactAttempts))
+                : 1,
             closeDate: d.closeDate || "",
+            dealCategory,
             ...(rawProducts.length > 0 ? { products: rawProducts } : {}),
-            ...(closureType ? { closureType } : {}),
+            bookingType,
           };
         })
       : [],

@@ -1,4 +1,3 @@
-import { productLabels } from "@/lib/constants/products";
 import type {
   DealInput,
   FunnelStage,
@@ -117,7 +116,9 @@ function mergeDealPair(base: DealInput, parsed: DealInput): DealInput {
   const hasProducts = base.products && base.products.length > 0;
   const programName =
     hasProducts
-      ? productLabels(base.products!)
+      ? (!isEmptyString(base.programName) && base.programName !== "غير محدد"
+          ? base.programName
+          : base.products!.join("، "))
       : !isEmptyString(base.programName) && base.programName !== "غير محدد"
         ? base.programName
         : parsed.programName;
@@ -141,8 +142,18 @@ function mergeDealPair(base: DealInput, parsed: DealInput): DealInput {
     firstContactDate: !isEmptyString(base.firstContactDate)
       ? base.firstContactDate
       : parsed.firstContactDate,
+    contactAttempts:
+      typeof base.contactAttempts === "number" && base.contactAttempts >= 1
+        ? Math.round(base.contactAttempts)
+        : typeof parsed.contactAttempts === "number" && parsed.contactAttempts >= 1
+          ? Math.round(parsed.contactAttempts)
+          : 1,
     products: hasProducts ? base.products! : (parsed.products?.length ? parsed.products : []),
-    closureType: base.closureType ?? parsed.closureType ?? "call",
+    dealCategory: base.dealCategory ?? parsed.dealCategory ?? "core",
+    bookingType:
+      base.bookingType
+      ?? parsed.bookingType
+      ?? (base.closureType === "call" || parsed.closureType === "call" ? "call_booking" : "self_booking"),
   };
 }
 
@@ -204,6 +215,7 @@ export function mergeParsedReportFillEmpty(
     programTrack: !isEmptyString(base.programTrack) ? base.programTrack : parsed.programTrack,
     sourceType: !isEmptyString(base.sourceType) ? base.sourceType : parsed.sourceType,
     closedDeals: mergeClosedDeals(base.closedDeals, parsed.closedDeals),
+    objections: base.objections && base.objections.length > 0 ? base.objections : (parsed.objections ?? []),
   };
   out.conversionRate = recalcConversionRate(out);
   return out;

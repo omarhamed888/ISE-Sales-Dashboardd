@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import { parseReport } from "@/lib/services/gemini-parser";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { parseReport, clearParseCache } from "@/lib/services/gemini-parser";
 import { useCourses } from "@/lib/hooks/useCourses";
-import type { ParsedReportData, ReportFunnel, FunnelStage } from "@/lib/services/gemini-parser";
+import { AdSelectDropdown } from "@/components/ads/AdSelectDropdown";
+import type { ParsedReportData, ReportFunnel, FunnelStage, GeminiObjection } from "@/lib/services/gemini-parser";
 import { collection, addDoc, doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
@@ -20,33 +21,35 @@ function normalizeReportDate(d: unknown): string {
   return s;
 }
 
+function isPermissionDeniedError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const code = (error as { code?: unknown }).code;
+  return code === "permission-denied" || code === "PERMISSION_DENIED";
+}
+
 type AppState = "input" | "processing" | "review" | "success";
 type InputMode = "form" | "template";
 
-interface FormStage {
-  greeting: number;
-  details: number;
-  price: number;
-  closed: number;
-  greetingNotes: string;
-  detailsNotes: string;
-  priceNotes: string;
-  closedNotes: string;
+interface FormAdEntry {
+  id: string;
+  adId?: string;
+  adName: string;
+  count: number;
+  notes: string;
 }
 
-const emptyFormStage = (): FormStage => ({
-  greeting: 0,
-  details: 0,
-  price: 0,
-  closed: 0,
-  greetingNotes: "",
-  detailsNotes: "",
-  priceNotes: "",
-  closedNotes: "",
-});
+interface FormStageEntries {
+  greeting: FormAdEntry[];
+  details: FormAdEntry[];
+  price: FormAdEntry[];
+  closed: FormAdEntry[];
+}
+
+const newEntry = (): FormAdEntry => ({ id: `entry-${Date.now()}-${Math.random()}`, adName: "", count: 0, notes: "" });
+const emptyFormStage = (): FormStageEntries => ({ greeting: [], details: [], price: [], closed: [] });
 
 // ── Reusable funnel table (used in review step) ────────────────────────────
-function TableSection({ title, defaultExpanded, data, onChange }: {
+const TableSection = memo(function TableSection({ title, defaultExpanded, data, onChange }: {
   title: string;
   defaultExpanded: boolean;
   data: FunnelStage[];
@@ -107,7 +110,7 @@ function TableSection({ title, defaultExpanded, data, onChange }: {
       )}
     </div>
   );
-}
+});
 
 // ── Main page ──────────────────────────────────────────────────────────────
 export default function SubmitReportPage() {
@@ -127,6 +130,7 @@ export default function SubmitReportPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
   const [newNote, setNewNote] = useState("");
+  const [showAdvancedFunnel, setShowAdvancedFunnel] = useState(false);
 
   // date / platform (shared)
   const [formDate, setFormDate] = useState(() => {
@@ -139,11 +143,13 @@ export default function SubmitReportPage() {
   const [parsedData, setParsedData] = useState<ParsedReportData | null>(null);
 
   // ── Direct form state ─────────────────────────────────────────────────
-  const [formStages, setFormStages] = useState<FormStage>(emptyFormStage());
+  const [formStages, setFormStages] = useState<FormStageEntries>(emptyFormStage());
+  const [formObjections, setFormObjections] = useState<GeminiObjection[]>([]);
 
   // cycling messages during Gemini processing
-  const cycleMsgs = ["جاري قراءة التقرير...", "يقوم Gemini باستخراج البيانات...", "جاري بناء الجداول وتحليل السياق..."];
+  const cycleMsgs = ["جاري تحليل التقرير بالذكاء الاصطناعي...", "إرسال التقرير...", "تحليل البيانات...", "استخراج النتائج..."];
   const [cycleIdx, setCycleIdx] = useState(0);
+  const [forceReparse, setForceReparse] = useState(false);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -193,6 +199,7 @@ export default function SubmitReportPage() {
         setWasDirectEntry(data.entryMode === "form");
         setInputMode(data.entryMode === "form" ? "form" : "template");
         setReportText(typeof data.rawText === "string" ? data.rawText : "");
+        setFormObjections(Array.isArray(pd.objections) ? pd.objections : []);
         setIsConfirmed(false);
         setAppState("review");
       } catch (e: any) {
@@ -207,27 +214,85 @@ export default function SubmitReportPage() {
     return () => { cancelled = true; };
   }, [editId, user]);
 
-  const updateStageField = (field: keyof FormStage, val: string | number) =>
-    setFormStages((prev) => ({ ...prev, [field]: val }));
+  const addEntry = useCallback((stage: keyof FormStageEntries) => {
+    setFormStages(prev => ({ ...prev, [stage]: [...prev[stage], newEntry()] }));
+  }, []);
+
+  const updateEntry = useCallback((stage: keyof FormStageEntries, id: string, patch: Partial<FormAdEntry>) => {
+    setFormStages(prev => ({
+      ...prev,
+      [stage]: prev[stage].map(e => e.id === id ? { ...e, ...patch } : e),
+    }));
+  }, []);
+
+  const removeEntry = useCallback((stage: keyof FormStageEntries, id: string) => {
+    setFormStages(prev => ({ ...prev, [stage]: prev[stage].filter(e => e.id !== id) }));
+  }, []);
+
+  const addObjection = useCallback(() => {
+    setFormObjections(prev => [...prev, { id: `obj-${Date.now()}-${Math.random()}`, text: "", count: 1 }]);
+  }, []);
+
+  const updateObjection = useCallback((id: string, field: "text" | "count", value: string | number) => {
+    setFormObjections(prev => prev.map(o => o.id === id ? { ...o, [field]: value } : o));
+  }, []);
+
+  const removeObjection = useCallback((id: string) => {
+    setFormObjections(prev => prev.filter(o => o.id !== id));
+  }, []);
+
+  const sumStage = (entries: FormAdEntry[]) => entries.reduce((s, e) => s + (Number(e.count) || 0), 0);
+
+  const derivedTotalMessages = Math.max(
+    0,
+    sumStage(formStages.greeting)
+    + sumStage(formStages.details)
+    + sumStage(formStages.price)
+    + sumStage(formStages.closed)
+  );
+
+  function validateTotalMessagesConsistency(data: ParsedReportData): string | null {
+    const sumFromFunnel =
+      (data.funnel?.noReplyAfterGreeting || []).reduce((s, x) => s + (Number(x.count) || 0), 0)
+      + (data.funnel?.noReplyAfterDetails || []).reduce((s, x) => s + (Number(x.count) || 0), 0)
+      + (data.funnel?.noReplyAfterPrice || []).reduce((s, x) => s + (Number(x.count) || 0), 0)
+      + (data.funnel?.repliedAfterPrice || []).reduce((s, x) => s + (Number(x.count) || 0), 0);
+    if ((Number(data.totalMessages) || 0) !== sumFromFunnel) {
+      return `إجمالي الرسائل غير متوافق مع تفاصيل المراحل (${sumFromFunnel}).`;
+    }
+    return null;
+  }
+
+  function computeTotalMessagesFromFunnel(data: ParsedReportData): number {
+    return (
+      (data.funnel?.noReplyAfterGreeting || []).reduce((s, x) => s + (Number(x.count) || 0), 0)
+      + (data.funnel?.noReplyAfterDetails || []).reduce((s, x) => s + (Number(x.count) || 0), 0)
+      + (data.funnel?.noReplyAfterPrice || []).reduce((s, x) => s + (Number(x.count) || 0), 0)
+      + (data.funnel?.repliedAfterPrice || []).reduce((s, x) => s + (Number(x.count) || 0), 0)
+    );
+  }
+
+  const reviewTotalMessages = useMemo(
+    () => (parsedData ? computeTotalMessagesFromFunnel(parsedData) : 0),
+    [parsedData]
+  );
 
   // ── Build ParsedReportData from form ─────────────────────────────────
   const buildParsedDataFromForm = (): ParsedReportData => {
-    const toStage = (
-      stageName: string,
-      count: number,
-      notes: string
-    ): FunnelStage[] => [{
-      id: `${stageName}-${Date.now()}`,
-      adName: stageName,
-      count,
-      notes: notes.trim(),
-      leadNotes: [],
-    }];
+    const toStages = (entries: FormAdEntry[]): FunnelStage[] =>
+      entries
+        .filter(e => e.adName.trim() || e.count > 0)
+        .map(e => ({
+          id: e.id,
+          adName: e.adName.trim() || "إعلان",
+          adId: e.adId,
+          count: Number(e.count) || 0,
+          notes: e.notes.trim(),
+          leadNotes: [],
+        }));
 
-    const closedCount = formStages.closed;
-    const totalMessages = formStages.greeting > 0
-      ? formStages.greeting
-      : formStages.greeting + formStages.details + formStages.price + formStages.closed;
+    const closedCount = sumStage(formStages.closed);
+    const totalMessages = derivedTotalMessages;
 
     return {
       totalMessages,
@@ -240,10 +305,10 @@ export default function SubmitReportPage() {
           : 0,
       jobConfusionCount: 0,
       funnel: {
-        noReplyAfterGreeting: toStage("لم يرد بعد التحية", formStages.greeting, formStages.greetingNotes),
-        noReplyAfterDetails: toStage("لم يرد بعد التفاصيل", formStages.details, formStages.detailsNotes),
-        noReplyAfterPrice: toStage("لم يرد بعد السعر", formStages.price, formStages.priceNotes),
-        repliedAfterPrice: toStage("رد بعد السعر", formStages.closed, formStages.closedNotes),
+        noReplyAfterGreeting: toStages(formStages.greeting),
+        noReplyAfterDetails: toStages(formStages.details),
+        noReplyAfterPrice: toStages(formStages.price),
+        repliedAfterPrice: toStages(formStages.closed),
       },
       commentsFunnel: {
         noReplyAfterGreeting: [],
@@ -259,20 +324,17 @@ export default function SubmitReportPage() {
       salesNotes: "",
       programTrack: "",
       sourceType: formPlatform,
+      objections: formObjections.filter(o => o.text.trim() !== ""),
     };
   };
 
   // ── Direct form submit ────────────────────────────────────────────────
   const handleDirectSubmit = () => {
     const hasAnyData =
-      formStages.greeting > 0 ||
-      formStages.details > 0 ||
-      formStages.price > 0 ||
-      formStages.closed > 0 ||
-      formStages.greetingNotes.trim() ||
-      formStages.detailsNotes.trim() ||
-      formStages.priceNotes.trim() ||
-      formStages.closedNotes.trim();
+      formStages.greeting.some(e => e.count > 0 || e.adName.trim()) ||
+      formStages.details.some(e => e.count > 0 || e.adName.trim()) ||
+      formStages.price.some(e => e.count > 0 || e.adName.trim()) ||
+      formStages.closed.some(e => e.count > 0 || e.adName.trim());
     if (!hasAnyData) {
       setParseError("أدخل بيانات في واحدة على الأقل من مراحل القمع");
       return;
@@ -289,7 +351,15 @@ export default function SubmitReportPage() {
     setAppState('processing');
     setParseError(null);
     try {
-      const result = await parseReport(reportText, formPlatform, courses.map(c => c.name));
+      const courseNames = courses.map(c => c.name);
+      const result = await parseReport(reportText, formPlatform, courseNames, {
+        forceRefresh: forceReparse,
+        onProgress: (step) => {
+          if (step === "send") setCycleIdx(1);
+          if (step === "analyze") setCycleIdx(2);
+          if (step === "extract") setCycleIdx(3);
+        }
+      });
       const merged = mergeParsedReportFillEmpty(buildParsedDataFromForm(), result.parsedData);
       setParsedData(merged);
       setWasDirectEntry(false);
@@ -309,8 +379,11 @@ export default function SubmitReportPage() {
     try {
       const reportPayload: ParsedReportData = {
         ...parsedData,
+        totalMessages: computeTotalMessagesFromFunnel(parsedData),
         closedDeals: [],
       };
+      const validationError = validateTotalMessagesConsistency(reportPayload);
+      if (validationError) throw new Error(validationError);
       if (reportIdToUpdate) {
         await updateDoc(doc(db, "reports", reportIdToUpdate), {
           date: formDate,
@@ -341,7 +414,11 @@ export default function SubmitReportPage() {
       setIsConfirmed(false);
       setForcedDate(null);
     } catch (error: any) {
-      setParseError(error.message || "فشل الحفظ.");
+      if (isPermissionDeniedError(error)) {
+        setParseError("غير مسموح لك بتعديل/حفظ هذا التقرير.");
+      } else {
+        setParseError(error?.message || "فشل الحفظ.");
+      }
     } finally {
       setIsSaving(false);
     }
@@ -487,72 +564,141 @@ export default function SubmitReportPage() {
           {inputMode === "form" && (
             <div className="space-y-4">
 
-              {/* Main stages */}
+              {/* Main stages — per-ad entry */}
               <div className="bg-white rounded-[24px] shadow-sm border border-[#E2E8F0] p-6">
-                <h3 className="font-black text-[#1E293B] text-[15px] mb-4 flex items-center gap-2">
+                <h3 className="font-black text-[#1E293B] text-[15px] mb-1 flex items-center gap-2">
                   <span className="material-symbols-outlined text-[#8B5CF6]">tune</span>
                   المراحل الرئيسية
                 </h3>
                 <p className="text-[11px] font-bold text-[#64748B] mb-4">
-                  كل حقل رئيسي = مرحلة من القمع، وتحته ملاحظاتك (الإعلانات، الوظائف، تفاصيل السجل).
+                  أضف إعلاناً لكل مرحلة مع عدد الليدز والملاحظات. الإجمالي يُحسب تلقائياً.
                 </p>
-                <div className="space-y-3">
-                  <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3">
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-[12px] font-black text-[#F59E0B]">لم يرد بعد التحية</span>
-                      <input type="number" min={0} value={formStages.greeting || ""}
-                        onChange={e => updateStageField("greeting", parseInt(e.target.value, 10) || 0)}
-                        className="w-20 bg-white border border-[#E2E8F0] rounded-lg px-2 py-1 text-center text-[14px] font-black" />
-                    </div>
-                    <textarea value={formStages.greetingNotes}
-                      onChange={e => updateStageField("greetingNotes", e.target.value)}
-                      placeholder="اكتب الإعلانات والوظائف والملاحظات..."
-                      rows={3}
-                      className="w-full bg-white border border-[#E2E8F0] rounded-lg px-2 py-2 text-[11px] font-bold text-[#475569] resize-y min-h-[64px] focus:border-[#2563EB] outline-none" />
-                  </div>
 
-                  <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3">
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-[12px] font-black text-[#EF4444]/80">لم يرد بعد التفاصيل</span>
-                      <input type="number" min={0} value={formStages.details || ""}
-                        onChange={e => updateStageField("details", parseInt(e.target.value, 10) || 0)}
-                        className="w-20 bg-white border border-[#E2E8F0] rounded-lg px-2 py-1 text-center text-[14px] font-black" />
+                {([
+                  { key: "greeting" as const, label: "لم يرد بعد التحية",   color: "text-[#F59E0B]", bg: "bg-amber-50",   border: "border-amber-200" },
+                  { key: "details"  as const, label: "لم يرد بعد التفاصيل", color: "text-[#EF4444]/80", bg: "bg-red-50",  border: "border-red-100" },
+                  { key: "price"    as const, label: "لم يرد بعد السعر",    color: "text-[#EF4444]",   bg: "bg-red-50",   border: "border-red-200" },
+                  { key: "closed"   as const, label: "رد بعد السعر",         color: "text-[#10B981]",   bg: "bg-emerald-50", border: "border-emerald-200" },
+                ] as const).map(({ key, label, color, bg, border }) => (
+                  <div key={key} className={`${bg} border ${border} rounded-xl p-3 mb-3`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`text-[12px] font-black ${color}`}>{label}</span>
+                      <span className="text-[11px] font-black text-[#94A3B8]">
+                        إجمالي: {sumStage(formStages[key])}
+                      </span>
                     </div>
-                    <textarea value={formStages.detailsNotes}
-                      onChange={e => updateStageField("detailsNotes", e.target.value)}
-                      placeholder="اكتب الإعلانات والوظائف والملاحظات..."
-                      rows={3}
-                      className="w-full bg-white border border-[#E2E8F0] rounded-lg px-2 py-2 text-[11px] font-bold text-[#475569] resize-y min-h-[64px] focus:border-[#2563EB] outline-none" />
-                  </div>
 
-                  <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3">
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-[12px] font-black text-[#EF4444]">لم يرد بعد السعر</span>
-                      <input type="number" min={0} value={formStages.price || ""}
-                        onChange={e => updateStageField("price", parseInt(e.target.value, 10) || 0)}
-                        className="w-20 bg-white border border-[#E2E8F0] rounded-lg px-2 py-1 text-center text-[14px] font-black" />
-                    </div>
-                    <textarea value={formStages.priceNotes}
-                      onChange={e => updateStageField("priceNotes", e.target.value)}
-                      placeholder="اكتب الإعلانات والوظائف والملاحظات..."
-                      rows={3}
-                      className="w-full bg-white border border-[#E2E8F0] rounded-lg px-2 py-2 text-[11px] font-bold text-[#475569] resize-y min-h-[64px] focus:border-[#2563EB] outline-none" />
-                  </div>
+                    {formStages[key].length === 0 && (
+                      <p className="text-[11px] font-bold text-[#94A3B8] text-center py-2">
+                        لا توجد إعلانات في هذه المرحلة
+                      </p>
+                    )}
 
-                  <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3">
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-[12px] font-black text-[#10B981]">رد بعد السعر</span>
-                      <input type="number" min={0} value={formStages.closed || ""}
-                        onChange={e => updateStageField("closed", parseInt(e.target.value, 10) || 0)}
-                        className="w-20 bg-white border border-[#E2E8F0] rounded-lg px-2 py-1 text-center text-[14px] font-black" />
-                    </div>
-                    <textarea value={formStages.closedNotes}
-                      onChange={e => updateStageField("closedNotes", e.target.value)}
-                      placeholder="اكتب الإعلانات والوظائف والملاحظات..."
-                      rows={3}
-                      className="w-full bg-white border border-[#E2E8F0] rounded-lg px-2 py-2 text-[11px] font-bold text-[#475569] resize-y min-h-[64px] focus:border-[#2563EB] outline-none" />
+                    {formStages[key].map(entry => (
+                      <div key={entry.id} className="bg-white border border-[#E2E8F0] rounded-xl p-3 mb-2">
+                        <div className="flex items-center gap-2 mb-2">
+                          <AdSelectDropdown
+                            value={entry.adName}
+                            adId={entry.adId}
+                            onChange={(name, id) => updateEntry(key, entry.id, { adName: name, adId: id })}
+                            placeholder="اختر إعلان..."
+                            className="flex-1"
+                          />
+                          <input
+                            type="number"
+                            min={0}
+                            value={entry.count || ""}
+                            onChange={e => updateEntry(key, entry.id, { count: parseInt(e.target.value, 10) || 0 })}
+                            placeholder="0"
+                            className="w-16 bg-[#F7F9FC] border border-[#E2E8F0] rounded-lg px-2 py-2 text-center text-[13px] font-black text-[#1E293B] focus:border-[#2563EB] outline-none"
+                          />
+                          <button
+                            onClick={() => removeEntry(key, entry.id)}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg text-[#94A3B8] hover:bg-red-50 hover:text-red-400 transition-colors flex-shrink-0"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">delete</span>
+                          </button>
+                        </div>
+                        <textarea
+                          value={entry.notes}
+                          onChange={e => updateEntry(key, entry.id, { notes: e.target.value })}
+                          placeholder="الوظائف، ملاحظات السجل..."
+                          rows={2}
+                          className="w-full bg-[#F7F9FC] border border-[#E2E8F0] rounded-lg px-2 py-2 text-[11px] font-bold text-[#475569] resize-y min-h-[48px] focus:border-[#2563EB] outline-none"
+                        />
+                      </div>
+                    ))}
+
+                    <button
+                      onClick={() => addEntry(key)}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 text-[12px] font-bold text-[#2563EB] border border-dashed border-[#BFDBFE] rounded-xl hover:bg-[#EFF6FF] transition-colors mt-1"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">add</span>
+                      إضافة إعلان
+                    </button>
                   </div>
+                ))}
+
+                <div className="mt-2 bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl p-3 flex items-center justify-between">
+                  <span className="text-[12px] font-black text-[#1E40AF]">إجمالي الرسائل (محسوب تلقائياً)</span>
+                  <input
+                    type="number"
+                    readOnly
+                    value={derivedTotalMessages}
+                    className="w-24 bg-white border border-[#BFDBFE] rounded-lg px-2 py-1 text-center text-[14px] font-black text-[#1E3A8A]"
+                  />
                 </div>
+              </div>
+
+              {/* Objections */}
+              <div className="bg-white rounded-[24px] shadow-sm border border-[#E2E8F0] p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[15px] font-black text-[#0F172A] flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px] text-[#EF4444]" style={{ fontVariationSettings: "'FILL' 1" }}>thumb_down</span>
+                    الاعتراضات
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={addObjection}
+                    className="flex items-center gap-1.5 text-[12px] font-bold text-[#2563EB] bg-[#EFF6FF] px-3 py-1.5 rounded-xl hover:bg-[#DBEAFE] transition-colors cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">add</span>
+                    إضافة اعتراض
+                  </button>
+                </div>
+
+                {formObjections.length === 0 ? (
+                  <p className="text-[13px] text-[#94A3B8] text-center py-4 font-bold">
+                    لا توجد اعتراضات — اضغط "إضافة اعتراض" لإضافة واحد
+                  </p>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {formObjections.map(obj => (
+                      <div key={obj.id} className="flex items-center gap-2">
+                        <input
+                          value={obj.text}
+                          onChange={e => updateObjection(obj.id, "text", e.target.value)}
+                          placeholder="نص الاعتراض... (مثال: السعر غالي)"
+                          className="flex-1 bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-3 py-2 text-[13px] font-bold text-[#1E293B] focus:border-[#2563EB] outline-none"
+                        />
+                        <input
+                          type="number"
+                          min={1}
+                          value={obj.count}
+                          onChange={e => updateObjection(obj.id, "count", Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-20 bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-3 py-2 text-[13px] font-bold text-[#1E293B] text-center focus:border-[#2563EB] outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeObjection(obj.id)}
+                          className="w-8 h-8 flex items-center justify-center rounded-xl text-[#94A3B8] hover:bg-red-50 hover:text-red-400 transition-colors flex-shrink-0 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Submit button */}
@@ -598,6 +744,24 @@ export default function SubmitReportPage() {
                   className="bg-[#2563EB] text-white px-8 py-3.5 rounded-xl font-bold flex items-center gap-2 hover:bg-[#1D4ED8] transition-colors disabled:opacity-50 disabled:bg-[#94A3B8]">
                   <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
                   تحليل بـ Gemini
+                </button>
+              </div>
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <label className="flex items-center gap-2 text-[12px] font-bold text-[#64748B]">
+                  <input
+                    type="checkbox"
+                    checked={forceReparse}
+                    onChange={(e) => setForceReparse(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  إعادة التحليل (تجاوز النسخة المحفوظة)
+                </label>
+                <button
+                  onClick={() => clearParseCache(reportText, formPlatform, courses.map(c => c.name))}
+                  type="button"
+                  className="text-[11px] font-bold text-[#2563EB] hover:underline"
+                >
+                  مسح الكاش لهذا التقرير
                 </button>
               </div>
 
@@ -651,12 +815,22 @@ export default function SubmitReportPage() {
           </div>
 
           {/* Summary cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="bg-white border border-[#E2E8F0] p-4 rounded-2xl">
+              <p className="text-[10px] font-bold text-[#64748B] mb-1">تاريخ التقرير</p>
+              <input
+                type="date"
+                value={formDate}
+                onChange={e => setFormDate(e.target.value)}
+                className="p-0 border-none bg-transparent font-black text-[16px] text-[#1E293B] focus:ring-0 w-full"
+                dir="ltr"
+              />
+            </div>
             <div className="bg-white border border-[#E2E8F0] p-4 rounded-2xl">
               <p className="text-[10px] font-bold text-[#64748B] mb-1">إجمالي الرسائل</p>
-              <input type="number" className="p-0 border-none bg-transparent font-black text-[22px] text-[#1E293B] focus:ring-0 w-full"
-                value={parsedData.totalMessages}
-                onChange={e => setParsedData({ ...parsedData, totalMessages: parseInt(e.target.value) || 0 })} />
+              <input type="number" readOnly className="p-0 border-none bg-transparent font-black text-[22px] text-[#1E293B] focus:ring-0 w-full"
+                value={reviewTotalMessages}
+                aria-label="إجمالي الرسائل محسوب تلقائياً" />
             </div>
             <div className="bg-white border border-[#E2E8F0] p-4 rounded-2xl">
               <p className="text-[10px] font-bold text-[#64748B] mb-1">إجمالي التفاعل</p>
@@ -701,16 +875,28 @@ export default function SubmitReportPage() {
                 data={parsedData.funnel.noReplyAfterGreeting}
                 onChange={d => setParsedData({ ...parsedData, funnel: { ...parsedData.funnel, noReplyAfterGreeting: d } })} />
             </div>
-            <div className="border-r-4 border-[#EF4444]/60 rounded-l-2xl overflow-hidden mb-1">
-              <TableSection title="لم يرد بعد التفاصيل" defaultExpanded={false}
-                data={parsedData.funnel.noReplyAfterDetails}
-                onChange={d => setParsedData({ ...parsedData, funnel: { ...parsedData.funnel, noReplyAfterDetails: d } })} />
-            </div>
-            <div className="border-r-4 border-[#EF4444] rounded-l-2xl overflow-hidden mb-1">
-              <TableSection title="لم يرد بعد السعر" defaultExpanded={false}
-                data={parsedData.funnel.noReplyAfterPrice}
-                onChange={d => setParsedData({ ...parsedData, funnel: { ...parsedData.funnel, noReplyAfterPrice: d } })} />
-            </div>
+            {showAdvancedFunnel ? (
+              <>
+                <div className="border-r-4 border-[#EF4444]/60 rounded-l-2xl overflow-hidden mb-1">
+                  <TableSection title="لم يرد بعد التفاصيل" defaultExpanded={false}
+                    data={parsedData.funnel.noReplyAfterDetails}
+                    onChange={d => setParsedData({ ...parsedData, funnel: { ...parsedData.funnel, noReplyAfterDetails: d } })} />
+                </div>
+                <div className="border-r-4 border-[#EF4444] rounded-l-2xl overflow-hidden mb-1">
+                  <TableSection title="لم يرد بعد السعر" defaultExpanded={false}
+                    data={parsedData.funnel.noReplyAfterPrice}
+                    onChange={d => setParsedData({ ...parsedData, funnel: { ...parsedData.funnel, noReplyAfterPrice: d } })} />
+                </div>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowAdvancedFunnel(true)}
+                className="w-full mb-2 py-2.5 rounded-xl border border-dashed border-[#CBD5E1] text-[#475569] text-[12px] font-bold hover:border-[#2563EB] hover:text-[#2563EB]"
+              >
+                عرض باقي المراحل
+              </button>
+            )}
             <div className="border-r-4 border-[#10B981] rounded-l-2xl overflow-hidden mb-1">
               <TableSection title="رد بعد السعر" defaultExpanded={true}
                 data={parsedData.funnel.repliedAfterPrice}
@@ -742,6 +928,28 @@ export default function SubmitReportPage() {
             </div>
           </div>
 
+          {/* Objections review */}
+          {parsedData.objections && parsedData.objections.length > 0 && (
+            <div className="bg-white border border-[#E2E8F0] p-6 rounded-[24px] shadow-sm">
+              <h3 className="font-black text-[#1E293B] text-[15px] mb-4 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px] text-[#EF4444]" style={{ fontVariationSettings: "'FILL' 1" }}>thumb_down</span>
+                الاعتراضات ({parsedData.objections.length})
+              </h3>
+              <div className="border border-[#E2E8F0] rounded-xl overflow-hidden">
+                <div className="grid grid-cols-[1fr_80px] bg-[#F7F9FC] px-4 py-2 border-b border-[#E2E8F0]">
+                  <span className="text-[11px] font-bold text-[#64748B]">الاعتراض</span>
+                  <span className="text-[11px] font-bold text-[#64748B] text-center">العدد</span>
+                </div>
+                {parsedData.objections.map(obj => (
+                  <div key={obj.id} className="grid grid-cols-[1fr_80px] items-center px-4 py-2.5 border-b border-[#E2E8F0] last:border-0 hover:bg-[#F7F9FC]/50">
+                    <span className="text-[13px] font-bold text-[#1E293B]">{obj.text}</span>
+                    <span className="text-[13px] font-black text-[#2563EB] text-center">{obj.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Original text (template mode only) */}
           {!wasDirectEntry && reportText && (
             <details className="bg-white border border-[#E2E8F0] rounded-[24px] shadow-sm">
@@ -761,7 +969,7 @@ export default function SubmitReportPage() {
 
       {/* ─── CONFIRMATION BAR ──────────────────────────────────────────── */}
       {appState === "review" && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-[#E2E8F0] p-4 lg:p-6 z-[60] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+        <div className="ios-fast-chrome fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-[#E2E8F0] p-4 lg:p-6 z-[60] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
           <div className="max-w-[720px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <label className="flex items-center gap-3 cursor-pointer">
               <input type="checkbox" checked={isConfirmed} onChange={e => setIsConfirmed(e.target.checked)}
@@ -811,6 +1019,7 @@ export default function SubmitReportPage() {
               setSearchParams({}, { replace: true });
               setAppState("input"); setReportText(""); setParsedData(null);
               setFormStages(emptyFormStage());
+              setFormObjections([]);
             }}
               className="flex-1 bg-[#2563EB] text-white py-3.5 rounded-xl font-black text-[13px] hover:bg-[#1D4ED8] shadow-lg shadow-[#2563EB]/20 transition-all hover:scale-105">
               رفع تقرير جديد
