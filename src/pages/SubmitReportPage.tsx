@@ -33,20 +33,39 @@ function toArabicError(error: unknown): string {
   if (!error || typeof error !== "object") return "حدث خطأ غير متوقع. حاول مجدداً.";
   const code = (error as { code?: unknown }).code;
   const message = String((error as { message?: unknown }).message || "");
+  const lower = message.toLowerCase();
+
   if (code === "permission-denied" || code === "PERMISSION_DENIED")
     return "لا تملك صلاحية حفظ هذا التقرير.";
+
+  if (
+    code === "invalid-argument" ||
+    lower.includes("unsupported field value") ||
+    (lower.includes("invalid") && lower.includes("data"))
+  )
+    return "تعذّر الحفظ: بيانات غير صالحة (قيم غير مسموحة داخل التقرير، غالباً داخل الجداول أو الاعتراضات). أعد مراجعة الصفوف الفارغة أو احذف الصفوف الزائدة ثم احفظ مجدداً.";
+
+  if (
+    code === "not-found" ||
+    lower.includes("no document to update") ||
+    lower.includes("not found")
+  )
+    return "لم يُعثر على التقرير في الخادم. قد يكون قد حُذف أو انتهت الجلسة. ارجع لقائمة التقارير وحاول مرة أخرى.";
+
   if (
     code === "unavailable" || code === "UNAVAILABLE" ||
-    message.toLowerCase().includes("network") ||
-    message.toLowerCase().includes("fetch") ||
-    message.toLowerCase().includes("offline")
+    lower.includes("network") ||
+    lower.includes("fetch") ||
+    lower.includes("offline")
   ) return "تعذر الاتصال. تحقق من الإنترنت وحاول مجدداً.";
+
   if (
     message.toUpperCase().includes("QUOTA") ||
-    message.toLowerCase().includes("resource exhausted") ||
-    message.toLowerCase().includes("rate limit")
+    lower.includes("resource exhausted") ||
+    lower.includes("rate limit")
   ) return "خدمة الذكاء الاصطناعي غير متاحة حالياً. جرّب الإدخال المباشر.";
-  return "حدث خطأ غير متوقع. حاول مجدداً.";
+
+  return "تعذّر حفظ التقرير. إذا تكرّر ذلك، انسخ رسالة الخطأ من المتصفح (F12) وأرسلها للدعم.";
 }
 
 type AppState = "input" | "processing" | "review" | "success";
@@ -394,8 +413,10 @@ export default function SubmitReportPage() {
       setParsedData(merged);
       setWasDirectEntry(false);
       setAppState('review');
-    } catch (error: any) {
-      setParseError(toArabicError(error));
+    } catch (error: unknown) {
+      const msg = toArabicError(error);
+      setParseError(msg);
+      showToast("error", msg);
       setAppState('input');
     }
   };
@@ -458,7 +479,7 @@ export default function SubmitReportPage() {
             date: formDate,
             platform: formPlatform,
             salesRepId: user.uid,
-            salesRepName: user.name,
+            salesRepName: (user.name && String(user.name).trim()) || "مستخدم",
             rawText: wasDirectEntry ? null : reportText,
             entryMode: wasDirectEntry ? "form" : "template",
             parsedData: cleanedParsed,
@@ -472,8 +493,10 @@ export default function SubmitReportPage() {
       showToast("success", "تم حفظ التقرير بنجاح!");
       setIsConfirmed(false);
       setForcedDate(null);
-    } catch (error: any) {
-      setParseError(toArabicError(error));
+    } catch (error: unknown) {
+      const msg = toArabicError(error);
+      setParseError(msg);
+      showToast("error", msg);
     } finally {
       setIsSaving(false);
     }

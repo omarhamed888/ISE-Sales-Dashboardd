@@ -7,12 +7,16 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return proto === Object.prototype || proto === null;
 }
 
-/** Removes keys whose value is undefined (recursive). Firestore rejects undefined. */
+/** Removes keys whose value is undefined (recursive). Firestore rejects undefined — including inside arrays. */
 export function stripUndefined<T>(value: T): T {
   if (value === undefined) return value;
   if (value === null) return value;
   if (typeof value !== "object") return value;
-  if (Array.isArray(value)) return value.map(stripUndefined) as T;
+  if (Array.isArray(value)) {
+    const mapped = value.map((item) => stripUndefined(item));
+    const filtered = mapped.filter((item) => item !== undefined);
+    return filtered as T;
+  }
   if (!isPlainObject(value)) return value;
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(value)) {
