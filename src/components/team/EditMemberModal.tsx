@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useCourses } from "@/lib/hooks/useCourses";
+import { useToast } from "@/components/ui/Toast";
 
 interface EditMemberModalProps {
   user: any;
@@ -10,6 +11,7 @@ interface EditMemberModalProps {
 }
 
 export function EditMemberModal({ user, isOpen, onClose }: EditMemberModalProps) {
+  const { showToast } = useToast();
   const courses = useCourses();
   const [role, setRole] = useState(user?.role || "sales");
   const [isActive, setIsActive] = useState(user?.isActive ?? true);
@@ -58,9 +60,11 @@ export function EditMemberModal({ user, isOpen, onClose }: EditMemberModalProps)
     setDeleting(true);
     try {
       await deleteDoc(doc(db, "users", user.id));
+      showToast("success", "تم حذف الموظف من القائمة.");
       onClose();
     } catch (err: any) {
       setError("حدث خطأ أثناء حذف العضو. " + err.message);
+      showToast("error", "تعذر حذف الموظف.");
     } finally {
       setDeleting(false);
     }

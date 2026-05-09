@@ -21,6 +21,7 @@ import { InsightResultPanel } from "@/components/insights/InsightResultPanel";
 import { SavedInsightsList } from "@/components/insights/SavedInsightsList";
 import { Skeleton, SkeletonChart, SkeletonText } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useToast } from "@/components/ui/Toast";
 import { format } from "date-fns";
 import { arEG } from "date-fns/locale/ar-EG";
 
@@ -51,6 +52,7 @@ const PERIODS: { id: InsightPeriod; label: string }[] = [
 ];
 
 export default function InsightsPage() {
+  const { showToast } = useToast();
   const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState<InsightPeriod>("week");
   const [isLoading, setIsLoading] = useState(false);
@@ -139,8 +141,10 @@ export default function InsightsPage() {
       });
       await loadSavedInsights();
       setSaveBanner("ok");
+      showToast("success", "تم حفظ تقرير الإنسايتس.");
     } catch {
       setSaveBanner("err");
+      showToast("error", "تعذر حفظ التقرير.");
     }
     setIsSaving(false);
   };
@@ -162,8 +166,10 @@ export default function InsightsPage() {
         setSelectedSavedId(null);
       }
       await loadSavedInsights();
+      showToast("success", "تم حذف التقرير المحفوظ.");
     } catch (e) {
       console.error(e);
+      showToast("error", "تعذر حذف التقرير.");
     }
   };
 

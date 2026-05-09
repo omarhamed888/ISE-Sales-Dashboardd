@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useAllAds } from "@/lib/hooks/useAds";
 import { createAd, updateAd, deleteAd, bulkCreateAds } from "@/lib/services/ads-service";
 import type { Ad } from "@/lib/types";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { useToast } from "@/components/ui/Toast";
 
 const STATUS_LABELS: Record<Ad["status"], { label: string; classes: string }> = {
   active:   { label: "نشط",    classes: "bg-emerald-50 text-emerald-700 border-emerald-200" },
@@ -21,6 +23,7 @@ const emptyForm = (): AdFormState => ({ name: "", postLink: "", status: "active"
 interface ImportRow { name: string; postLink: string }
 
 export default function AdsManagementPage() {
+  const { showToast } = useToast();
   const { ads, loading } = useAllAds();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -69,12 +72,15 @@ export default function AdsManagementPage() {
     try {
       if (editingId) {
         await updateAd(editingId, form);
+        showToast("success", "تم تحديث الإعلان.");
       } else {
         await createAd(form);
+        showToast("success", "تم إضافة الإعلان.");
       }
       setShowModal(false);
     } catch {
       setModalError("حدث خطأ، حاول مرة أخرى");
+      showToast("error", "حدث خطأ، حاول مرة أخرى");
     } finally {
       setSaving(false);
     }
@@ -86,7 +92,10 @@ export default function AdsManagementPage() {
     setDeleting(true);
     try {
       await deleteAd(deletingId);
+      showToast("success", "تم حذف الإعلان.");
       setDeletingId(null);
+    } catch {
+      showToast("error", "تعذر حذف الإعلان.");
     } finally {
       setDeleting(false);
     }
@@ -141,13 +150,16 @@ export default function AdsManagementPage() {
 
   async function handleConfirmImport() {
     if (!importRows.length) return;
+    const count = importRows.length;
     setImporting(true);
     try {
       await bulkCreateAds(importRows);
       setShowImport(false);
       setImportRows([]);
+      showToast("success", `تم استيراد ${count} إعلان.`);
     } catch {
       setImportError("فشل الاستيراد، حاول مرة أخرى");
+      showToast("error", "فشل استيراد الإعلانات.");
     } finally {
       setImporting(false);
     }
@@ -213,11 +225,22 @@ export default function AdsManagementPage() {
             <p className="text-[13px] font-bold text-[#94A3B8] mt-2">جاري تحميل الإعلانات...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <span className="material-symbols-outlined text-[40px] text-[#CBD5E1]">campaign</span>
-            <p className="text-[13px] font-bold text-[#94A3B8] mt-2">
-              {search ? "لا توجد نتائج" : "لم يتم إضافة أي إعلانات بعد"}
-            </p>
+          <div className="py-8 px-4">
+            <EmptyState
+              variant={search ? "filtered-empty" : "getting-started"}
+              icon="campaign"
+              title={search ? "لا توجد نتائج للبحث" : "لم يتم إضافة أي إعلانات بعد"}
+              description={
+                search
+                  ? "جرّب كلمات مختلفة أو امسح البحث لعرض كل الإعلانات."
+                  : "أضف إعلاناً ليربطه السيلز بالتقارير اليومية."
+              }
+              actionLabel={search ? "مسح البحث" : "إضافة إعلان"}
+              actionIcon={search ? "close" : "add"}
+              onAction={search ? () => setSearch("") : openAdd}
+              compact
+              className="border-0 shadow-none min-h-0"
+            />
           </div>
         ) : (
           <table className="w-full text-right">

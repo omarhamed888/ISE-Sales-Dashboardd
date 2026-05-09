@@ -4,8 +4,10 @@ import { db } from "@/lib/firebase";
 import { ReportDetailModal } from "@/components/reports/ReportDetailModal";
 import { SkeletonTableRow } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useToast } from "@/components/ui/Toast";
 
 export default function ReportsPage() {
+  const { showToast } = useToast();
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -136,6 +138,7 @@ export default function ReportsPage() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        showToast("success", "تم تنزيل ملف Excel.");
   };
 
   const calculateDeepStatsForColumn = (parsedData: any) => {

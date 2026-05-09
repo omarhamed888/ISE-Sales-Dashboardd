@@ -42,6 +42,8 @@ export type EmptyStateProps = {
   /** Renders CTA as react-router Link */
   to?: string;
   icon?: string;
+  /** Material symbol for the main CTA (defaults: arrow_forward if `to`, else restart_alt) */
+  actionIcon?: string;
   className?: string;
   /** Smaller padding when embedded in a card/table */
   compact?: boolean;
@@ -55,6 +57,7 @@ export function EmptyState({
   onAction,
   to,
   icon,
+  actionIcon,
   className = "",
   compact = false,
 }: EmptyStateProps) {
@@ -70,6 +73,7 @@ export function EmptyState({
   const handleClick = onAction ?? defaultFiltered;
 
   const showCta = Boolean(to || handleClick);
+  const ctaSymbol = actionIcon ?? (to ? "arrow_forward" : "restart_alt");
 
   const shell = compact
     ? "py-12 px-4 flex flex-col items-center justify-center text-center"
@@ -99,12 +103,12 @@ export function EmptyState({
       {showCta &&
         (to ? (
           <Link to={to} className={ctaClass}>
-            <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+            <span className="material-symbols-outlined text-[20px]">{ctaSymbol}</span>
             {finalActionLabel}
           </Link>
         ) : (
           <button type="button" onClick={handleClick} className={ctaClass}>
-            <span className="material-symbols-outlined text-[20px]">restart_alt</span>
+            <span className="material-symbols-outlined text-[20px]">{ctaSymbol}</span>
             {finalActionLabel}
           </button>
         ))}

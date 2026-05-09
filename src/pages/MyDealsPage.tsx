@@ -7,6 +7,7 @@ import { useCourses } from "@/lib/hooks/useCourses";
 import { logRuntimeError } from "@/lib/services/runtime-logging-service";
 import { classifyDealCategory } from "@/lib/utils/normalize-course-names";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useToast } from "@/components/ui/Toast";
 
 function currentYearMonth(): string {
   const d = new Date();
@@ -40,6 +41,7 @@ function hasUpgradeableProducts(allDeals: any[], deal: any, allCourseIds: string
 }
 
 export default function MyDealsPage() {
+  const { showToast } = useToast();
   const { user } = useAuth();
   const courses = useCourses();
   const courseItems = useMemo(
@@ -91,7 +93,9 @@ export default function MyDealsPage() {
         console.error("Failed to load my deals:", e);
         void logRuntimeError({ source: "MyDealsPage.loadDeals", message: String((e as Error)?.message || e) });
         setDeals([]);
-        setError("تعذر تحميل صفقاتك حالياً. تأكد من الصلاحيات أو حاول مرة أخرى.");
+        const msg = "تعذر تحميل صفقاتك حالياً. تأكد من الصلاحيات أو حاول مرة أخرى.";
+        setError(msg);
+        showToast("error", msg);
       })
       .finally(() => setLoading(false));
   }, [user]);
@@ -184,7 +188,9 @@ export default function MyDealsPage() {
   const saveEdit = async () => {
     if (!editingDealId) return;
     if (!Number.isFinite(Number(editForm.contactAttempts)) || Number(editForm.contactAttempts) < 1) {
-      setSaveMsg("عدد مرات التواصل يجب أن يكون رقمًا صحيحًا يبدأ من 1.");
+      const m = "عدد مرات التواصل يجب أن يكون رقمًا صحيحًا يبدأ من 1.";
+      setSaveMsg(m);
+      showToast("warning", m);
       return;
     }
     setIsSavingEdit(true);
@@ -243,10 +249,13 @@ export default function MyDealsPage() {
       );
       setEditingDealId(null);
       setSaveMsg("تم تحديث الصفقة في قاعدة البيانات بنجاح");
+      showToast("success", "تم تحديث الصفقة بنجاح.");
     } catch (e) {
       console.error("Update deal failed:", e);
       void logRuntimeError({ source: "MyDealsPage.saveEdit", message: String((e as Error)?.message || e) });
-      setSaveMsg("فشل تحديث الصفقة. تأكد من الصلاحيات ثم حاول مرة أخرى.");
+      const m = "فشل تحديث الصفقة. تأكد من الصلاحيات ثم حاول مرة أخرى.";
+      setSaveMsg(m);
+      showToast("error", m);
     } finally {
       setIsSavingEdit(false);
     }
@@ -271,11 +280,15 @@ export default function MyDealsPage() {
   const saveUpgrade = async () => {
     if (!user || !upgradeForDeal) return;
     if (upgradeSelected.length === 0) {
-      setSaveMsg("اختر منتجاً واحداً على الأقل للترقية.");
+      const m = "اختر منتجاً واحداً على الأقل للترقية.";
+      setSaveMsg(m);
+      showToast("warning", m);
       return;
     }
     if (upgradeValue <= 0) {
-      setSaveMsg("أدخل سعر الصفقة كاملاً (أكبر من صفر).");
+      const m = "أدخل سعر الصفقة كاملاً (أكبر من صفر).";
+      setSaveMsg(m);
+      showToast("warning", m);
       return;
     }
     setUpgradeSaving(true);
@@ -306,11 +319,14 @@ export default function MyDealsPage() {
       );
       closeUpgrade();
       setSaveMsg("تم تسجيل صفقة الترقية بنجاح.");
+      showToast("success", "تم تسجيل صفقة الترقية بنجاح.");
       loadDeals();
     } catch (e) {
       console.error("Upgrade save failed:", e);
       void logRuntimeError({ source: "MyDealsPage.saveUpgrade", message: String((e as Error)?.message || e) });
-      setSaveMsg("فشل حفظ الترقية. حاول مرة أخرى.");
+      const m = "فشل حفظ الترقية. حاول مرة أخرى.";
+      setSaveMsg(m);
+      showToast("error", m);
     } finally {
       setUpgradeSaving(false);
     }
@@ -330,10 +346,13 @@ export default function MyDealsPage() {
       if (editingDealId === deal.id) setEditingDealId(null);
       if (upgradeForDeal?.id === deal.id) closeUpgrade();
       setSaveMsg("تم حذف الصفقة.");
+      showToast("success", "تم حذف الصفقة.");
     } catch (e) {
       console.error("Delete deal failed:", e);
       void logRuntimeError({ source: "MyDealsPage.delete", message: String((e as Error)?.message || e) });
-      setSaveMsg("تعذر حذف الصفقة. يمكنك حذف صفقاتك فقط أو حاول مرة أخرى.");
+      const m = "تعذر حذف الصفقة. يمكنك حذف صفقاتك فقط أو حاول مرة أخرى.";
+      setSaveMsg(m);
+      showToast("error", m);
     } finally {
       setDeletingId(null);
     }
@@ -440,16 +459,29 @@ export default function MyDealsPage() {
       <div>
         <h3 className="text-base font-bold text-[#0F172A] mb-3">الصفقات</h3>
         {filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-[#E2E8F0] py-14 text-center flex flex-col items-center gap-3">
-            <span
-              className="material-symbols-outlined text-[40px] text-[#CBD5E1]"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              monetization_on
-            </span>
-            <p className="text-base font-bold text-[#0F172A]">لا توجد صفقات</p>
-            <p className="text-sm text-[#64748B]">لا توجد صفقات مسجلة في هذه الفترة</p>
-          </div>
+          deals.length === 0 ? (
+            <EmptyState
+              variant="getting-started"
+              icon="monetization_on"
+              title="لا توجد صفقات مسجلة"
+              description="سجّل صفقات الإغلاق من صفحة تسجيل الصفقات لتظهر هنا."
+              to="/deals"
+              actionLabel="تسجيل صفقة"
+              compact
+              className="border-[#E2E8F0] shadow-sm"
+            />
+          ) : (
+            <EmptyState
+              variant="filtered-empty"
+              icon="calendar_month"
+              title="لا توجد صفقات في هذا الشهر"
+              description="جرّب عرض كل الصفقات أو اختر شهراً آخر من القائمة أعلاه."
+              actionLabel="عرض كل الصفقات"
+              onAction={() => setShowAll(true)}
+              compact
+              className="border-[#E2E8F0] shadow-sm"
+            />
+          )
         ) : (
           <div className="space-y-3">
             {visibleDeals.map((deal: any, i: number) => (

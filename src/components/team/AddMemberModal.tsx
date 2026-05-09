@@ -3,6 +3,7 @@ import { collection, query, where, getDocs, serverTimestamp, setDoc, doc } from 
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { useCourses } from "@/lib/hooks/useCourses";
+import { useToast } from "@/components/ui/Toast";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { initializeApp, deleteApp } from "firebase/app";
 
@@ -12,6 +13,7 @@ interface AddMemberModalProps {
 }
 
 export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
+  const { showToast } = useToast();
   const { user } = useAuth();
   const courses = useCourses();
   const [name, setName] = useState("");
@@ -79,6 +81,7 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
         addedAt: serverTimestamp()
       });
 
+      showToast("success", `تم إضافة الموظف "${name.trim()}" بنجاح.`);
       onClose();
     } catch (err: any) {
       setError("حدث خطأ أثناء إضافة الموظف. " + err.message);

@@ -9,6 +9,7 @@ import {
 } from "@/lib/utils/dashboard-aggregations";
 import { logRuntimeError } from "@/lib/services/runtime-logging-service";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useToast } from "@/components/ui/Toast";
 
 function isPermissionDeniedError(error: unknown): boolean {
     if (!error || typeof error !== "object") return false;
@@ -17,6 +18,7 @@ function isPermissionDeniedError(error: unknown): boolean {
 }
 
 export default function MyReportsPage() {
+    const { showToast } = useToast();
     const { user } = useAuth();
     const [reports, setReports] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -80,9 +82,13 @@ export default function MyReportsPage() {
                 void logRuntimeError({ source: "MyReportsPage.load", message: String((err as Error)?.message || err) });
                 setReports([]);
                 if (isPermissionDeniedError(err)) {
-                    setStatusMsg("غير مسموح لك بعرض هذه التقارير.");
+                    const m = "غير مسموح لك بعرض هذه التقارير.";
+                    setStatusMsg(m);
+                    showToast("error", m);
                 } else {
-                    setStatusMsg("تعذر تحميل التقارير حالياً. حاول مرة أخرى.");
+                    const m = "تعذر تحميل التقارير حالياً. حاول مرة أخرى.";
+                    setStatusMsg(m);
+                    showToast("error", m);
                 }
             } finally {
                 setLoading(false);
@@ -102,13 +108,18 @@ export default function MyReportsPage() {
             await deleteDoc(doc(db, "reports", reportId));
             setReports((prev) => prev.filter((r) => r.id !== reportId));
             setStatusMsg("تم حذف التقرير بنجاح.");
+            showToast("success", "تم حذف التقرير بنجاح.");
         } catch (err) {
             console.error(err);
             void logRuntimeError({ source: "MyReportsPage.delete", message: String((err as Error)?.message || err) });
             if (isPermissionDeniedError(err)) {
-                setStatusMsg("غير مسموح لك بحذف هذا التقرير.");
+                const m = "غير مسموح لك بحذف هذا التقرير.";
+                setStatusMsg(m);
+                showToast("error", m);
             } else {
-                setStatusMsg("تعذر حذف التقرير. يمكنك حذف تقاريرك فقط أو حاول مرة أخرى.");
+                const m = "تعذر حذف التقرير. يمكنك حذف تقاريرك فقط أو حاول مرة أخرى.";
+                setStatusMsg(m);
+                showToast("error", m);
             }
         } finally {
             setDeletingId(null);
