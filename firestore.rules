@@ -122,7 +122,16 @@ service cloud.firestore {
     match /insights/{insightId} {
       allow read: if isAdmin();
       allow create, update: if isAdmin();
-      allow delete: if isSuperAdmin();
+      allow delete: if isAdmin();
+    }
+
+    /** Client error telemetry (see runtime-logging-service). */
+    match /runtime_logs/{logId} {
+      allow create: if isAuth()
+        && request.resource.data.source is string
+        && request.resource.data.message is string;
+      allow read: if isAdmin();
+      allow update, delete: if false;
     }
 
     match /customers/{customerId} {
