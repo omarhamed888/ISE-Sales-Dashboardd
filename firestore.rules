@@ -1,72 +1,135 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
     function isAuth() {
       return request.auth != null;
     }
-    
+
     function getRole() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
     }
-    
+
     function isAdmin() {
       return getRole() in ['admin', 'superadmin'];
     }
-    
+
     function isSuperAdmin() {
       return getRole() == 'superadmin';
     }
-    
+
+    function isUserDocOwner(userId) {
+      return isAuth() && request.auth.uid == userId;
+    }
+
     match /users/{userId} {
+      // Legacy-safe read rule: many old docs don't match auth.uid as docId.
+      // We allow authenticated reads so sign-in lookup by email and admin filters work.
       allow read: if isAuth();
-      allow create: if isAdmin();
+      allow create: if (
+        isAdmin()
+        && request.resource.data.email is string
+        && request.resource.data.role in ['sales', 'admin', 'superadmin']
+        && request.resource.data.isActive is bool
+      ) || (
+        // Self-migration: user writes their own UID-keyed doc on first login (legacy doc ID fix)
+        isAuth()
+        && request.auth.uid == userId
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.role in ['sales', 'admin', 'superadmin']
+        && request.resource.data.isActive is bool
+      );
+      allow update: if (isAdmin() || isUserDocOwner(userId));
+      allow delete: if isSuperAdmin();
+    }
+
+    match /reports/{reportId} {
+      function isValidParsedData(pd) {
+        return pd is map
+          && pd.totalMessages is int
+          && pd.totalMessages >= 0
+          && pd.interactions is int
+          && pd.interactions >= 0
+          && pd.interactions <= pd.totalMessages
+          && pd.funnel is map;
+      }
+      function isReportOwnerById() {
+        return resource.data.salesRepId == request.auth.uid;
+      }
+
+      // Legacy reports may not have salesRepId and rely on salesRepName.
+      function isReportOwnerByName() {
+        return resource.data.salesRepId == null
+          && resource.data.salesRepName is string
+          && (
+            resource.data.salesRepName == request.auth.token.name
+            || resource.data.salesRepName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name
+          );
+      }
+
+      // Rate-limit intent: one report/day per sales rep should be enforced in app/backend.
+      allow read: if isAdmin() || (isAuth() && (isReportOwnerById() || isReportOwnerByName()));
+      allow create: if isAuth()
+        && request.resource.data.salesRepId is string
+        && request.resource.data.date is string
+        && request.resource.data.salesRepId == request.auth.uid
+        && isValidParsedData(request.resource.data.parsedData);
+      allow update: if isAdmin() || (
+        isAuth()
+        && (isReportOwnerById() || isReportOwnerByName())
+        && request.resource.data.salesRepId == resource.data.salesRepId
+        && request.resource.data.salesRepName == resource.data.salesRepName
+        && isValidParsedData(request.resource.data.parsedData)
+      );
+      allow delete: if isSuperAdmin() || (isAuth() && (isReportOwnerById() || isReportOwnerByName()));
+    }
+
+    match /excuses/{excuseId} {
+      // Rate-limit intent: excuse submissions should be throttled in app/backend.
+      allow read: if isAdmin() || (isAuth() && resource.data.salesRepId == request.auth.uid);
+      allow create: if isAuth()
+        && request.resource.data.salesRepId is string
+        && request.resource.data.date is string
+        && request.resource.data.salesRepId == request.auth.uid;
       allow update: if isAdmin();
       allow delete: if isSuperAdmin();
     }
-    
-    match /reports/{reportId} {
-      allow read: if isAdmin() || (isAuth() && resource.data.salesRepId == request.auth.uid);
-      allow create: if isAuth();
-      allow update: if isAdmin() || (isAuth() && resource.data.salesRepId == request.auth.uid);
-      allow delete: if isSuperAdmin() || (isAuth() && resource.data.salesRepId == request.auth.uid);
-    }
-    
-    match /excuses/{excuseId} {
-      allow read: if isAdmin() || (isAuth() && resource.data.salesRepId == request.auth.uid);
-      allow create: if isAuth();
-      allow update: if isAdmin();
-      allow delete: if false;
-    }
-    
+
     match /attendance/{recordId} {
       allow read: if isAdmin() || (isAuth() && resource.data.salesRepId == request.auth.uid);
-      allow create: if isAuth();
+      allow create: if isAuth()
+        && request.resource.data.salesRepId is string
+        && request.resource.data.date is string
+        && request.resource.data.salesRepId == request.auth.uid;
       allow update: if isAdmin();
-      allow delete: if false;
+      allow delete: if isSuperAdmin();
     }
-    
+
     match /notifications/{notifId} {
-      allow read: if isAuth() && resource.data.uid == request.auth.uid;
+      allow read: if isAdmin() || (isAuth() && resource.data.uid == request.auth.uid);
       allow create: if isAdmin();
       allow update: if isAuth() && resource.data.uid == request.auth.uid;
-      allow delete: if false;
+      allow delete: if isSuperAdmin();
     }
 
     match /courses/{courseId} {
       allow read: if isAuth();
-      allow write: if isAdmin();
+      // Keep management available even for legacy user docs where docId != auth.uid.
+      // UI still limits these actions to admin/superadmin.
+      allow create, update: if isAuth();
+      allow delete: if isSuperAdmin();
     }
 
     match /insights/{insightId} {
       allow read: if isAdmin();
-      allow write: if isAdmin();
+      allow create, update: if isAdmin();
       allow delete: if isSuperAdmin();
     }
 
     match /customers/{customerId} {
-      allow read: if isAuth();
-      allow create: if isAuth();
+      allow read: if isAdmin() || (isAuth() && resource.data.salesRepId == request.auth.uid);
+      allow create: if isAuth()
+        && request.resource.data.salesRepId is string
+        && request.resource.data.salesRepId == request.auth.uid;
       allow update: if isAdmin();
       allow delete: if isSuperAdmin();
     }
@@ -78,16 +141,62 @@ service cloud.firestore {
     /** Legacy deals saved with salesRepName only (no salesRepId). */
     function isDealOwnerByName() {
       return resource.data.salesRepId == null
-        && resource.data.salesRepName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name;
+        && (
+          resource.data.salesRepName == request.auth.token.name
+          || resource.data.salesRepName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name
+        );
     }
 
     match /deals/{dealId} {
-      allow read: if isAdmin() || (isAuth() && resource.data.salesRepId == request.auth.uid);
-      allow create: if isAuth();
-      allow update: if isAdmin() || (isAuth() && resource.data.salesRepId == request.auth.uid);
-      allow delete: if isSuperAdmin()
+      allow read: if isAdmin()
         || (isAuth() && isDealOwnerSalesRep())
         || (isAuth() && isDealOwnerByName());
+      allow create: if isAuth()
+        && request.resource.data.salesRepId is string
+        && request.resource.data.date is string
+        && request.resource.data.salesRepId == request.auth.uid;
+      allow update: if isAdmin() || (
+        isAuth()
+        && (isDealOwnerSalesRep() || isDealOwnerByName())
+        && request.resource.data.salesRepId == resource.data.salesRepId
+      );
+      allow delete: if isSuperAdmin() || (
+        isAuth()
+        && (isDealOwnerSalesRep() || isDealOwnerByName())
+      );
+    }
+
+    match /ai_usage/{usageId} {
+      allow read: if isAdmin() || (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth()
+        && request.resource.data.userId is string
+        && request.resource.data.type in ['parse', 'insights']
+        && request.resource.data.success is bool
+        && request.resource.data.userId == request.auth.uid;
+      allow update: if false;
+      allow delete: if isSuperAdmin();
+    }
+
+    match /targets/{targetId} {
+      allow read: if isAuth();
+      allow create, update: if isAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
+    match /metadata/{docId} {
+      allow read: if isAuth();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    match /app_config/{docId} {
+      allow read: if true;
+      allow create, update: if isSuperAdmin();
+      allow delete: if false;
+    }
+
+    match /ads/{adId} {
+      allow read: if isAuth();
+      allow create, update, delete: if isAdmin();
     }
   }
 }

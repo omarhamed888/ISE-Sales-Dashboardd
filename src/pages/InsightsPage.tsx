@@ -19,6 +19,8 @@ import {
 } from "@/lib/utils/insights-period";
 import { InsightResultPanel } from "@/components/insights/InsightResultPanel";
 import { SavedInsightsList } from "@/components/insights/SavedInsightsList";
+import { Skeleton, SkeletonChart, SkeletonText } from "@/components/ui/Skeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { format } from "date-fns";
 import { arEG } from "date-fns/locale/ar-EG";
 
@@ -107,7 +109,7 @@ export default function InsightsPage() {
         no_reports: "لا توجد تقارير في هذه الفترة",
         low_data: "البيانات غير كافية للتحليل (أقل من 10 رسائل إجمالاً)",
         rate_limited: "يرجى الانتظار دقيقة بين كل تحليل بالذكاء الاصطناعي",
-        no_api_key: "مفتاح Gemini غير مضبوط (VITE_GEMINI_API_KEY)",
+        no_api_key: "لا يوجد مفتاح Gemini صالح (تحقق من المفاتيح أو استبدل المفتاح المنتهي).",
         gemini_failed: "تعذر الاتصال بخدمة التحليل. حاول مرة أخرى.",
         bad_json: "تعذر قراءة نتيجة التحليل. حاول مرة أخرى.",
       };
@@ -193,22 +195,30 @@ export default function InsightsPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-8 shadow-sm">
-        <p className="text-[#64748B] text-sm mb-4 text-right">
-          {reportsLoading
-            ? "جاري تحميل التقارير..."
-            : `${reports.length} تقرير متاح في فترة ${periodLabel}`}
-        </p>
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={isLoading || reportsLoading || reports.length === 0}
-          className="w-full sm:w-auto bg-[#2563EB] text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto sm:mx-0"
-        >
-          {isLoading ? "⏳ جاري التحليل..." : "🤖 تحليل البيانات بالذكاء الاصطناعي"}
-        </button>
-        <p className="text-xs text-[#94A3B8] mt-2 text-right">
-          بناءً على {reports.length} تقرير من {periodLabel} ({dateFrom} → {dateTo})
-        </p>
+        {reportsLoading ? (
+          <div className="space-y-4">
+            <SkeletonText lines={2} />
+            <Skeleton className="h-11 w-full sm:w-56 rounded-xl max-w-full mr-auto" />
+            <Skeleton className="h-3 w-72 max-w-full mr-auto" />
+          </div>
+        ) : (
+          <>
+            <p className="text-[#64748B] text-sm mb-4 text-right">
+              {`${reports.length} تقرير متاح في فترة ${periodLabel}`}
+            </p>
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={isLoading || reports.length === 0}
+              className="w-full sm:w-auto bg-[#2563EB] text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto sm:mx-0"
+            >
+              {isLoading ? "⏳ جاري التحليل..." : "🤖 تحليل البيانات بالذكاء الاصطناعي"}
+            </button>
+            <p className="text-xs text-[#94A3B8] mt-2 text-right">
+              بناءً على {reports.length} تقرير من {periodLabel} ({dateFrom} → {dateTo})
+            </p>
+          </>
+        )}
       </div>
 
       <div aria-live="polite" className="sr-only">
@@ -223,23 +233,12 @@ export default function InsightsPage() {
       )}
 
       {isLoading && (
-        <div className="flex flex-col items-center justify-center py-16 gap-4">
-          <div className="w-16 h-16 bg-[#EFF6FF] rounded-full flex items-center justify-center animate-pulse">
-            <span className="text-3xl">🤖</span>
-          </div>
-          <p className="text-[#475569] font-medium">جاري تحليل البيانات...</p>
-          <p className="text-[#94A3B8] text-sm">
+        <div className="space-y-4 py-8">
+          <SkeletonChart />
+          <SkeletonText lines={5} />
+          <p className="text-[#94A3B8] text-sm text-right">
             Gemini يدرس {reports.length} تقرير من {periodLabel}
           </p>
-          <div className="flex gap-1 mt-2">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="w-2 h-2 bg-[#3B82F6] rounded-full animate-bounce"
-                style={{ animationDelay: `${i * 0.15}s` }}
-              />
-            ))}
-          </div>
         </div>
       )}
 
@@ -303,11 +302,16 @@ export default function InsightsPage() {
       )}
 
       {!isLoading && !error && showEmptyPeriod && (
-        <div className="text-center py-12 text-[#94A3B8]">
-          <span className="text-4xl">📭</span>
-          <p className="mt-3 font-medium">لا توجد تقارير في فترة {periodLabel}</p>
-          <p className="text-sm mt-1">اطلب من الفريق رفع التقارير أولاً</p>
-        </div>
+        <EmptyState
+          variant="no-data"
+          icon="calendar_month"
+          title={`لا توجد تقارير في فترة ${periodLabel}`}
+          description="اطلب من الفريق رفع التقارير أو غيّر الفترة من الأعلى."
+          to="/submit-report"
+          actionLabel="رفع تقرير"
+          compact
+          className="border-[#E2E8F0] shadow-sm max-w-xl mx-auto"
+        />
       )}
 
       {!isLoading && result && (

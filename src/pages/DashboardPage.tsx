@@ -1,42 +1,65 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, Suspense, lazy } from "react";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Link } from "react-router-dom";
+import { useAuth } from "@/lib/auth-context";
 import { useFilter } from "@/lib/filter-context";
 import { filterReports } from "@/lib/utils/dashboard-filters";
-import { SmartInsightsSection } from "@/components/dashboard/SmartInsightsSection";
-import { RecommendationsSection } from "@/components/dashboard/RecommendationsSection";
 import { KPICards } from "@/components/dashboard/KPICards";
-import { ChartsGrid } from "@/components/dashboard/ChartsGrid";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { TeamStatusSummary } from "@/components/dashboard/TeamStatusSummary";
-import { RejectionAnalyticsSection } from "@/components/dashboard/RejectionAnalyticsSection";
-import { DealCycleSection } from "@/components/dashboard/DealCycleSection";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Button } from "@/components/ui/Button";
+import { Skeleton, SkeletonChart } from "@/components/ui/Skeleton";
+const ChartsGrid = lazy(() => import("@/components/dashboard/ChartsGrid").then((m) => ({ default: m.ChartsGrid })));
+const SmartInsightsSection = lazy(() => import("@/components/dashboard/SmartInsightsSection").then((m) => ({ default: m.SmartInsightsSection })));
+const RecommendationsSection = lazy(() => import("@/components/dashboard/RecommendationsSection").then((m) => ({ default: m.RecommendationsSection })));
+const RejectionAnalyticsSection = lazy(() => import("@/components/dashboard/RejectionAnalyticsSection").then((m) => ({ default: m.RejectionAnalyticsSection })));
+const DealCycleSection = lazy(() => import("@/components/dashboard/DealCycleSection").then((m) => ({ default: m.DealCycleSection })));
 
 export default function DashboardPage() {
   const [allReports, setAllReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const { filter } = useFilter();
 
   useEffect(() => {
-    const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      setAllReports(docs);
+    if (!user?.uid) {
+      setAllReports([]);
       setLoading(false);
-    });
+      return;
+    }
+
+    const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        setAllReports(docs);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("dashboard reports listener:", err);
+        setLoading(false);
+      }
+    );
     return () => unsubscribe();
-  }, []);
+  }, [user?.uid]);
 
   const currentReports = useMemo(() => filterReports(allReports, filter), [allReports, filter]);
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#2563EB]"></div>
-        <p className="text-[#64748B] font-bold text-sm tracking-widest animate-pulse">جاري تجميع البيانات الاستراتيجية...</p>
+      <div className="max-w-[1500px] w-full mx-auto space-y-6 pb-20 font-body" dir="rtl">
+        <Skeleton className="h-[72px] w-full rounded-2xl border border-[#E2E8F0]" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((k) => (
+            <Skeleton key={k} className="h-[120px] rounded-2xl border border-[#E2E8F0]" />
+          ))}
+        </div>
+        <SkeletonChart />
+        <div className="grid md:grid-cols-2 gap-4">
+          <SkeletonChart />
+          <SkeletonChart />
+        </div>
       </div>
     );
   }
@@ -44,17 +67,16 @@ export default function DashboardPage() {
   // Entirely empty database state (no reports ever)
   if (allReports.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8 animate-in fade-in zoom-in-95">
-        <div className="w-24 h-24 bg-surface-container rounded-full flex items-center justify-center text-outline/30">
-          <span className="material-symbols-outlined text-6xl">dashboard_customize</span>
-        </div>
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-black text-on-surface">مرحباً بك في لوحة القيادة</h2>
-          <p className="text-on-surface-variant italic">لا توجد بيانات متاحة بعد. نظامنا مدعوم بالكامل من Gemini.</p>
-        </div>
-        <Link to="/submit-report">
-          <Button variant="gradient" className="px-10 py-4 shadow-xl shadow-primary/20 hover:scale-105 transition-transform">إرسال تقرير المبيعات الأول</Button>
-        </Link>
+      <div className="max-w-[1500px] w-full mx-auto flex flex-col items-center justify-center min-h-[60vh] px-2">
+        <EmptyState
+          variant="getting-started"
+          icon="dashboard_customize"
+          title="مرحباً بك في لوحة القيادة"
+          description="لا توجد بيانات متاحة بعد. نظامنا مدعوم بالكامل من Gemini."
+          to="/submit-report"
+          actionLabel="إرسال تقرير المبيعات الأول"
+          className="max-w-lg border-0 shadow-none bg-transparent"
+        />
       </div>
     );
   }
@@ -91,14 +113,18 @@ export default function DashboardPage() {
         ) : (
            <>
               {/* SECTION 1: KPI Cards */}
-              <KPICards reports={currentReports} />
+              <KPICards reports={currentReports} allReports={allReports} />
 
               {/* SECTION 2: Charts */}
-              <ChartsGrid reports={currentReports} />
+              <Suspense fallback={<SkeletonChart />}>
+                <ChartsGrid reports={currentReports} />
+              </Suspense>
 
               {/* SECTION 3: AI Insights + Recommendations */}
-              <SmartInsightsSection reports={currentReports} />
-              <RecommendationsSection reports={currentReports} />
+              <Suspense fallback={<SkeletonChart />}>
+                <SmartInsightsSection reports={currentReports} />
+                <RecommendationsSection reports={currentReports} />
+              </Suspense>
 
               {/* SECTION 4: Rejection Analytics */}
               <>
@@ -110,7 +136,9 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex-1 h-px bg-[#E2E8F0]" />
                 </div>
-                <RejectionAnalyticsSection reports={currentReports} />
+                <Suspense fallback={<SkeletonChart />}>
+                  <RejectionAnalyticsSection reports={currentReports} />
+                </Suspense>
               </>
 
               {/* SECTION 5: Deal Cycle Analytics */}
@@ -122,7 +150,9 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex-1 h-px bg-[#E2E8F0]" />
               </div>
-              <DealCycleSection />
+              <Suspense fallback={<SkeletonChart />}>
+                <DealCycleSection />
+              </Suspense>
 
               {/* SECTION 6: Team Status */}
               <div className="flex items-center gap-3 my-1">

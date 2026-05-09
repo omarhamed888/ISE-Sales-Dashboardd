@@ -7,62 +7,86 @@ import {
   calcInteractionsFromParsedData,
   calcConversionRate,
 } from "@/lib/utils/dashboard-aggregations";
+import { logRuntimeError } from "@/lib/services/runtime-logging-service";
+import { EmptyState } from "@/components/ui/EmptyState";
+
+function isPermissionDeniedError(error: unknown): boolean {
+    if (!error || typeof error !== "object") return false;
+    const code = (error as { code?: unknown }).code;
+    return code === "permission-denied" || code === "PERMISSION_DENIED";
+}
 
 export default function MyReportsPage() {
     const { user } = useAuth();
     const [reports, setReports] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [streak, setStreak] = useState(0);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [statusMsg, setStatusMsg] = useState<string | null>(null);
+    const [visibleCount, setVisibleCount] = useState(20);
+    const visibleReports = reports.slice(0, visibleCount);
 
     useEffect(() => {
         if (!user) return;
 
         const fetchMyData = async () => {
-            const q = query(
-                collection(db, "reports"), 
-                where("salesRepId", "==", user.uid),
-            );
-            
-            const snap = await getDocs(q);
-            const rpts: any[] = [];
-            snap.forEach(doc => {
-                rpts.push({ id: doc.id, ...doc.data() });
-            });
-            
-            // sort descending
-            rpts.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-            
-            setReports(rpts);
-
-            // Calculate streak (consecutive working days submitted)
-            let currentStreak = 0;
-            const submittedDates = new Set(rpts.map(r => r.date.replace(/\//g, '-')));
-            
-            // Loop backwards from today
-            let checkDate = new Date();
-            while (true) {
-                if (checkDate.getDay() === 5) { // Skip Friday
-                    checkDate.setDate(checkDate.getDate() - 1);
-                    continue;
-                }
-
-                const dStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+            try {
+                const q = query(
+                    collection(db, "reports"), 
+                    where("salesRepId", "==", user.uid),
+                );
                 
-                if (submittedDates.has(dStr)) {
-                    currentStreak++;
-                    checkDate.setDate(checkDate.getDate() - 1);
-                } else {
-                    // if today is missing, we don't break streak yet just in case they haven't submitted today
-                    const todayStr = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
-                    if (dStr === todayStr) {
-                         checkDate.setDate(checkDate.getDate() - 1);
-                         continue;
+                const snap = await getDocs(q);
+                const rpts: any[] = [];
+                snap.forEach(doc => {
+                    rpts.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // sort descending
+                rpts.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                
+                setReports(rpts);
+
+                // Calculate streak (consecutive working days submitted)
+                let currentStreak = 0;
+                const submittedDates = new Set(rpts.map(r => r.date.replace(/\//g, '-')));
+                
+                // Loop backwards from today
+                let checkDate = new Date();
+                while (true) {
+                    if (checkDate.getDay() === 5) { // Skip Friday
+                        checkDate.setDate(checkDate.getDate() - 1);
+                        continue;
                     }
-                    break;
+
+                    const dStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+                    
+                    if (submittedDates.has(dStr)) {
+                        currentStreak++;
+                        checkDate.setDate(checkDate.getDate() - 1);
+                    } else {
+                        // if today is missing, we don't break streak yet just in case they haven't submitted today
+                        const todayStr = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
+                        if (dStr === todayStr) {
+                             checkDate.setDate(checkDate.getDate() - 1);
+                             continue;
+                        }
+                        break;
+                    }
                 }
+                setStreak(currentStreak);
+            } catch (err) {
+                console.error("Failed to load reports:", err);
+                void logRuntimeError({ source: "MyReportsPage.load", message: String((err as Error)?.message || err) });
+                setReports([]);
+                if (isPermissionDeniedError(err)) {
+                    setStatusMsg("غير مسموح لك بعرض هذه التقارير.");
+                } else {
+                    setStatusMsg("تعذر تحميل التقارير حالياً. حاول مرة أخرى.");
+                }
+            } finally {
+                setLoading(false);
             }
-            setStreak(currentStreak);
-            setLoading(false);
         };
 
         fetchMyData();
@@ -72,12 +96,22 @@ export default function MyReportsPage() {
         e.preventDefault();
         e.stopPropagation();
         if (!window.confirm("حذف هذا التقرير نهائياً؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+        setStatusMsg(null);
+        setDeletingId(reportId);
         try {
             await deleteDoc(doc(db, "reports", reportId));
             setReports((prev) => prev.filter((r) => r.id !== reportId));
+            setStatusMsg("تم حذف التقرير بنجاح.");
         } catch (err) {
             console.error(err);
-            alert("تعذر حذف التقرير. حاول مرة أخرى.");
+            void logRuntimeError({ source: "MyReportsPage.delete", message: String((err as Error)?.message || err) });
+            if (isPermissionDeniedError(err)) {
+                setStatusMsg("غير مسموح لك بحذف هذا التقرير.");
+            } else {
+                setStatusMsg("تعذر حذف التقرير. يمكنك حذف تقاريرك فقط أو حاول مرة أخرى.");
+            }
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -104,6 +138,11 @@ export default function MyReportsPage() {
                     </div>
                 )}
             </header>
+            {statusMsg && (
+                <div className="mb-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm font-bold text-[#334155]">
+                    {statusMsg}
+                </div>
+            )}
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-5 flex flex-col gap-2 border-r-4 border-r-[#F59E0B] transition-all hover:-translate-y-0.5 hover:shadow-md">
@@ -165,9 +204,21 @@ export default function MyReportsPage() {
                     </h2>
                 </div>
                 <div className="overflow-x-auto">
+                    {reports.length === 0 ? (
+                      <EmptyState
+                        variant="getting-started"
+                        title="لا توجد تقارير مرفوعة بعد"
+                        description="ارفع أول تقرير لمتابعة أدائك وبناء سلسلة الالتزام."
+                        to="/submit-report"
+                        actionLabel="رفع تقرير جديد"
+                        compact
+                        className="border-0 rounded-none shadow-none min-h-[260px]"
+                      />
+                    ) : (
+                      <>
                     {/* Mobile cards */}
                     <div className="md:hidden divide-y divide-[#F1F5F9]">
-                      {reports.map(report => (
+                      {visibleReports.map(report => (
                         <div key={report.id} className="p-4 flex flex-col gap-2">
                           <div className="flex justify-between items-center">
                             <span className="font-black text-[13px] text-[#1E293B]">{report.date}</span>
@@ -202,15 +253,26 @@ export default function MyReportsPage() {
                             <button
                               type="button"
                               onClick={(e) => handleDeleteReport(report.id, e)}
-                              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-red-50 text-red-600 text-[12px] font-black"
+                              disabled={deletingId === report.id}
+                              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-red-50 text-red-600 text-[12px] font-black disabled:opacity-50"
                             >
                               <span className="material-symbols-outlined text-[18px]">delete</span>
-                              حذف
+                              {deletingId === report.id ? "جاري الحذف..." : "حذف"}
                             </button>
                           </div>
                         </div>
                       ))}
-                      {reports.length === 0 && <p className="p-8 text-center text-[#64748B] font-bold text-[13px]">لا توجد تقارير مرفوعة حتى الآن.</p>}
+                      {visibleCount < reports.length && (
+                        <div className="p-4">
+                          <button
+                            type="button"
+                            onClick={() => setVisibleCount((v) => v + 20)}
+                            className="w-full py-2.5 rounded-xl border border-[#E2E8F0] bg-white text-[#334155] text-sm font-bold hover:bg-[#F8FAFC]"
+                          >
+                            تحميل المزيد ({reports.length - visibleCount} متبقي)
+                          </button>
+                        </div>
+                      )}
                     </div>
                     {/* Desktop table */}
                     <table className="w-full text-right text-[13px] hidden md:table">
@@ -225,7 +287,7 @@ export default function MyReportsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {reports.map(report => (
+                            {visibleReports.map(report => (
                                 <tr key={report.id} className="border-b border-[#E2E8F0] last:border-0 hover:bg-[#F7F9FC]/50 transition-colors">
                                     <td className="p-4 font-black text-[#1E293B]">{report.date}</td>
                                     <td className="p-4">
@@ -256,22 +318,22 @@ export default function MyReportsPage() {
                                             <button
                                                 type="button"
                                                 onClick={(e) => handleDeleteReport(report.id, e)}
-                                                className="inline-flex items-center justify-center p-2 rounded-lg text-red-500 hover:bg-red-50"
+                                                disabled={deletingId === report.id}
+                                                className="inline-flex items-center justify-center p-2 rounded-lg text-red-500 hover:bg-red-50 disabled:opacity-50"
                                                 title="حذف"
                                             >
-                                                <span className="material-symbols-outlined text-[20px]">delete</span>
+                                                <span className="material-symbols-outlined text-[20px]">
+                                                    {deletingId === report.id ? "progress_activity" : "delete"}
+                                                </span>
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
-                            {reports.length === 0 && (
-                                <tr>
-                                    <td colSpan={6} className="p-12 text-center text-[#64748B] font-bold text-[13px]">لا توجد تقارير مرفوعة حتى الآن.</td>
-                                </tr>
-                            )}
                         </tbody>
                     </table>
+                      </>
+                    )}
                 </div>
             </div>
         </div>

@@ -19,34 +19,42 @@ export function NotificationBell() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<SystemNotification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [shouldConnect, setShouldConnect] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !shouldConnect) return;
 
     const q = query(
       collection(db, "notifications"),
       where("uid", "==", user.uid)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const notifs: SystemNotification[] = [];
-      snapshot.forEach((docSnap) => {
-        notifs.push({ id: docSnap.id, ...docSnap.data() } as SystemNotification);
-      });
-      
-      // Sort client-side to bypass Firestore compound index requirement
-      notifs.sort((a, b) => {
-         const tA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-         const tB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-         return tB - tA;
-      });
-      
-      setNotifications(notifs);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const notifs: SystemNotification[] = [];
+        snapshot.forEach((docSnap) => {
+          notifs.push({ id: docSnap.id, ...docSnap.data() } as SystemNotification);
+        });
+        
+        // Sort client-side to bypass Firestore compound index requirement
+        notifs.sort((a, b) => {
+          const tA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+          const tB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+          return tB - tA;
+        });
+        
+        setNotifications(notifs);
+      },
+      (err) => {
+        console.error("notifications listener:", err);
+        setNotifications([]);
+      }
+    );
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, shouldConnect]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -98,7 +106,10 @@ export function NotificationBell() {
   return (
     <div className="relative" ref={dropdownRef}>
       <button 
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setShouldConnect(true);
+          setIsOpen(!isOpen);
+        }}
         className="relative w-10 h-10 flex items-center justify-center text-[#64748B] hover:text-[#2563EB] hover:bg-[#EFF6FF] rounded-full transition-colors group"
       >
         <span className="material-symbols-outlined text-[24px]">notifications</span>

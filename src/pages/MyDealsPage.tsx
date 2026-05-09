@@ -6,14 +6,12 @@ import { ProductPicker } from "@/components/ProductPicker";
 import { useCourses } from "@/lib/hooks/useCourses";
 import { logRuntimeError } from "@/lib/services/runtime-logging-service";
 import { classifyDealCategory } from "@/lib/utils/normalize-course-names";
+import { EmptyState } from "@/components/ui/EmptyState";
 
-type Range = "month" | "week" | "all";
-
-const RANGE_LABELS: Record<Range, string> = {
-  month: "هذا الشهر",
-  week: "الأسبوع",
-  all: "الكل",
-};
+function currentYearMonth(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
 
 function formatNumber(n: number) {
   return n.toLocaleString('en-US');
@@ -60,7 +58,8 @@ export default function MyDealsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
-  const [range, setRange] = useState<Range>("month");
+  const [showAll, setShowAll] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState<string>(currentYearMonth);
   const [editingDealId, setEditingDealId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     customerName: "",
@@ -102,16 +101,21 @@ export default function MyDealsPage() {
   }, [loadDeals]);
 
   const filtered = useMemo(() => {
-    if (range === "all") return deals;
-    const now = new Date();
-    const cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    if (range === "week") cutoff.setDate(cutoff.getDate() - 7);
-    if (range === "month") cutoff.setDate(cutoff.getDate() - 30);
+    if (showAll) return deals;
+    const [y, m] = selectedMonth.split("-").map(Number);
+    const firstDay = `${selectedMonth}-01`;
+    const lastDayDate = new Date(y, m, 0);
+    const lastDay = `${selectedMonth}-${String(lastDayDate.getDate()).padStart(2, "0")}`;
     return deals.filter((d) => {
-      const date = d.closeDate ? new Date(d.closeDate) : null;
-      return date && date >= cutoff;
+      const cd = d.closeDate ?? d.date ?? null;
+      if (!cd || typeof cd !== "string") return false;
+      return cd >= firstDay && cd <= lastDay;
     });
-  }, [deals, range]);
+  }, [deals, showAll, selectedMonth]);
+
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [showAll, selectedMonth]);
   const visibleDeals = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
 
   const totalRevenue = filtered.reduce((s: number, d: any) => s + (d.dealValue || 0), 0);
@@ -344,17 +348,34 @@ export default function MyDealsPage() {
         </div>
       )}
 
-      {/* Range Tabs */}
-      <div className="flex gap-2">
-        {(["month", "week", "all"] as Range[]).map((r) => (
-          <button
-            key={r}
-            onClick={() => setRange(r)}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${range === r ? "bg-[#2563EB] text-white" : "bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0]"}`}
-          >
-            {RANGE_LABELS[r]}
-          </button>
-        ))}
+      {/* Filter bar */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+            showAll
+              ? "bg-[#2563EB] text-white"
+              : "bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0]"
+          }`}
+        >
+          الكل
+        </button>
+        <input
+          type="month"
+          value={selectedMonth}
+          onChange={(e) => {
+            if (e.target.value) {
+              setSelectedMonth(e.target.value);
+              setShowAll(false);
+            }
+          }}
+          className={`rounded-xl border px-3 py-2 text-sm font-bold transition-all ${
+            !showAll
+              ? "border-[#2563EB] bg-[#EFF6FF] text-[#1E293B]"
+              : "border-[#E2E8F0] bg-[#F1F5F9] text-[#64748B]"
+          }`}
+        />
       </div>
 
       {/* Summary KPI Cards */}

@@ -34,7 +34,7 @@ export function useAttendance() {
             // 3. Fetch all reports + excuses for this user
             const [reportsSnap, excusesSnap] = await Promise.all([
                 getDocs(query(collection(db, "reports"), where("salesRepId", "==", user.uid))),
-                getDocs(query(collection(db, "excuses"), where("userId", "==", user.uid)))
+                getDocs(query(collection(db, "excuses"), where("salesRepId", "==", user.uid)))
             ]);
 
             const submittedDates = new Set<string>();

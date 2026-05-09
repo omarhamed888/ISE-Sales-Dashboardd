@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { ReportDetailModal } from "@/components/reports/ReportDetailModal";
+import { SkeletonTableRow } from "@/components/ui/Skeleton";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function ReportsPage() {
   const [reports, setReports] = useState<any[]>([]);
@@ -244,13 +246,27 @@ export default function ReportsPage() {
       {/* REPORTS TABLE */}
       <div className="bg-white rounded-[24px] border border-[#E2E8F0] shadow-sm overflow-hidden flex flex-col min-h-[500px]">
           {loading ? (
-             <div className="flex-1 flex flex-col items-center justify-center p-12">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#2563EB]"></div>
+             <div className="flex-1 p-6 md:p-8 space-y-0">
+                <div className="hidden md:flex gap-3 pb-3 border-b border-[#E2E8F0] mb-2">
+                  {[1, 2, 3, 4, 5, 6].map((c) => (
+                    <div key={c} className="h-3 flex-1 rounded bg-[#E2E8F0]/90 animate-pulse" />
+                  ))}
+                </div>
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <SkeletonTableRow key={i} cols={6} />
+                ))}
              </div>
           ) : paginatedReports.length === 0 ? (
-             <div className="flex-1 flex flex-col items-center justify-center p-12 text-[#64748B]">
-                <span className="material-symbols-outlined text-5xl mb-4 text-[#CBD5E1]">search_off</span>
-                <p className="font-bold text-[14px]">لا توجد تقارير مطابقة لخيارات الفلترة.</p>
+             <div className="flex-1 p-6 md:p-10">
+                <EmptyState
+                  variant="filtered-empty"
+                  title="لا توجد تقارير مطابقة لخيارات الفلترة."
+                  description="جرّب توسيع نطاق التاريخ أو إعادة ضبط الفلاتر لعرض المزيد من النتائج."
+                  actionLabel="إعادة ضبط الفلاتر"
+                  onAction={resetFilters}
+                  compact
+                  className="border-0 shadow-none min-h-0"
+                />
              </div>
           ) : (
              <div className="overflow-x-auto flex-1">

@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { parseReport, clearParseCache } from "@/lib/services/gemini-parser";
 import { useCourses } from "@/lib/hooks/useCourses";
 import { AdSelectDropdown } from "@/components/ads/AdSelectDropdown";
@@ -8,6 +8,8 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { Link, useSearchParams } from "react-router-dom";
 import { mergeParsedReportFillEmpty } from "@/lib/utils/merge-parsed-report";
+import { stripUndefined } from "@/lib/utils/strip-undefined";
+import { useToast } from "@/components/ui/Toast";
 
 function normalizeReportDate(d: unknown): string {
   if (typeof d !== "string") return "";
@@ -25,6 +27,26 @@ function isPermissionDeniedError(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
   const code = (error as { code?: unknown }).code;
   return code === "permission-denied" || code === "PERMISSION_DENIED";
+}
+
+function toArabicError(error: unknown): string {
+  if (!error || typeof error !== "object") return "حدث خطأ غير متوقع. حاول مجدداً.";
+  const code = (error as { code?: unknown }).code;
+  const message = String((error as { message?: unknown }).message || "");
+  if (code === "permission-denied" || code === "PERMISSION_DENIED")
+    return "لا تملك صلاحية حفظ هذا التقرير.";
+  if (
+    code === "unavailable" || code === "UNAVAILABLE" ||
+    message.toLowerCase().includes("network") ||
+    message.toLowerCase().includes("fetch") ||
+    message.toLowerCase().includes("offline")
+  ) return "تعذر الاتصال. تحقق من الإنترنت وحاول مجدداً.";
+  if (
+    message.toUpperCase().includes("QUOTA") ||
+    message.toLowerCase().includes("resource exhausted") ||
+    message.toLowerCase().includes("rate limit")
+  ) return "خدمة الذكاء الاصطناعي غير متاحة حالياً. جرّب الإدخال المباشر.";
+  return "حدث خطأ غير متوقع. حاول مجدداً.";
 }
 
 type AppState = "input" | "processing" | "review" | "success";
@@ -115,6 +137,8 @@ const TableSection = memo(function TableSection({ title, defaultExpanded, data, 
 // ── Main page ──────────────────────────────────────────────────────────────
 export default function SubmitReportPage() {
   const { user } = useAuth();
+  const { showToast } = useToast();
+  const errorRef = useRef<HTMLDivElement>(null);
   const courses = useCourses();
   const [searchParams, setSearchParams] = useSearchParams();
   const editId = searchParams.get("edit");
@@ -160,6 +184,12 @@ export default function SubmitReportPage() {
   }, [appState]);
 
   useEffect(() => { if (forcedDate) setFormDate(forcedDate); }, [forcedDate]);
+
+  useEffect(() => {
+    if (parseError && appState === "review" && errorRef.current) {
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [parseError, appState]);
 
   useEffect(() => {
     if (!editId || !user) {
@@ -365,7 +395,7 @@ export default function SubmitReportPage() {
       setWasDirectEntry(false);
       setAppState('review');
     } catch (error: any) {
-      setParseError(error.message || 'فشل تحليل التقرير.');
+      setParseError(toArabicError(error));
       setAppState('input');
     }
   };
@@ -376,49 +406,74 @@ export default function SubmitReportPage() {
     setIsSaving(true);
     setParseError(null);
     const reportIdToUpdate = searchParams.get("edit");
+
+    const clampInt = (x: unknown): number => Math.floor(Number(x) || 0);
+
     try {
       const reportPayload: ParsedReportData = {
         ...parsedData,
-        totalMessages: computeTotalMessagesFromFunnel(parsedData),
+        totalMessages: clampInt(computeTotalMessagesFromFunnel(parsedData)),
+        interactions: clampInt(parsedData.interactions),
+        messagesCount: clampInt(parsedData.messagesCount),
+        commentsCount: clampInt(parsedData.commentsCount),
+        jobConfusionCount: clampInt(parsedData.jobConfusionCount),
         closedDeals: [],
       };
+
       const validationError = validateTotalMessagesConsistency(reportPayload);
-      if (validationError) throw new Error(validationError);
+      if (validationError) { setParseError(validationError); return; }
+
+      if (reportPayload.interactions < 0 || reportPayload.totalMessages < 0) {
+        setParseError("لا يمكن أن تكون القيم سالبة.");
+        return;
+      }
+      if (reportPayload.interactions > reportPayload.totalMessages) {
+        setParseError(
+          `عدد التفاعلات (${reportPayload.interactions}) أكبر من إجمالي الرسائل (${reportPayload.totalMessages}). عدّل الرقم قبل الحفظ.`
+        );
+        return;
+      }
+
+      const cleanedParsed = stripUndefined(reportPayload);
+
       if (reportIdToUpdate) {
-        await updateDoc(doc(db, "reports", reportIdToUpdate), {
-          date: formDate,
-          platform: formPlatform,
-          rawText: wasDirectEntry ? null : reportText,
-          entryMode: wasDirectEntry ? "form" : "template",
-          parsedData: reportPayload,
-          confirmed: true,
-          updatedAt: serverTimestamp(),
-        });
+        await updateDoc(
+          doc(db, "reports", reportIdToUpdate),
+          stripUndefined({
+            date: formDate,
+            platform: formPlatform,
+            rawText: wasDirectEntry ? null : reportText,
+            entryMode: wasDirectEntry ? "form" : "template",
+            parsedData: cleanedParsed,
+            confirmed: true,
+            updatedAt: serverTimestamp(),
+          })
+        );
         setLastActionWasUpdate(true);
         setSearchParams({}, { replace: true });
       } else {
-        await addDoc(collection(db, "reports"), {
-          date: formDate,
-          platform: formPlatform,
-          salesRepId: user.uid,
-          salesRepName: user.name,
-          rawText: wasDirectEntry ? null : reportText,
-          entryMode: wasDirectEntry ? "form" : "template",
-          parsedData: reportPayload,
-          confirmed: true,
-          createdAt: serverTimestamp(),
-        });
+        await addDoc(
+          collection(db, "reports"),
+          stripUndefined({
+            date: formDate,
+            platform: formPlatform,
+            salesRepId: user.uid,
+            salesRepName: user.name,
+            rawText: wasDirectEntry ? null : reportText,
+            entryMode: wasDirectEntry ? "form" : "template",
+            parsedData: cleanedParsed,
+            confirmed: true,
+            createdAt: serverTimestamp(),
+          })
+        );
         setLastActionWasUpdate(false);
       }
       setAppState("success");
+      showToast("success", "تم حفظ التقرير بنجاح!");
       setIsConfirmed(false);
       setForcedDate(null);
     } catch (error: any) {
-      if (isPermissionDeniedError(error)) {
-        setParseError("غير مسموح لك بتعديل/حفظ هذا التقرير.");
-      } else {
-        setParseError(error?.message || "فشل الحفظ.");
-      }
+      setParseError(toArabicError(error));
     } finally {
       setIsSaving(false);
     }
@@ -963,6 +1018,16 @@ export default function SubmitReportPage() {
                 <p className="mt-3 text-[12px] leading-loose whitespace-pre-wrap text-[#475569] font-medium p-4 bg-white rounded-xl border border-[#E2E8F0]/50 max-h-60 overflow-y-auto">{reportText}</p>
               </div>
             </details>
+          )}
+
+          {parseError && (
+            <div
+              ref={errorRef}
+              className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3"
+            >
+              <span className="material-symbols-outlined text-red-500 text-[20px] mt-0.5">error</span>
+              <p className="text-[13px] font-bold text-red-700 leading-relaxed">{parseError}</p>
+            </div>
           )}
         </div>
       )}

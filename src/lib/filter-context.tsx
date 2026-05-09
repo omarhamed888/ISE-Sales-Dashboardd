@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './auth-context';
 
-export type DateRange = "اليوم" | "الأسبوع" | "الشهر" | "الإجمالي";
+export type DateRange = "اليوم" | "الأسبوع" | "الشهر" | "الإجمالي" | "مخصص";
 export type Platform = "all" | "whatsapp" | "messenger" | "tiktok";
 
 export interface FilterState {
@@ -9,6 +9,8 @@ export interface FilterState {
   platform: Platform;
   salesRep: string;
   adName: string;
+  bookingType: "all" | "self_booking" | "call_booking";
+  dealCategory: "all" | "core" | "side";
   customDateFrom: Date | null;
   customDateTo: Date | null;
 }
@@ -18,6 +20,8 @@ const DEFAULT_FILTER_STATE: FilterState = {
   platform: "all",
   salesRep: "all",
   adName: "all",
+  bookingType: "all",
+  dealCategory: "all",
   customDateFrom: null,
   customDateTo: null
 };

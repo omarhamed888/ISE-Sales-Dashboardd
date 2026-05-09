@@ -1,7 +1,27 @@
 import { PRODUCTS, productLabels } from "@/lib/constants/products";
 import type { DealInput } from "@/lib/services/gemini-parser";
+import { DEAL_CATEGORY_CONFIG } from "@/lib/config";
 
 const VALID_IDS = new Set(PRODUCTS.map((p) => p.id));
+const CANONICAL_LABELS: Record<string, string> = {
+  bdp_online: "BDP Online",
+  bdp_offline: "BDP Offline",
+  bdp_recorded: "BDP Recorded",
+  negotiation: "Negotiation",
+  ifp: "IFP",
+  ibn_souq: "Ibn Souq",
+  bds: "BDS",
+  book: "Book",
+  subscription: "Subscription",
+  workshop: "Workshop",
+  business_track: "Business Track",
+};
+const SIDE_PRODUCT_IDS = new Set(
+  DEAL_CATEGORY_CONFIG.sideProductIds.map((id) => normalizeForMatch(id))
+);
+const CORE_PRODUCT_IDS = new Set(
+  DEAL_CATEGORY_CONFIG.coreProductIds.map((id) => normalizeForMatch(id))
+);
 
 /** Latin + common Arabic noise for matching */
 function normalizeForMatch(s: string): string {
@@ -52,6 +72,15 @@ export function matchCourseTextToProductId(raw: string): string | null {
   if (/^book$|كتاب|الكتاب|book\b/.test(t) || /كتاب/.test(raw)) {
     return "book";
   }
+  if (/subscription|اشتراك|sub\b/.test(t)) {
+    return "subscription";
+  }
+  if (/workshop|ورشة|ورشه|ws\b/.test(t)) {
+    return "workshop";
+  }
+  if (/business[\s_-]*track|biz[\s_-]*track|مسار\s*الأعمال|مسار\s*الاعمال/.test(t)) {
+    return "business_track";
+  }
 
   return null;
 }
@@ -81,6 +110,43 @@ export function inferProductIdsFromProgramName(programName: string): string[] {
   return applyBdpExclusive(out);
 }
 
+function canonicalLabelFor(id: string): string {
+  if (CANONICAL_LABELS[id]) return CANONICAL_LABELS[id];
+  return id;
+}
+
+/**
+ * Normalize mixed product IDs/text entries into canonical IDs where possible.
+ * Also splits accidental combined entries such as "BDP Online، BDS" to two IDs.
+ */
+export function canonicalizeProductIds(rawProducts: string[]): string[] {
+  const out: string[] = [];
+  for (const raw of rawProducts) {
+    const token = String(raw || "").trim();
+    if (!token) continue;
+    const parts = splitProgramTokens(token);
+    if (parts.length > 1) {
+      for (const part of parts) {
+        const mapped = matchCourseTextToProductId(part) ?? normalizeForMatch(part);
+        if (mapped) out.push(mapped);
+      }
+      continue;
+    }
+    const mapped = matchCourseTextToProductId(token);
+    if (mapped) {
+      out.push(mapped);
+      continue;
+    }
+    out.push(normalizeForMatch(token));
+  }
+  return applyBdpExclusive(dedupeKeepOrder(out.filter(Boolean)));
+}
+
+export function buildProgramNameFromProducts(ids: string[]): string {
+  const labels = ids.map(canonicalLabelFor);
+  return labels.join("، ");
+}
+
 function applyBdpExclusive(ids: string[]): string[] {
   const iOn = ids.indexOf("bdp_online");
   const iOff = ids.indexOf("bdp_offline");
@@ -97,8 +163,7 @@ export function normalizeDealInput(
   deal: DealInput,
   inferFromProgramName = true
 ): DealInput {
-  let products = (deal.products ?? []).filter((id) => VALID_IDS.has(id));
-  products = dedupeKeepOrder(products);
+  let products = canonicalizeProductIds(deal.products ?? []);
 
   if (
     products.length === 0 &&
@@ -110,8 +175,13 @@ export function normalizeDealInput(
 
   products = applyBdpExclusive(products);
 
+  const hasOnlyLegacyKnownProducts = products.every((id) => VALID_IDS.has(id));
   const programName =
-    products.length > 0 ? productLabels(products) : deal.programName.trim();
+    products.length > 0 && hasOnlyLegacyKnownProducts
+      ? productLabels(products)
+      : products.length > 0
+        ? buildProgramNameFromProducts(products)
+        : deal.programName.trim();
   const programCount =
     products.length > 0 ? products.length : Math.max(1, deal.programCount || 1);
 
@@ -122,6 +192,22 @@ export function normalizeDealInput(
     programCount,
     dealValue: deal.dealValue,
   };
+}
+
+export type DealCategory = "core" | "side";
+
+export function classifyDealCategory(input: {
+  products?: string[];
+  programName?: string;
+}): DealCategory {
+  const normalizedProducts = canonicalizeProductIds(input.products ?? []);
+  const inferred =
+    normalizedProducts.length > 0
+      ? normalizedProducts
+      : inferProductIdsFromProgramName(input.programName || "");
+  if (inferred.length === 0) return "core";
+  if (inferred.some((id) => CORE_PRODUCT_IDS.has(id))) return "core";
+  return inferred.every((id) => SIDE_PRODUCT_IDS.has(id)) ? "side" : "core";
 }
 
 function dedupeKeepOrder(ids: string[]): string[] {

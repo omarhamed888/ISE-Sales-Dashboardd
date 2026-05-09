@@ -29,6 +29,12 @@ function platformMatches(filter: FilterState, r: any): boolean {
 
 function passesDateAndQuality(r: any, filter: FilterState): boolean {
   const key = normalizeReportDateKey(r);
+  if (filter.dateRange === "مخصص") {
+    if (!key || !filter.customDateFrom || !filter.customDateTo) return false;
+    const from = filter.customDateFrom.toISOString().slice(0, 10);
+    const to = filter.customDateTo.toISOString().slice(0, 10);
+    return isKeyInClosedRange(key, from, to);
+  }
 
   if (filter.dateRange === "الإجمالي") {
     if (!key) return false;
@@ -93,6 +99,7 @@ export function getDashboardPreviousPeriodReports(
   allReports: any[],
   filter: FilterState
 ): any[] {
+  if (filter.dateRange === "مخصص" || !filter.customDateFrom || !filter.customDateTo) return [];
   const range = getPreviousPeriodYmdRange(filter.dateRange);
   if (!range) return [];
   return filterReportsByYmdRange(allReports, filter, range.from, range.to);
@@ -101,6 +108,14 @@ export function getDashboardPreviousPeriodReports(
 /** Closed deals whose closeDate falls in the same dashboard window as reports (اليوم / الأسبوع / الشهر / الإجمالي). */
 export function filterDealsByDashboardDate(deals: any[], filter: FilterState): any[] {
   return deals.filter((d) => {
+    if (filter.bookingType && filter.bookingType !== "all") {
+      const bt = d.bookingType || (d.closureType === "call" ? "call_booking" : "self_booking");
+      if (bt !== filter.bookingType) return false;
+    }
+    if (filter.dealCategory && filter.dealCategory !== "all") {
+      const category = d.dealCategory === "side" ? "side" : "core";
+      if (category !== filter.dealCategory) return false;
+    }
     const raw =
       typeof d.closeDate === "string" && d.closeDate.trim()
         ? d.closeDate.trim()
@@ -108,6 +123,12 @@ export function filterDealsByDashboardDate(deals: any[], filter: FilterState): a
           ? d.date.trim()
           : "";
     if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return false;
+    if (filter.dateRange === "مخصص") {
+      if (!filter.customDateFrom || !filter.customDateTo) return false;
+      const from = filter.customDateFrom.toISOString().slice(0, 10);
+      const to = filter.customDateTo.toISOString().slice(0, 10);
+      return isKeyInClosedRange(raw, from, to);
+    }
     return isReportDateInDashboardRange(raw, filter.dateRange);
   });
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useFilter, DateRange, Platform } from "@/lib/filter-context";
 import { useAuth } from "@/lib/auth-context";
@@ -29,33 +29,42 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
   const [uniqueAds, setUniqueAds] = useState<string[]>([]);
   const [isLoadingProps, setIsLoadingProps] = useState(true);
 
-  useEffect(() => {
-    async function loadDynamicFilters() {
-      setIsLoadingProps(true);
-      try {
-        const [usersRes, adMetaRes] = await Promise.allSettled([
-          getDocs(query(collection(db, "users"), where("role", "==", "sales"))),
-          getDoc(doc(db, "metadata", "adNames")),
-        ]);
-        if (usersRes.status === "fulfilled") {
-          setSalesReps(usersRes.value.docs.map(d => ({ uid: d.id, name: d.data().name || "مستخدم" })));
-        } else {
-          setSalesReps([]);
-        }
-        if (adMetaRes.status === "fulfilled" && adMetaRes.value.exists() && Array.isArray(adMetaRes.value.data().names)) {
-          setUniqueAds(adMetaRes.value.data().names as string[]);
-        } else {
-          setUniqueAds([]);
-        }
-      } catch {
+  const loadDynamicFilters = useCallback(async () => {
+    setIsLoadingProps(true);
+    try {
+      const [usersRes, adMetaRes] = await Promise.allSettled([
+        getDocs(query(collection(db, "users"), where("role", "==", "sales"))),
+        getDoc(doc(db, "metadata", "adNames")),
+      ]);
+      if (usersRes.status === "fulfilled") {
+        setSalesReps(usersRes.value.docs.map((d) => ({ uid: d.id, name: d.data().name || "مستخدم" })));
+      } else {
         setSalesReps([]);
-        setUniqueAds([]);
-      } finally {
-        setIsLoadingProps(false);
       }
+      if (adMetaRes.status === "fulfilled" && adMetaRes.value.exists() && Array.isArray(adMetaRes.value.data().names)) {
+        setUniqueAds(adMetaRes.value.data().names as string[]);
+      } else {
+        setUniqueAds([]);
+      }
+    } catch {
+      setSalesReps([]);
+      setUniqueAds([]);
+    } finally {
+      setIsLoadingProps(false);
     }
-    loadDynamicFilters();
   }, []);
+
+  useEffect(() => {
+    void loadDynamicFilters();
+  }, [loadDynamicFilters]);
+
+  useEffect(() => {
+    const onAdNamesUpdated = () => {
+      void loadDynamicFilters();
+    };
+    window.addEventListener("ise-metadata-adnames-updated", onAdNamesUpdated);
+    return () => window.removeEventListener("ise-metadata-adnames-updated", onAdNamesUpdated);
+  }, [loadDynamicFilters]);
 
   return (
     <div

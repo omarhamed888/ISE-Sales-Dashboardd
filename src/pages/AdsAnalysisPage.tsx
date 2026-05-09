@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Link } from "react-router-dom";
 import { useFilter } from "@/lib/filter-context";
 import { filterReports } from "@/lib/utils/dashboard-filters";
 import { getAdsDeepStats } from "@/components/ads/AdsAggregator";
@@ -9,7 +8,6 @@ import { getAdsDeepStats } from "@/components/ads/AdsAggregator";
 import { AdsSummaryRow } from "@/components/ads/AdsSummaryRow";
 import { AdMatrixChart } from "@/components/ads/AdMatrixChart";
 import { AdCardsList } from "@/components/ads/AdCardsList";
-import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 export default function AdsAnalysisPage() {
@@ -57,25 +55,26 @@ export default function AdsAnalysisPage() {
   // Entirely empty database state
   if (allReports.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] py-20 space-y-6">
-        <div className="w-24 h-24 bg-surface-container rounded-full flex items-center justify-center text-outline/30">
-          <span className="material-symbols-outlined text-6xl">campaign</span>
-        </div>
-        <div className="text-center">
-            <h3 className="text-2xl font-black text-[#1E293B]">لا توجد حملات حالياً</h3>
-            <p className="text-[#64748B] mt-2 font-bold mb-6">ابدأ بإضافة أول تقرير مبيعات ليقوم الذكاء الاصطناعي باستخراج الحملات.</p>
-        </div>
-        <Link to="/submit-report">
-          <Button variant="gradient" className="px-10 py-4 font-black shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
-             إضافة تقرير أداء
-          </Button>
-        </Link>
+      <div className="max-w-[1500px] w-full mx-auto flex flex-col items-center justify-center min-h-[60vh] px-2">
+        <EmptyState
+          variant="getting-started"
+          icon="campaign"
+          title="لا توجد حملات حالياً"
+          description="ابدأ بإضافة أول تقرير مبيعات ليستخرج النظام أسماء الحملات من بياناتك."
+          to="/submit-report"
+          actionLabel="إضافة تقرير أداء"
+          className="max-w-lg border-0 shadow-none bg-transparent"
+        />
       </div>
     );
   }
 
   if (stats.length === 0) {
-     return <EmptyState />;
+    return (
+      <div className="max-w-[1500px] w-full mx-auto">
+        <EmptyState variant="filtered-empty" />
+      </div>
+    );
   }
 
   return (

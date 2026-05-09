@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { ParsedReportData } from "@/lib/services/gemini-parser";
 import { normalizeReportDateKey } from "@/lib/utils/report-dates";
 import { calcInteractionsFromParsedData } from "@/lib/utils/dashboard-aggregations";
+import { trackAIUsage } from "@/lib/services/ai-usage-service";
 
 export type InsightPeriod = "today" | "week" | "month" | "all";
 
@@ -64,7 +65,7 @@ export type GenerateInsightsResponse =
   | { ok: true; data: AIInsightsResult }
   | { ok: false; code: GenerateInsightsFailureCode };
 
-function reportMessages(pd: ReportDocument["parsedData"]): number {
+function reportMessages(pd: any): number {
   if (!pd) return 0;
   const tm =
     (typeof pd.totalMessages === "number" ? pd.totalMessages : null) ??
@@ -73,7 +74,7 @@ function reportMessages(pd: ReportDocument["parsedData"]): number {
   return tm;
 }
 
-function reportInteractions(pd: ReportDocument["parsedData"]): number {
+function reportInteractions(pd: any): number {
   if (!pd) return 0;
   return calcInteractionsFromParsedData(pd);
 }
@@ -361,9 +362,37 @@ ${context}
 
 const RATE_SUCCESS_KEY = "ai_insights_last_success_ms";
 const CACHE_PREFIX = "ai_insights_cache_";
+const INSIGHTS_CACHE_TTL_MS = 2 * 60 * 60 * 1000;
+const MAX_TOKEN_ESTIMATE = 8000;
+
+function getInsightApiKeys(): string[] {
+  const keys: string[] = [];
+  for (let i = 1; i <= 10; i++) {
+    const k = (import.meta.env as Record<string, string>)[`VITE_GEMINI_API_KEY_${i}`];
+    if (typeof k === "string" && k.trim()) keys.push(k.trim());
+  }
+  const legacy = import.meta.env.VITE_GEMINI_API_KEY;
+  if (typeof legacy === "string" && legacy.trim()) keys.push(legacy.trim());
+  return [...new Set(keys)];
+}
+
+function isRecoverableGeminiKeyError(error: unknown): boolean {
+  const msg = String((error as { message?: string })?.message ?? error ?? "").toLowerCase();
+  return (
+    msg.includes("api_key_invalid") ||
+    msg.includes("api key invalid") ||
+    msg.includes("api key expired") ||
+    msg.includes("key expired") ||
+    msg.includes("invalid api key")
+  );
+}
 
 function buildCacheKey(period: InsightPeriod, reports: ReportDocument[]): string {
   return `${CACHE_PREFIX}${period}_${fingerprintReports(reports)}`;
+}
+
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
 }
 
 function getCachedInsights(
@@ -402,7 +431,7 @@ function cacheInsights(
 ): void {
   try {
     const key = buildCacheKey(period, reports);
-    const expiry = Date.now() + 30 * 60 * 1000;
+    const expiry = Date.now() + INSIGHTS_CACHE_TTL_MS;
     const serializable = {
       ...result,
       generatedAt: result.generatedAt.toISOString(),
@@ -458,89 +487,110 @@ export async function generateAIInsights(params: {
     return { ok: false, code: "no_reports" };
   }
 
-  // Key rotation: try VITE_GEMINI_API_KEY_1, _2, ... then fall back to legacy key
-  const apiKey = (() => {
-    for (let i = 1; i <= 10; i++) {
-      const k = (import.meta.env as Record<string, string>)[`VITE_GEMINI_API_KEY_${i}`];
-      if (k) return k;
-    }
-    return import.meta.env.VITE_GEMINI_API_KEY || null;
-  })();
-
-  if (!apiKey) {
-    return { ok: false, code: "no_api_key" };
-  }
-
-  try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      systemInstruction: SYSTEM_INSTRUCTION,
-    });
-
-    const result = await model.generateContent(USER_PROMPT_TEMPLATE(contextText));
-    const text = result.response.text().trim();
-
-    let parsed: {
-      summary: string;
-      criticalIssues: AIInsightItem[];
-      positivePoints: AIInsightItem[];
-      recommendations: AIRecommendation[];
-    };
-
-    try {
-      const clean = text
-        .replace(/^```json\s*/i, "")
-        .replace(/^```\s*/i, "")
-        .replace(/\s*```$/i, "")
-        .trim();
-      parsed = JSON.parse(clean);
-    } catch {
-      console.error("Failed to parse Gemini insights JSON:", text);
-      return { ok: false, code: "bad_json" };
-    }
-
-    const totalInteractions = reports.reduce(
-      (s, r) => s + reportInteractions(r.parsedData),
-      0
-    );
-
-    const insightsResult: AIInsightsResult = {
+  let finalContext = contextText;
+  let tokenEstimate = estimateTokens(contextText);
+  if (tokenEstimate > MAX_TOKEN_ESTIMATE) {
+    const reducedReports = [...reports]
+      .sort((a, b) => reportMessages(b.parsedData) - reportMessages(a.parsedData))
+      .slice(0, 10);
+    finalContext = `ملاحظة: البيانات ملخصة لأهم العناصر\n\n${buildInsightsContext({
       period,
       periodLabel,
       dateFrom,
       dateTo,
-      criticalIssues: parsed.criticalIssues ?? [],
-      positivePoints: parsed.positivePoints ?? [],
-      recommendations: parsed.recommendations ?? [],
-      summary: parsed.summary ?? "",
-      generatedAt: new Date(),
-      dataSnapshot: {
-        totalMessages,
-        totalInteractions,
-        conversionRate:
-          totalMessages > 0
-            ? Math.min(
-                100,
-                (totalInteractions / totalMessages) * 100
-              )
-            : 0,
-        reportsCount: reports.length,
-        salesRepsCount: new Set(reports.map((r) => r.salesRepId).filter(Boolean)).size,
-      },
-    };
-
-    try {
-      localStorage.setItem(RATE_SUCCESS_KEY, Date.now().toString());
-    } catch {
-      /* ignore */
-    }
-
-    cacheInsights(period, reports, insightsResult);
-
-    return { ok: true, data: insightsResult };
-  } catch (error) {
-    console.error("Gemini insights error:", error);
-    return { ok: false, code: "gemini_failed" };
+      reports: reducedReports,
+    })}`;
+    tokenEstimate = estimateTokens(finalContext);
   }
+
+  const apiKeys = getInsightApiKeys();
+  if (apiKeys.length === 0) {
+    return { ok: false, code: "no_api_key" };
+  }
+
+  let lastError: unknown = null;
+  for (const apiKey of apiKeys) {
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash",
+        systemInstruction: SYSTEM_INSTRUCTION,
+      });
+
+      const result = await model.generateContent(USER_PROMPT_TEMPLATE(finalContext));
+      const text = result.response.text().trim();
+
+      let parsed: {
+        summary: string;
+        criticalIssues: AIInsightItem[];
+        positivePoints: AIInsightItem[];
+        recommendations: AIRecommendation[];
+      };
+
+      try {
+        const clean = text
+          .replace(/^```json\s*/i, "")
+          .replace(/^```\s*/i, "")
+          .replace(/\s*```$/i, "")
+          .trim();
+        parsed = JSON.parse(clean);
+      } catch {
+        console.error("Failed to parse Gemini insights JSON:", text);
+        await trackAIUsage({ type: "insights", tokenEstimate, success: false });
+        return { ok: false, code: "bad_json" };
+      }
+
+      const totalInteractions = reports.reduce(
+        (s, r) => s + reportInteractions(r.parsedData),
+        0
+      );
+
+      const insightsResult: AIInsightsResult = {
+        period,
+        periodLabel,
+        dateFrom,
+        dateTo,
+        criticalIssues: parsed.criticalIssues ?? [],
+        positivePoints: parsed.positivePoints ?? [],
+        recommendations: parsed.recommendations ?? [],
+        summary: parsed.summary ?? "",
+        generatedAt: new Date(),
+        dataSnapshot: {
+          totalMessages,
+          totalInteractions,
+          conversionRate:
+            totalMessages > 0
+              ? Math.min(
+                  100,
+                  (totalInteractions / totalMessages) * 100
+                )
+              : 0,
+          reportsCount: reports.length,
+          salesRepsCount: new Set(reports.map((r) => r.salesRepId).filter(Boolean)).size,
+        },
+      };
+
+      try {
+        localStorage.setItem(RATE_SUCCESS_KEY, Date.now().toString());
+      } catch {
+        /* ignore */
+      }
+
+      cacheInsights(period, reports, insightsResult);
+      await trackAIUsage({ type: "insights", tokenEstimate, success: true });
+      return { ok: true, data: insightsResult };
+    } catch (error) {
+      lastError = error;
+      if (isRecoverableGeminiKeyError(error)) {
+        continue;
+      }
+      console.error("Gemini insights error:", error);
+      await trackAIUsage({ type: "insights", tokenEstimate, success: false });
+      return { ok: false, code: "gemini_failed" };
+    }
+  }
+
+  console.error("Gemini insights error: all configured keys failed", lastError);
+  await trackAIUsage({ type: "insights", tokenEstimate, success: false });
+  return { ok: false, code: "no_api_key" };
 }

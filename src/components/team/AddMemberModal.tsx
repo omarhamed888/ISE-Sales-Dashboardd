@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, serverTimestamp, setDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { useCourses } from "@/lib/hooks/useCourses";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { initializeApp, deleteApp } from "firebase/app";
 
 interface AddMemberModalProps {
   isOpen: boolean;
@@ -17,6 +19,27 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
   const [role, setRole] = useState("sales");
   const [teamName, setTeamName] = useState("");
   const [programTrack, setProgramTrack] = useState("");
+  const [password, setPassword] = useState("");
+  const firebaseConfig = {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  };
+
+  const createAuthUser = async (memberEmail: string, memberPassword: string) => {
+    const secondaryApp = initializeApp(firebaseConfig, `secondary-add-member-${Date.now()}`);
+    const secondaryAuth = getAuth(secondaryApp);
+    try {
+      const cred = await createUserWithEmailAndPassword(secondaryAuth, memberEmail, memberPassword);
+      return cred.user.uid;
+    } finally {
+      await deleteApp(secondaryApp);
+    }
+  };
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -37,9 +60,17 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
         return;
       }
 
-      await addDoc(collection(db, "users"), {
+      if (password.trim().length < 6) {
+        setError("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
+        setLoading(false);
+        return;
+      }
+
+      const uid = await createAuthUser(email.toLowerCase().trim(), password.trim());
+      await setDoc(doc(db, "users", uid), {
         name: name.trim(),
         email: email.toLowerCase().trim(),
+        authUid: uid,
         role,
         isActive: true,
         teamName: teamName.trim() || null,
@@ -96,6 +127,20 @@ export function AddMemberModal({ isOpen, onClose }: AddMemberModalProps) {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 transition-all placeholder:text-[#94A3B8]"
               placeholder="employee@gmail.com"
+              disabled={loading}
+              dir="ltr"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[13px] font-bold text-[#1E293B] mb-2">كلمة المرور</label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 transition-all placeholder:text-[#94A3B8]"
+              placeholder="6 أحرف على الأقل"
               disabled={loading}
               dir="ltr"
             />

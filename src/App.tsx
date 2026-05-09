@@ -1,19 +1,22 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { lazy, Suspense } from "react";
 import { useAuth } from '@/lib/auth-context';
-import { AppLayout } from '@/components/layout/AppLayout';
-import LoginPage from '@/pages/LoginPage';
-import DashboardPage from '@/pages/DashboardPage';
-import SubmitReportPage from '@/pages/SubmitReportPage';
-import ReportsPage from '@/pages/ReportsPage';
-import AdsAnalysisPage from '@/pages/AdsAnalysisPage';
-import TeamPage from '@/pages/TeamPage';
-import SettingsPage from '@/pages/SettingsPage';
-import MyReportsPage from '@/pages/MyReportsPage';
-import InsightsPage from '@/pages/InsightsPage';
-import DealsPage from '@/pages/DealsPage';
-import MyDealsPage from '@/pages/MyDealsPage';
-import AccessPage from '@/pages/AccessPage';
-import DealsAnalyticsPage from '@/pages/DealsAnalyticsPage';
+const AppLayout = lazy(() => import('@/components/layout/AppLayout').then((m) => ({ default: m.AppLayout })));
+const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
+const SubmitReportPage = lazy(() => import('@/pages/SubmitReportPage'));
+const ReportsPage = lazy(() => import('@/pages/ReportsPage'));
+const AdsAnalysisPage = lazy(() => import('@/pages/AdsAnalysisPage'));
+const TeamPage = lazy(() => import('@/pages/TeamPage'));
+const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
+const MyReportsPage = lazy(() => import('@/pages/MyReportsPage'));
+const InsightsPage = lazy(() => import('@/pages/InsightsPage'));
+const DealsPage = lazy(() => import('@/pages/DealsPage'));
+const MyDealsPage = lazy(() => import('@/pages/MyDealsPage'));
+const AccessPage = lazy(() => import('@/pages/AccessPage'));
+const DealsAnalyticsPage = lazy(() => import('@/pages/DealsAnalyticsPage'));
+const AdsManagementPage = lazy(() => import('@/pages/AdsManagementPage'));
+const AdInsightsPage = lazy(() => import('@/pages/AdInsightsPage'));
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -53,6 +56,7 @@ function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
 
 export default function App() {
   return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>}>
     <Routes>
       {/* Login - no layout */}
       <Route path="/login" element={<LoginPage />} />
@@ -81,6 +85,8 @@ export default function App() {
       {/* Access Management (admin + superadmin) */}
       <Route path="/access" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><AccessPage /></AppLayout></ProtectedRoute>} />
       <Route path="/deals-analytics" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><DealsAnalyticsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/ads-management" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><AdsManagementPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/ads-management/:id" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><AdInsightsPage /></AppLayout></ProtectedRoute>} />
 
       {/* Sales Routes */}
       <Route path="/submit-report" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><SubmitReportPage /></AppLayout></ProtectedRoute>} />
@@ -91,5 +97,6 @@ export default function App() {
       {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 }

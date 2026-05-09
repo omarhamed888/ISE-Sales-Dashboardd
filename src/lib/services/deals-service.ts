@@ -1,13 +1,29 @@
-import { collection, doc, writeBatch, serverTimestamp, query, where, orderBy, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, doc, serverTimestamp, query, where, orderBy, getDocs, updateDoc, deleteDoc, limit, setDoc } from "firebase/firestore";
+import { stripUndefined } from "@/lib/utils/strip-undefined";
 import { db } from "@/lib/firebase";
 import type { DealInput } from "./gemini-parser";
 import { getOrCreateCustomerId } from "./customers-service";
-import { normalizeDealInput } from "@/lib/utils/normalize-course-names";
+import { classifyDealCategory, normalizeDealInput } from "@/lib/utils/normalize-course-names";
 import type { Deal } from "@/lib/types";
 
 function getTodayString(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+async function loadCoursesCatalog(): Promise<{
+  validIds: Set<string>;
+  labelById: Map<string, string>;
+}> {
+  const snap = await getDocs(collection(db, "courses"));
+  const validIds = new Set<string>();
+  const labelById = new Map<string, string>();
+  for (const d of snap.docs) {
+    validIds.add(d.id);
+    const name = String((d.data() as { name?: unknown }).name || "").trim();
+    if (name) labelById.set(d.id, name);
+  }
+  return { validIds, labelById };
 }
 
 export async function saveDeals(
@@ -16,12 +32,26 @@ export async function saveDeals(
   salesRepName: string,
   teamName?: string
 ): Promise<void> {
-  const batch = writeBatch(db);
-
+  const coursesCatalog = await loadCoursesCatalog();
   for (const deal of deals) {
     const nd = normalizeDealInput(deal, true);
-    const dealRef = doc(collection(db, "deals"));
-
+    const sanitizedProducts = (nd.products ?? []).filter((id) => coursesCatalog.validIds.has(id));
+    const sanitizedProgramName =
+      sanitizedProducts.length > 0
+        ? sanitizedProducts.map((id) => coursesCatalog.labelById.get(id) || id).join("، ")
+        : nd.programName;
+    const sanitizedProgramCount =
+      sanitizedProducts.length > 0 ? sanitizedProducts.length : Math.max(1, Number(nd.programCount) || 1);
+    const sanitizedDealInput: DealInput = {
+      ...nd,
+      products: sanitizedProducts,
+      programName: sanitizedProgramName,
+      programCount: sanitizedProgramCount,
+    };
+    const contactAttempts = normalizeContactAttempts(nd.contactAttempts);
+    if (contactAttempts < 1) {
+      throw new Error("عدد مرات التواصل يجب أن يكون رقمًا صحيحًا أكبر من أو يساوي 1.");
+    }
     const closeDateStr = (deal.closeDate && deal.closeDate.trim()) || getTodayString();
     let cycleDays: number | null = null;
     if (nd.firstContactDate && nd.firstContactDate.trim()) {
@@ -39,29 +69,85 @@ export async function saveDeals(
 
     const customerId =
       nd.customerId?.trim() ||
-      (await getOrCreateCustomerId(nd.customerName));
+      (await getOrCreateCustomerId(nd.customerName, salesRepId));
 
-    batch.set(dealRef, {
-      salesRepId,
-      salesRepName,
-      teamName: teamName || null,
-      date: closeDateStr,
-      customerId,
-      customerName: nd.customerName,
-      adSource: nd.adSource,
-      programName: nd.programName,
-      programCount: nd.programCount,
-      dealValue: nd.dealValue,
-      firstContactDate: nd.firstContactDate || null,
-      closeDate: closeDateStr,
-      closingCycleDays: cycleDays,
-      products: nd.products ?? [],
-      closureType: nd.closureType ?? "call",
-      createdAt: serverTimestamp(),
-    });
+    const existingSnap = await getDocs(
+      query(
+        collection(db, "deals"),
+        where("salesRepId", "==", salesRepId),
+        where("customerId", "==", customerId),
+        limit(1)
+      )
+    );
+    const bookingType = sanitizedDealInput.bookingType
+      ?? (sanitizedDealInput.closureType === "call" ? "call_booking" : "self_booking");
+    const incomingCategory = sanitizedDealInput.dealCategory ?? classifyDealCategory(sanitizedDealInput);
+
+    if (!existingSnap.empty) {
+      const existing = existingSnap.docs[0];
+      const data = existing.data() as Partial<Deal>;
+      const existingProducts = Array.isArray(data.products) ? data.products : [];
+      const incomingProducts = Array.isArray(sanitizedDealInput.products) ? sanitizedDealInput.products : [];
+      const mergedProducts = Array.from(new Set([...existingProducts, ...incomingProducts]))
+        .filter((id) => coursesCatalog.validIds.has(id));
+      const mergedProgramCount = Math.max(1, mergedProducts.length);
+      const mergedProgramName = mergedProducts.length > 0
+        ? mergedProducts.map((id) => coursesCatalog.labelById.get(id) || id).join("، ")
+        : (sanitizedDealInput.programName || data.programName || "غير محدد");
+      const existingRevenue = Number(data.dealValue) || 0;
+      const existingAttempts = normalizeContactAttempts(data.contactAttempts);
+      const existingCategory = data.dealCategory === "side" ? "side" : "core";
+      const mergedCategory = existingCategory === "core" || incomingCategory === "core" ? "core" : "side";
+
+      await updateDoc(
+        existing.ref,
+        stripUndefined({
+          salesRepName,
+          teamName: teamName || data.teamName || null,
+          customerName: sanitizedDealInput.customerName || data.customerName || "",
+          adSource: sanitizedDealInput.adSource || data.adSource || "",
+          products: mergedProducts,
+          programName: mergedProgramName,
+          programCount: mergedProgramCount,
+          dealValue: existingRevenue + (Number(sanitizedDealInput.dealValue) || 0),
+          contactAttempts: existingAttempts + contactAttempts,
+          bookingType,
+          dealCategory: mergedCategory,
+          firstContactDate: data.firstContactDate || sanitizedDealInput.firstContactDate || null,
+          closeDate: closeDateStr,
+          date: closeDateStr,
+          closingCycleDays: cycleDays,
+          updatedAt: serverTimestamp(),
+        })
+      );
+      continue;
+    }
+
+    const dealRef = doc(collection(db, "deals"));
+    await setDoc(
+      dealRef,
+      stripUndefined({
+        salesRepId,
+        salesRepName,
+        teamName: teamName || null,
+        date: closeDateStr,
+        customerId,
+        customerName: sanitizedDealInput.customerName,
+        adSource: sanitizedDealInput.adSource,
+        programName: sanitizedDealInput.programName,
+        programCount: sanitizedDealInput.programCount,
+        dealValue: sanitizedDealInput.dealValue,
+        firstContactDate: sanitizedDealInput.firstContactDate || null,
+        contactAttempts,
+        dealCategory: incomingCategory,
+        closeDate: closeDateStr,
+        closingCycleDays: cycleDays,
+        products: sanitizedDealInput.products ?? [],
+        bookingType,
+        createdAt: serverTimestamp(),
+      })
+    );
   }
-
-  await batch.commit();
 }
 
 function toMs(value: unknown): number {
@@ -75,6 +161,18 @@ function toMs(value: unknown): number {
     return dt.getTime();
   }
   return 0;
+}
+
+function isPermissionDeniedError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const code = (error as { code?: unknown }).code;
+  return code === "permission-denied" || code === "PERMISSION_DENIED";
+}
+
+function normalizeContactAttempts(value: unknown): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.round(n));
 }
 
 export async function getMyDeals(
@@ -121,11 +219,14 @@ export async function updateDeal(
     programCount: number;
     dealValue: number;
     firstContactDate: string;
+    contactAttempts: number;
     closeDate: string;
     products?: string[];
-    closureType?: "call" | "self";
+    bookingType?: "self_booking" | "call_booking";
+    dealCategory?: "core" | "side";
   }
 ): Promise<void> {
+  const coursesCatalog = await loadCoursesCatalog();
   let cycleDays: number | null = null;
   const nd = normalizeDealInput(
     {
@@ -135,10 +236,12 @@ export async function updateDeal(
       programCount: patch.programCount,
       dealValue: patch.dealValue,
       firstContactDate: patch.firstContactDate,
+      contactAttempts: patch.contactAttempts,
       products: patch.products ?? [],
-      closureType: patch.closureType ?? "call",
+      bookingType: patch.bookingType ?? "self_booking",
+      dealCategory: patch.dealCategory ?? "core",
     },
-    patch.products !== undefined
+    true
   );
 
   if (nd.firstContactDate?.trim()) {
@@ -159,22 +262,52 @@ export async function updateDeal(
     programCount: Math.max(1, Number(nd.programCount) || 1),
     dealValue: Math.max(0, Number(nd.dealValue) || 0),
     firstContactDate: nd.firstContactDate?.trim() || null,
+    contactAttempts: normalizeContactAttempts(nd.contactAttempts),
+    closeDate: patch.closeDate?.trim() || null,
+    date: patch.closeDate?.trim() || null,
     closingCycleDays: cycleDays,
     updatedAt: serverTimestamp(),
   };
 
-  if (patch.products !== undefined) {
-    payload.products = nd.products ?? [];
+  const sanitizedProducts = (nd.products ?? []).filter((id) => coursesCatalog.validIds.has(id));
+  payload.products = sanitizedProducts;
+  payload.programName =
+    sanitizedProducts.length > 0
+      ? sanitizedProducts.map((id) => coursesCatalog.labelById.get(id) || id).join("، ")
+      : nd.programName.trim();
+  payload.programCount =
+    sanitizedProducts.length > 0 ? sanitizedProducts.length : Math.max(1, Number(nd.programCount) || 1);
+  if ((payload.contactAttempts as number) < 1) {
+    throw new Error("عدد مرات التواصل يجب أن يكون رقمًا صحيحًا أكبر من أو يساوي 1.");
   }
-  if (patch.closureType !== undefined) {
-    payload.closureType = nd.closureType ?? "call";
+  if (patch.bookingType !== undefined) {
+    payload.bookingType = patch.bookingType;
+  }
+  if (patch.dealCategory !== undefined) {
+    payload.dealCategory = patch.dealCategory;
+  } else {
+    payload.dealCategory = nd.dealCategory ?? classifyDealCategory(nd);
   }
 
-  await updateDoc(doc(db, "deals", dealId), payload);
+  try {
+    await updateDoc(doc(db, "deals", dealId), stripUndefined(payload));
+  } catch (error) {
+    if (isPermissionDeniedError(error)) {
+      throw new Error("غير مسموح لك بتعديل هذه الصفقة.");
+    }
+    throw error;
+  }
 }
 
 export async function deleteDeal(dealId: string): Promise<void> {
-  await deleteDoc(doc(db, "deals", dealId));
+  try {
+    await deleteDoc(doc(db, "deals", dealId));
+  } catch (error) {
+    if (isPermissionDeniedError(error)) {
+      throw new Error("غير مسموح لك بحذف هذه الصفقة.");
+    }
+    throw error;
+  }
 }
 
 export interface DealCycleStats {

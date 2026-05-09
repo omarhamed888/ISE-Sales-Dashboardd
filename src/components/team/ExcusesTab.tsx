@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useToast } from "@/components/ui/Toast";
 
 export function ExcusesTab({ excuses, users }: { excuses: any[], users: any[] }) {
+    const { showToast } = useToast();
     const [filter, setFilter] = useState("all");
     const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -17,7 +19,7 @@ export function ExcusesTab({ excuses, users }: { excuses: any[], users: any[] })
             await updateDoc(doc(db, "excuses", id), { status: newStatus });
         } catch (err) {
             console.error("Failed to update excuse", err);
-            alert("حدث خطأ أثناء تعديل حالة العذر");
+            showToast("error", "حدث خطأ، حاول مرة أخرى");
         } finally {
             setActionLoading(null);
         }
@@ -67,7 +69,7 @@ export function ExcusesTab({ excuses, users }: { excuses: any[], users: any[] })
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredExcuses.map(excuse => {
                         const statusUI = getStatusUI(excuse.status);
-                        const user = users.find(u => u.id === excuse.userId);
+                        const user = users.find(u => u.id === excuse.salesRepId);
                         const displayName = user?.name || excuse.userName || "غير مسجل";
                         
                         return (

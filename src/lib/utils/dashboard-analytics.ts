@@ -3,6 +3,8 @@ import {
   calcInteractionsFromParsedData,
   calcConversionRate,
 } from "@/lib/utils/dashboard-aggregations";
+import type { PlatformStats, DailyBucket, SalesRepBucket, LeakPieSlice } from "@/lib/types";
+export type { DailyBucket, SalesRepBucket, LeakPieSlice, PlatformStats };
 import {
   normalizeReportDateKey,
   formatReportDateArabicShort,
@@ -31,12 +33,6 @@ export function classifyPlatform(platformRaw: string | undefined): PlatformKey {
   return "messenger";
 }
 
-export interface PlatformStats {
-  whatsapp: { messages: number; interactions: number };
-  messenger: { messages: number; interactions: number };
-  tiktok: { messages: number; interactions: number };
-}
-
 export function getPlatformStats(reports: any[]): PlatformStats {
   const out: PlatformStats = {
     whatsapp: { messages: 0, interactions: 0 },
@@ -47,6 +43,7 @@ export function getPlatformStats(reports: any[]): PlatformStats {
     const pd = r.parsedData;
     if (!pd) return;
     const msgs =
+      // We intentionally trust parsed totalMessages so Messenger greeting-stage leakage stays included in KPI totals.
       (typeof pd.totalMessages === "number" ? pd.totalMessages : null) ??
       pd.summary?.totalMessages ??
       0;
@@ -122,15 +119,6 @@ export function buildConversionFunnelBars(cur: ReturnType<typeof calculateAggreg
   });
 }
 
-export interface DailyBucket {
-  dateKey: string;
-  label: string;
-  labelDayMonth: string;
-  msgs: number;
-  interactions: number;
-  conversionRate: number;
-}
-
 export function buildDailyBuckets(reports: any[]): DailyBucket[] {
   const map = new Map<string, DailyBucket>();
   reports.forEach((r) => {
@@ -159,14 +147,6 @@ export function buildDailyBuckets(reports: any[]): DailyBucket[] {
     e.conversionRate = calcConversionRate(e.interactions, e.msgs);
   });
   return list;
-}
-
-export interface SalesRepBucket {
-  name: string;
-  displayName: string;
-  messages: number;
-  interactions: number;
-  conversionRate: number;
 }
 
 function shortRepName(name: string): string {
@@ -200,13 +180,6 @@ export function buildSalesRepBuckets(reports: any[]): SalesRepBucket[] {
       conversionRate: calcConversionRate(v.interactions, v.messages),
     }))
     .sort((a, b) => b.messages - a.messages);
-}
-
-export interface LeakPieSlice {
-  name: string;
-  value: number;
-  pct: number;
-  fill: string;
 }
 
 /** Percentages are share of sum of included slice values (interactions uses KPI aggregate for consistency). */

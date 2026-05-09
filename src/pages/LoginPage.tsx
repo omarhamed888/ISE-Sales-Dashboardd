@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
+import { useAppConfig } from "@/lib/hooks/useAppConfig";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { signInWithGoogle, signInWithEmail } = useAuth();
-  const [errorStatus, setErrorStatus] = useState<"none" | "unregistered" | "wrong-credentials" | "other">("none");
+  const { config } = useAppConfig();
+  const [errorStatus, setErrorStatus] = useState<"none" | "unregistered" | "disabled" | "wrong-credentials" | "other">("none");
   const [isLoading, setIsLoading] = useState(false);
 
   // Email/password form
@@ -23,6 +25,8 @@ export default function LoginPage() {
       console.error("Login error:", err);
       if (err.message === "unregistered") {
         setErrorStatus("unregistered");
+      } else if (err.message === "disabled") {
+        setErrorStatus("disabled");
       } else if (
         err.code === "auth/wrong-password" ||
         err.code === "auth/user-not-found" ||
@@ -48,6 +52,8 @@ export default function LoginPage() {
       console.error("Login error:", err);
       if (err.message === "unregistered") {
         setErrorStatus("unregistered");
+      } else if (err.message === "disabled") {
+        setErrorStatus("disabled");
       } else {
         setErrorStatus("other");
       }
@@ -63,8 +69,8 @@ export default function LoginPage() {
     >
       <div className="flex-grow flex items-center justify-center p-6 relative overflow-hidden">
         {/* Soft decorative blobs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#2563EB]/5 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[#10B981]/8 rounded-full blur-[120px] pointer-events-none" />
+        <div className="ios-blur-blob absolute top-1/4 left-1/4 w-96 h-96 bg-[#2563EB]/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="ios-blur-blob absolute bottom-1/4 right-1/4 w-80 h-80 bg-[#10B981]/8 rounded-full blur-[120px] pointer-events-none" />
 
         {/* Login Card */}
         <div className="w-full max-w-[440px] z-10 transition-all duration-500 animate-in fade-in zoom-in-95">
@@ -72,16 +78,16 @@ export default function LoginPage() {
             <div className="p-10 flex flex-col items-center">
 
               {/* Unregistered Error State */}
-              {errorStatus === "unregistered" ? (
+              {errorStatus === "unregistered" || errorStatus === "disabled" ? (
                 <div className="flex flex-col items-center w-full animate-in fade-in zoom-in-95 pb-4">
                   <div className="w-24 h-24 bg-[#EF4444]/10 rounded-[24px] flex items-center justify-center mb-6">
                     <span className="material-symbols-outlined text-[48px] text-[#EF4444]">cancel</span>
                   </div>
                   <h2 className="text-2xl font-black text-[#0F172A] mb-3 tracking-tight">
-                    هذا الحساب غير مسجل في النظام
+                    {errorStatus === "disabled" ? "تم تعطيل حسابك" : "هذا الحساب غير مسجل في النظام"}
                   </h2>
                   <p className="text-sm text-[#64748B] leading-relaxed">
-                    تواصل مع الإدارة لتفعيل حسابك
+                    {errorStatus === "disabled" ? "تواصل مع الإدارة لإعادة تفعيل الحساب" : "تواصل مع الإدارة لتفعيل حسابك"}
                   </p>
                   <button
                     onClick={() => setErrorStatus("none")}
@@ -98,7 +104,7 @@ export default function LoginPage() {
                   </div>
 
                   <h1 className="text-3xl font-black text-[#0F172A] mb-1 tracking-tight" dir="ltr">
-                    BDI Sales Intelligence
+                    {config.companyName}
                   </h1>
                   <p className="text-sm text-[#64748B] font-medium mb-8">
                     منصة تحليل أداء المبيعات

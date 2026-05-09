@@ -30,3 +30,10 @@ firebase-debug.log
 
 # mcp
 mcp.json
+
+# sensitive
+Keys/
+.continue/
+.agents/
+.claude/settings.local.json
+skills-lock.json

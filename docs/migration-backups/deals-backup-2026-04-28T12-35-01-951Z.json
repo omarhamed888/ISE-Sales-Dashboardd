@@ -1,0 +1,5175 @@
+[
+  {
+    "id": "08v52kWcTrPl17TsHVmz",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-17",
+    "customerId": "FgqBpNny3pt4oozFpdQU",
+    "customerName": "Basma Hussien",
+    "adSource": "Old ",
+    "programName": "Ibn Souq",
+    "programCount": 1,
+    "dealValue": 5900,
+    "firstContactDate": null,
+    "closeDate": "2026-04-17",
+    "closingCycleDays": null,
+    "products": [
+      "ibn_souq"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776377061,
+      "_nanoseconds": 139000000
+    }
+  },
+  {
+    "id": "0kBCDhu4c679LF6i6aqo",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-08",
+    "customerId": "YcELHOuLeQhdz3hOxPoz",
+    "customerName": "نهي محمد ابراهيم عبدالسميع",
+    "adSource": "هل تقيس تقدمك بعدد الشهادات",
+    "programName": "BDP Recorded",
+    "programCount": 1,
+    "dealValue": 8000,
+    "firstContactDate": "2026-03-21",
+    "closeDate": "2026-04-08",
+    "closingCycleDays": 18,
+    "products": [
+      "bdp_recorded"
+    ],
+    "createdAt": {
+      "_seconds": 1776727051,
+      "_nanoseconds": 128000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729479,
+      "_nanoseconds": 533000000
+    }
+  },
+  {
+    "id": "0rTwBA6FUWON82ZPC6ys",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-12",
+    "customerId": "tlP5KNkPfYG0bKwhBPNq",
+    "customerName": "احمد نبيل سلطان خطاب",
+    "adSource": "3شهور كفيله",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-07",
+    "closeDate": "2026-04-12",
+    "closingCycleDays": 5,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776727776,
+      "_nanoseconds": 712000000
+    }
+  },
+  {
+    "id": "0ufv34vyCMstnm59xziY",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-03",
+    "customerId": "oJy4WNy8WYKTzkhKGvuI",
+    "customerName": "يوسف رامي عباس السيد",
+    "adSource": "ماهو ال BD ؟",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-01",
+    "closeDate": "2026-04-03",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776712783,
+      "_nanoseconds": 810000000
+    }
+  },
+  {
+    "id": "1Jf3bhToFyFCkypWPlBf",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-13",
+    "customerName": "ايمان زهران احمد عبد الوهاب",
+    "programCount": 1,
+    "dealValue": 8000,
+    "closeDate": "2026-04-13",
+    "createdAt": {
+      "_seconds": 1776116911,
+      "_nanoseconds": 87000000
+    },
+    "closingCycleDays": 373,
+    "firstContactDate": "2025-04-05",
+    "adSource": "خط روان",
+    "programName": "BDP Online",
+    "closureType": "self",
+    "products": [
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776776653,
+      "_nanoseconds": 53000000
+    }
+  },
+  {
+    "id": "1Lp6dl3F5NrtRGaNhHyY",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-21",
+    "customerId": "eLFxeXTCXUrsE6VjUNW3",
+    "customerName": "خالد محمد غنيوة",
+    "adSource": "ال business developer  هو واحد / واتساب",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-07",
+    "closeDate": "2026-04-21",
+    "closingCycleDays": 14,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776954025,
+      "_nanoseconds": 312000000
+    }
+  },
+  {
+    "id": "1fEzMd9kV5z0OuJxDBNo",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "date": "2026-04-10",
+    "customerName": "هاني محمود محمود أبو خوخ",
+    "programCount": 1,
+    "dealValue": 3950,
+    "firstContactDate": "2025-11-11",
+    "closeDate": "2026-04-10",
+    "closingCycleDays": 150,
+    "createdAt": {
+      "_seconds": 1775773010,
+      "_nanoseconds": 117000000
+    },
+    "programName": "Negotiation",
+    "adSource": "واتساب",
+    "closureType": "call",
+    "products": [
+      "negotiation"
+    ],
+    "updatedAt": {
+      "_seconds": 1776619894,
+      "_nanoseconds": 836000000
+    }
+  },
+  {
+    "id": "1hYgINNZacKjXcs9mNoH",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-26",
+    "customerId": "7JRoy36NO47Ia0k2RYfn",
+    "customerName": "هبة محمد السيد ",
+    "adSource": "واتساب ",
+    "programName": "wofm80729vaf1r9fq6a1",
+    "programCount": 1,
+    "dealValue": 500,
+    "firstContactDate": "2026-04-26",
+    "closeDate": "2026-04-26",
+    "closingCycleDays": 0,
+    "products": [
+      "wofm80729vaf1r9fq6a1"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777236031,
+      "_nanoseconds": 57000000
+    }
+  },
+  {
+    "id": "28VfS3o0UeRj4ZIB0PSA",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "date": "2026-04-10",
+    "customerName": "نورهان رمضان عبدالمنعم علي",
+    "adSource": "اعلان تعرف ان الطلب علي وظيفة",
+    "dealValue": 18500,
+    "firstContactDate": "2024-10-07",
+    "closeDate": "2026-04-10",
+    "closingCycleDays": 550,
+    "createdAt": {
+      "_seconds": 1775772550,
+      "_nanoseconds": 407000000
+    },
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "closureType": "call",
+    "products": [
+      "bdp_offline"
+    ],
+    "updatedAt": {
+      "_seconds": 1776597685,
+      "_nanoseconds": 85000000
+    }
+  },
+  {
+    "id": "2DbbxH9ALfqzjiubmdcv",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerId": "UFwzu3vxVt34ijQ8oZbS",
+    "customerName": "محمد السيد علي عبدالله",
+    "adSource": "whatsapp",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-27",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 19,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776206198,
+      "_nanoseconds": 291000000
+    }
+  },
+  {
+    "id": "2j5khDd6AIfNmDrx3g8B",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "UkoVaiyPRBFMDTQul2J4",
+    "customerName": "مرام مدحت عبدالمنطلب محمد ",
+    "adSource": "ليست كل البرامج التدريبيه",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-15",
+    "closeDate": "2026-04-18",
+    "closingCycleDays": 3,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776728687,
+      "_nanoseconds": 515000000
+    }
+  },
+  {
+    "id": "2qOiVZOyCzMnKWBx57ll",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-02",
+    "customerId": "zHRcuDgA6xNU9VFQaiH0",
+    "customerName": "عبدالعال ذكي عبدالعال ",
+    "adSource": "بدون اعلان",
+    "programName": "BDP Online، BDS",
+    "programCount": 2,
+    "dealValue": 12500,
+    "firstContactDate": "2026-03-30",
+    "closeDate": "2026-04-02",
+    "closingCycleDays": 3,
+    "products": [
+      "bdp_online",
+      "bds"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776712164,
+      "_nanoseconds": 665000000
+    }
+  },
+  {
+    "id": "2st4xzN5GdQJCHLTqLD5",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-09",
+    "customerId": "EnJy1yTsVpSG5h5MB3SI",
+    "customerName": "محمد اسامه عبد المجيد",
+    "programName": "IFP",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2025-05-15",
+    "closeDate": "2026-04-09",
+    "closingCycleDays": 329,
+    "products": [
+      "ifp"
+    ],
+    "createdAt": {
+      "_seconds": 1776727315,
+      "_nanoseconds": 933000000
+    },
+    "adSource": "Upgrade",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729405,
+      "_nanoseconds": 933000000
+    }
+  },
+  {
+    "id": "3joCPsF4VFC1HJf6l9cl",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-14",
+    "customerId": "BNav1ktN5RRlNqM04tT6",
+    "customerName": "Joseph Girgis Fakhry Sefain",
+    "adSource": "خط روان ",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 17500,
+    "firstContactDate": "2026-01-12",
+    "closeDate": "2026-04-14",
+    "closingCycleDays": 92,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776193489,
+      "_nanoseconds": 453000000
+    }
+  },
+  {
+    "id": "3q6FN4H5qe4TmPjQl51W",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-08",
+    "customerId": "NBakJKRVyvzdYL0p9gqA",
+    "customerName": "خالد صلاح الدين محمد",
+    "programName": "BDP Recorded",
+    "programCount": 1,
+    "dealValue": 8000,
+    "firstContactDate": "2025-10-17",
+    "closeDate": "2026-04-08",
+    "closingCycleDays": 173,
+    "products": [
+      "bdp_recorded"
+    ],
+    "createdAt": {
+      "_seconds": 1776727051,
+      "_nanoseconds": 128000000
+    },
+    "adSource": "تفتكر ليه business developers",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729462,
+      "_nanoseconds": 911000000
+    }
+  },
+  {
+    "id": "4CwuTCs0GneW3sbE14Ry",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-05",
+    "customerId": "Wo0q5a4NT9NoDT8Iv8iH",
+    "customerName": "تامر جمال الدينرحب حسانين",
+    "adSource": "احترف business development في120ساعه",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 8000,
+    "firstContactDate": "2025-04-01",
+    "closeDate": "2026-04-05",
+    "closingCycleDays": 369,
+    "products": [
+      "bdp_online"
+    ],
+    "createdAt": {
+      "_seconds": 1776726882,
+      "_nanoseconds": 415000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729532,
+      "_nanoseconds": 656000000
+    }
+  },
+  {
+    "id": "4dqeQ0BHV9hNDNzbvSEB",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-19",
+    "customerId": "UfQkIDzrHCRUqCjK6iHE",
+    "customerName": "مجدي السيد محمد أحمد ",
+    "adSource": "واتساب  من غير اعلان",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4000,
+    "firstContactDate": "2026-04-18",
+    "closeDate": "2026-04-19",
+    "closingCycleDays": 1,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776635778,
+      "_nanoseconds": 760000000
+    }
+  },
+  {
+    "id": "4sgDFxeLwDo9Lzzb8FRc",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerId": "iaRZNGih7GMspDvqHkni",
+    "customerName": "مصطفي ابراهيم حسين محمد",
+    "adSource": "لما رؤيتين يتقابلو علي هدف واحد / واتساب",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2025-07-23",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 266,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776248234,
+      "_nanoseconds": 835000000
+    }
+  },
+  {
+    "id": "4tYTzWXl1XgE4hMVcLk5",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "XtYZnEVzX9ZK33ZEIyfA",
+    "customerName": "Mahmoud Mohamed El-Matrawy Ibrahim  محمود محمد المطراوي ابراهيم  01004400030 +971505881324 m.matrawy88@gmail.com ",
+    "adSource": "لسه مش فاهم بالظب ايه مهام ال business ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2025-12-21",
+    "closeDate": "2026-04-20",
+    "closingCycleDays": 120,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776636223,
+      "_nanoseconds": 78000000
+    }
+  },
+  {
+    "id": "5o98hyipdaWsW2t2VTtB",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "customerId": "mek03uTXUgp0MRwTzgcT",
+    "dealValue": 4500,
+    "createdAt": {
+      "_seconds": 1776726387,
+      "_nanoseconds": 905000000
+    },
+    "adSource": "هذا البرنامج ليس متاحا / واتساب",
+    "customerName": "ياسر عبدالله رجب حسن",
+    "closureType": "self",
+    "programName": "BDS",
+    "programCount": 1,
+    "products": [
+      "bds"
+    ],
+    "closeDate": "2026-04-25",
+    "date": "2026-04-25",
+    "closingCycleDays": 51,
+    "firstContactDate": "2026-03-05",
+    "updatedAt": {
+      "_seconds": 1776952736,
+      "_nanoseconds": 464000000
+    }
+  },
+  {
+    "id": "5w8YN5ZcDTL4gtDsTHE1",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "6E9gkbANPP9Tq8iN7jBO",
+    "customerName": "Adel Salah Saad Saleh",
+    "adSource": "ليد قديم متابعات مش ظاهر إعلان ",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": null,
+    "closeDate": "2026-04-20",
+    "closingCycleDays": null,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776721570,
+      "_nanoseconds": 225000000
+    }
+  },
+  {
+    "id": "5wKkyVqaYTMC6iW1sQQj",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-05",
+    "customerId": "evvN2ukagThcJd75cYuM",
+    "customerName": "اسلام محمد عبد الحميد حنفي",
+    "adSource": "خط روان",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": null,
+    "closeDate": "2026-04-05",
+    "closingCycleDays": null,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776713052,
+      "_nanoseconds": 138000000
+    }
+  },
+  {
+    "id": "610CLGicYfiQjDhq2zSH",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-23",
+    "customerId": "CncLlPmJ5qti6EOzSqUy",
+    "customerName": "يحي ابراهيم زهران",
+    "adSource": "منغير اعلان/ انستجرام",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-01-01",
+    "closeDate": "2026-04-23",
+    "closingCycleDays": 112,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776982195,
+      "_nanoseconds": 560000000
+    }
+  },
+  {
+    "id": "68F1bSqTmFjqNHZvdjdk",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-02",
+    "customerId": "Yi0DZO9h5DFHeG1q4A78",
+    "customerName": "الاسم : شروق حسني مصطفي القاضي",
+    "adSource": "مستعد تكون مطور اعمال محترف؟",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-01-21",
+    "closeDate": "2026-04-02",
+    "closingCycleDays": 71,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776712576,
+      "_nanoseconds": 326000000
+    }
+  },
+  {
+    "id": "6OFm2zoNwYd4hXNhRBiZ",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "date": "2026-04-10",
+    "customerName": "محمود محمد ممدوح محمود",
+    "programCount": 2,
+    "dealValue": 13500,
+    "firstContactDate": "2026-04-05",
+    "closeDate": "2026-04-10",
+    "closingCycleDays": 5,
+    "createdAt": {
+      "_seconds": 1775773010,
+      "_nanoseconds": 117000000
+    },
+    "programName": "BDS، BDP Online",
+    "adSource": "تيك توك",
+    "closureType": "call",
+    "products": [
+      "bds",
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776619964,
+      "_nanoseconds": 220000000
+    }
+  },
+  {
+    "id": "6bL07r2taPwT1r5olu8W",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-25",
+    "customerId": "I6qcRxHjU8WkgkvW1roW",
+    "customerName": "محمد ماهر سلامة حسين   Mohamed Maher Salama Hussien",
+    "adSource": "من غير اعلان ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-19",
+    "closeDate": "2026-04-25",
+    "closingCycleDays": 6,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777152280,
+      "_nanoseconds": 874000000
+    }
+  },
+  {
+    "id": "6bmqP8fqq0rRPPyg4PAm",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-23",
+    "customerId": "BOpVgkGy6amZSkmPqXpe",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-05",
+    "closeDate": "2026-04-23",
+    "closingCycleDays": 18,
+    "products": [
+      "bdp_offline"
+    ],
+    "createdAt": {
+      "_seconds": 1776981203,
+      "_nanoseconds": 944000000
+    },
+    "adSource": "3 شهور كفيله",
+    "closureType": "self",
+    "customerName": "السيد محمد سالم سالم",
+    "updatedAt": {
+      "_seconds": 1777321452,
+      "_nanoseconds": 737000000
+    }
+  },
+  {
+    "id": "6loAq3TjLugQxD4XomTW",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-12",
+    "customerName": "محمد محمود مظلوم القزاز",
+    "adSource": "جاهز تبدء رحلتك / واتساب ",
+    "programName": "Bdp",
+    "programCount": 1,
+    "dealValue": 6900,
+    "firstContactDate": "2023-10-02",
+    "closeDate": "2026-04-12",
+    "closingCycleDays": 923,
+    "createdAt": {
+      "_seconds": 1776030386,
+      "_nanoseconds": 154000000
+    }
+  },
+  {
+    "id": "6nKPHtg21Soan26G6tbO",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "Rs8bIXl3IkcJzBYT37xG",
+    "customerName": "حسام الدين محمد حسن محمد",
+    "adSource": "لينكد ان",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-01-21",
+    "closeDate": "2026-04-20",
+    "closingCycleDays": 89,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776700370,
+      "_nanoseconds": 810000000
+    }
+  },
+  {
+    "id": "7Dnb5WMbGf7OEzISGXCS",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-01",
+    "customerId": "kXqn6rXYJ36YCqkhKIip",
+    "programName": "BDP Online، BDS",
+    "programCount": 2,
+    "dealValue": 13000,
+    "firstContactDate": "2025-12-01",
+    "closeDate": "2026-04-01",
+    "closingCycleDays": 121,
+    "products": [
+      "bdp_online",
+      "bds"
+    ],
+    "createdAt": {
+      "_seconds": 1776726251,
+      "_nanoseconds": 468000000
+    },
+    "adSource": "جمعنالك في bdi 6 كورسات اساسيه",
+    "closureType": "self",
+    "customerName": "هشام احمد ممدوح محمد عثمان",
+    "updatedAt": {
+      "_seconds": 1776729662,
+      "_nanoseconds": 440000000
+    }
+  },
+  {
+    "id": "7NQN4nClAM90PJKohA3j",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-12",
+    "customerName": "Mohamad ahmad yassin ahmad",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-08",
+    "closeDate": "2026-04-12",
+    "closingCycleDays": 4,
+    "createdAt": {
+      "_seconds": 1776030878,
+      "_nanoseconds": 566000000
+    },
+    "programName": "BDP Offline",
+    "adSource": "واتساب",
+    "closureType": "call",
+    "products": [
+      "bdp_offline"
+    ],
+    "updatedAt": {
+      "_seconds": 1776619940,
+      "_nanoseconds": 561000000
+    }
+  },
+  {
+    "id": "7f3jz1zcWlOK0LvCPgxb",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-14",
+    "customerId": "dpt0zUfiKtGOvwnBu9cj",
+    "customerName": "محمد اشرف محمد النبوي",
+    "adSource": "3شهور كفيله",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-07",
+    "closeDate": "2026-04-14",
+    "closingCycleDays": 7,
+    "products": [
+      "bdp_offline"
+    ],
+    "createdAt": {
+      "_seconds": 1776728026,
+      "_nanoseconds": 506000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729292,
+      "_nanoseconds": 684000000
+    }
+  },
+  {
+    "id": "86cBIeSBogwACVFsust2",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-06",
+    "customerId": "KOuXKr5aus1L8OV88hiu",
+    "customerName": "چوي ايمن بطرس عطية",
+    "adSource": "ليد خارجي",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "closeDate": "2026-04-06",
+    "products": [
+      "bdp_offline"
+    ],
+    "createdAt": {
+      "_seconds": 1776713103,
+      "_nanoseconds": 807000000
+    },
+    "closingCycleDays": 0,
+    "firstContactDate": "2026-04-06",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776713185,
+      "_nanoseconds": 503000000
+    }
+  },
+  {
+    "id": "8Ii3VOWOpvfjrFSou2fa",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-12",
+    "programCount": 2,
+    "dealValue": 12000,
+    "firstContactDate": "2026-04-07",
+    "closeDate": "2026-04-12",
+    "closingCycleDays": 5,
+    "createdAt": {
+      "_seconds": 1776030758,
+      "_nanoseconds": 574000000
+    },
+    "programName": "BDP Online، BDS",
+    "adSource": "واتساب",
+    "closureType": "call",
+    "customerName": "Mohamed Ashour sedik mohamed",
+    "products": [
+      "bdp_online",
+      "bds"
+    ],
+    "updatedAt": {
+      "_seconds": 1776619924,
+      "_nanoseconds": 25000000
+    }
+  },
+  {
+    "id": "8KFR5WAP6Liy4cdAuizl",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerId": "VsgtZjrVfyOXkC0os7Z1",
+    "customerName": "مايكل مجدي ماهر فهمي",
+    "adSource": "عميل قديم ",
+    "programName": "Ibn Souq",
+    "programCount": 1,
+    "dealValue": 5900,
+    "firstContactDate": null,
+    "closeDate": "2026-04-15",
+    "closingCycleDays": null,
+    "products": [
+      "ibn_souq"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776714887,
+      "_nanoseconds": 858000000
+    }
+  },
+  {
+    "id": "8NwVXw7TKQE16qcUUKoc",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-13",
+    "customerName": "Menna Mohamed Hassan Barsi",
+    "programCount": 1,
+    "dealValue": 3950,
+    "firstContactDate": "2026-04-12",
+    "closeDate": "2026-04-13",
+    "closingCycleDays": 1,
+    "createdAt": {
+      "_seconds": 1776117382,
+      "_nanoseconds": 685000000
+    },
+    "programName": "Negotiation",
+    "adSource": "مهما كان موقعك داخل الشركه",
+    "closureType": "call",
+    "products": [
+      "negotiation"
+    ],
+    "updatedAt": {
+      "_seconds": 1776620047,
+      "_nanoseconds": 134000000
+    }
+  },
+  {
+    "id": "8UOujRufkBlirn7rqn1b",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-17",
+    "customerId": "ZfViyjV4GyelPeOjzndy",
+    "adSource": "احترف business development في120 ساعه",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-16",
+    "closeDate": "2026-04-17",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_online"
+    ],
+    "createdAt": {
+      "_seconds": 1776728341,
+      "_nanoseconds": 45000000
+    },
+    "closureType": "self",
+    "customerName": "طارق منصور محمد احمد",
+    "updatedAt": {
+      "_seconds": 1776729243,
+      "_nanoseconds": 580000000
+    }
+  },
+  {
+    "id": "8oytQeVScPdiJYHxiBrf",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-14",
+    "customerId": "QBtDu6fbmo75sG1CdY9D",
+    "adSource": "ازاي تكون خبير",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2025-12-17",
+    "closeDate": "2026-04-14",
+    "closingCycleDays": 118,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776192662,
+      "_nanoseconds": 606000000
+    },
+    "customerName": "محمد الدسوقي الدسوقي الصعيدي",
+    "updatedAt": {
+      "_seconds": 1776193779,
+      "_nanoseconds": 276000000
+    }
+  },
+  {
+    "id": "8shBL6XwoUyo7HLtBrfC",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerId": "fDBDvaSHmIntB5393lNW",
+    "customerName": "عبد الرحمن صلاح موسى الصعيدي",
+    "adSource": "عدم امتلاكك لمهارات التفاوض ",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2026-04-14",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 1,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776289758,
+      "_nanoseconds": 720000000
+    }
+  },
+  {
+    "id": "96frZ0QSQmHNxBNMuLDc",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-08",
+    "customerId": "GRuuJHVTy6MiNLTQWvrb",
+    "customerName": "محمد يسري جلال السيد",
+    "adSource": "السوق لن ينتظرك ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-25",
+    "closeDate": "2026-04-08",
+    "closingCycleDays": 14,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776699634,
+      "_nanoseconds": 4000000
+    }
+  },
+  {
+    "id": "97sIyHtOIeFqueo8Luj6",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-16",
+    "customerId": "abtYgXw8KZRHxyipIaT2",
+    "customerName": "كريم ابراهيم عبدالغفار حسنين",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-15",
+    "closeDate": "2026-04-16",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_online"
+    ],
+    "createdAt": {
+      "_seconds": 1776728219,
+      "_nanoseconds": 725000000
+    },
+    "adSource": "ليست كل البرامج التدريبية",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729268,
+      "_nanoseconds": 365000000
+    }
+  },
+  {
+    "id": "9VoFQ0wf45c4B1jkIR53",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-09",
+    "customerId": "6e81dDQQVRCs97L2Q2i5",
+    "customerName": "صابرين صابر عبدالله ابراهيم",
+    "adSource": "ال business developer / واتساب",
+    "programName": "BDS",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2026-03-29",
+    "closeDate": "2026-04-09",
+    "closingCycleDays": 11,
+    "products": [
+      "bds"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776726274,
+      "_nanoseconds": 461000000
+    }
+  },
+  {
+    "id": "9WOkl9EGTmGUVsNIs0op",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-14",
+    "customerId": "uAmqsidBZsgM8zeoZqeQ",
+    "customerName": "محمد عبد الرحمن عمر بشير",
+    "adSource": "خط روان",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-04",
+    "closeDate": "2026-04-14",
+    "closingCycleDays": 10,
+    "products": [
+      "bdp_offline"
+    ],
+    "createdAt": {
+      "_seconds": 1776192870,
+      "_nanoseconds": 489000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776193622,
+      "_nanoseconds": 507000000
+    }
+  },
+  {
+    "id": "9sICcfdLBCzgNVMGMA9V",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerId": "uEH5LijWEkd4NOXrnzUP",
+    "customerName": "هدير حنفي محمود حسنين",
+    "firstContactDate": "2025-09-09",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 218,
+    "createdAt": {
+      "_seconds": 1776247831,
+      "_nanoseconds": 366000000
+    },
+    "dealValue": 17000,
+    "adSource": "تيك توك ( ال ٣ برامج bdp - bds - BN )",
+    "programName": "Negotiation، BDP Online، BDS",
+    "programCount": 3,
+    "closureType": "self",
+    "products": [
+      "negotiation",
+      "bdp_online",
+      "bds"
+    ],
+    "updatedAt": {
+      "_seconds": 1776701957,
+      "_nanoseconds": 121000000
+    }
+  },
+  {
+    "id": "9yVJxdetyfBeIsa8MSTu",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "sPYc4M2X4QeMghUkCDvo",
+    "customerName": "Ahmed Ibrahim Abdelmaged Morsy",
+    "adSource": "old ",
+    "programName": "Ibn Souq",
+    "programCount": 1,
+    "dealValue": 5900,
+    "firstContactDate": null,
+    "closeDate": "2026-04-20",
+    "closingCycleDays": null,
+    "products": [
+      "ibn_souq"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776721570,
+      "_nanoseconds": 225000000
+    }
+  },
+  {
+    "id": "AH5bdJOukwTGnGk6V0Cd",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "2A2HzIJd1j8tsoGvINWr",
+    "customerName": "الاسم: يوسف ناصر علي رفاعي",
+    "adSource": "الاعلان مش ظاهر",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-03",
+    "closeDate": "2026-04-20",
+    "closingCycleDays": 17,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776711773,
+      "_nanoseconds": 750000000
+    }
+  },
+  {
+    "id": "Aa9RzK7reAFV5LK3ysNz",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-16",
+    "customerId": "oPk8bMfFdcTmSItCsaMs",
+    "customerName": "زياد محمد حسن محمد ",
+    "adSource": "واتساب BDP في 140 ساعة ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-15",
+    "closeDate": "2026-04-16",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776290925,
+      "_nanoseconds": 556000000
+    }
+  },
+  {
+    "id": "Ai49a0RfcfDAQfLcZc77",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-02",
+    "customerId": "5Lo4S0ki0hx9DBMPE3cc",
+    "customerName": "محمد عامر سيد محمد",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-15",
+    "closeDate": "2026-04-02",
+    "closingCycleDays": 18,
+    "products": [
+      "bdp_online"
+    ],
+    "createdAt": {
+      "_seconds": 1776726453,
+      "_nanoseconds": 690000000
+    },
+    "adSource": "‎ليست كل البرامج التدريبيه",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729630,
+      "_nanoseconds": 951000000
+    }
+  },
+  {
+    "id": "AlaRtcuu0QtCsPVGbNgX",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-22",
+    "customerId": "1M0dZScjilt9nPlxw92H",
+    "customerName": "ميادة عادل عوض محمد",
+    "adSource": "ال business developer هو واحد / واتساب",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-16",
+    "closeDate": "2026-04-22",
+    "closingCycleDays": 6,
+    "products": [
+      "bdp_offline"
+    ],
+    "createdAt": {
+      "_seconds": 1776954782,
+      "_nanoseconds": 668000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1777238360,
+      "_nanoseconds": 357000000
+    }
+  },
+  {
+    "id": "Az6KVWZularc9TDz97iJ",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-23",
+    "customerId": "tHbIJ7Rh6yeWuyoWzQvK",
+    "customerName": "محمد أحمد أحمد اللاوندي",
+    "adSource": "عميل قديم ",
+    "programName": "IFP",
+    "programCount": 1,
+    "dealValue": 6000,
+    "firstContactDate": "2025-11-20",
+    "closeDate": "2026-04-23",
+    "closingCycleDays": 154,
+    "products": [
+      "ifp"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776974774,
+      "_nanoseconds": 225000000
+    }
+  },
+  {
+    "id": "B4nsgp04JnKRWEqFyMZI",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-19",
+    "customerId": "v5dCv15k1FelN8BsNMKd",
+    "customerName": "هاشم شبل هاشم محمود ",
+    "adSource": "واتساب/اعلان التفاوض ليس مهارة ",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4000,
+    "firstContactDate": "2026-04-18",
+    "closeDate": "2026-04-19",
+    "closingCycleDays": 1,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776635634,
+      "_nanoseconds": 174000000
+    }
+  },
+  {
+    "id": "B67Wf1tpVGEhRj1o5Q48",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-21",
+    "customerId": "IALd6DstHxm4uN2lFoA4",
+    "customerName": "ايمان فتحي فريد مصطفي ",
+    "adSource": "خط روان ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-01-29",
+    "closeDate": "2026-04-21",
+    "closingCycleDays": 82,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777323328,
+      "_nanoseconds": 970000000
+    }
+  },
+  {
+    "id": "BdBLib9h0UmQHC583gzA",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-12",
+    "customerName": "خالد عطيه علي علي",
+    "adSource": "جاهز تبدء رحلتك / واتساب ",
+    "programName": "BDP",
+    "programCount": 1,
+    "dealValue": 6900,
+    "firstContactDate": "2023-10-02",
+    "closeDate": "2026-04-12",
+    "closingCycleDays": 923,
+    "createdAt": {
+      "_seconds": 1776030386,
+      "_nanoseconds": 154000000
+    }
+  },
+  {
+    "id": "BhFQMOiEBJVpXIISxdvX",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-13",
+    "customerName": "Hossam Ramadan Mahmoud Elkasas",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-08",
+    "closeDate": "2026-04-13",
+    "closingCycleDays": 5,
+    "createdAt": {
+      "_seconds": 1776117382,
+      "_nanoseconds": 685000000
+    },
+    "programName": "BDP Online",
+    "adSource": "دور مطور الأعمال لا يتوقف",
+    "closureType": "call",
+    "products": [
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776620040,
+      "_nanoseconds": 226000000
+    }
+  },
+  {
+    "id": "BrITsPI3yfLPB8SOUGke",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerId": "3bWg6hcDBt3me0gfHjV2",
+    "customerName": "أيمن احمد محمد امين",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-08",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 7,
+    "products": [
+      "bdp_online"
+    ],
+    "createdAt": {
+      "_seconds": 1776247590,
+      "_nanoseconds": 505000000
+    },
+    "adSource": "منغير اعلان/ واتساب ( جاي referral )",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776701914,
+      "_nanoseconds": 867000000
+    }
+  },
+  {
+    "id": "CA3Kcj3xE0IXJC8I075c",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-01",
+    "customerId": "i7ziq1AVbabLLCjnBQkL",
+    "customerName": "د . سارة محمد رياض ابراهيم",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-31",
+    "closeDate": "2026-04-01",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776699782,
+      "_nanoseconds": 982000000
+    },
+    "adSource": "Transform your business / واتساب",
+    "updatedAt": {
+      "_seconds": 1776700878,
+      "_nanoseconds": 364000000
+    }
+  },
+  {
+    "id": "CAEBm7iWzRM1mnYddw1x",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-16",
+    "customerId": "wX7fseJ7bSsn6ATskmsO",
+    "customerName": "حمدي عبدالهادي عليوه هديه",
+    "adSource": "واتساب عرض الصحاب مع العميل الاول ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 6900,
+    "firstContactDate": "2026-04-15",
+    "closeDate": "2026-04-16",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776290859,
+      "_nanoseconds": 410000000
+    }
+  },
+  {
+    "id": "CPCR6vzeFiHBxzPMGsAp",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-07",
+    "customerId": "QBtDu6fbmo75sG1CdY9D",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2025-12-17",
+    "closeDate": "2026-04-07",
+    "closingCycleDays": 111,
+    "createdAt": {
+      "_seconds": 1776713290,
+      "_nanoseconds": 522000000
+    },
+    "programName": "BDP Online",
+    "adSource": "ازاي تكون خبير",
+    "closureType": "self",
+    "customerName": "محمد الدسوقي الدسوقي الصعيدي",
+    "products": [
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776776677,
+      "_nanoseconds": 5000000
+    }
+  },
+  {
+    "id": "CiclZFkEZvWTU2Soko1Y",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-12",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-12",
+    "closeDate": "2026-04-12",
+    "closingCycleDays": 0,
+    "createdAt": {
+      "_seconds": 1776025143,
+      "_nanoseconds": 443000000
+    },
+    "programName": "BDP Online",
+    "adSource": "السوق لن ينتظرك",
+    "closureType": "call",
+    "customerName": "أحمد خالد سعد عبد الحميد",
+    "products": [
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776783965,
+      "_nanoseconds": 534000000
+    }
+  },
+  {
+    "id": "CmruSzHrxrMMTPYTNbP1",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "F0cMNjGREp0tcSFu3RpT",
+    "customerName": "مروه محمد عبدالله محرم",
+    "adSource": "اعلان jerny",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 8000,
+    "firstContactDate": "2025-10-27",
+    "closeDate": "2026-04-20",
+    "closingCycleDays": 175,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776711700,
+      "_nanoseconds": 86000000
+    }
+  },
+  {
+    "id": "D1Q6xhu0qluAVu7hMQbm",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-13",
+    "customerId": "nCwGJ6tr4rpbQZYutWuR",
+    "customerName": "محمد سمير احمد بحيري",
+    "adSource": "3شهور كفيله",
+    "programName": "BDS",
+    "programCount": 1,
+    "dealValue": 23000,
+    "firstContactDate": "2026-04-12",
+    "closeDate": "2026-04-13",
+    "closingCycleDays": 1,
+    "products": [
+      "bds"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776727925,
+      "_nanoseconds": 824000000
+    }
+  },
+  {
+    "id": "DiQTLzKzxTQ7la6bLF1i",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-22",
+    "customerId": "hz0oEX5zITjY0vzCvssu",
+    "customerName": "Tamer Mohamed Fahmy Raslan",
+    "adSource": "BDP في 140 ساعة",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-20",
+    "closeDate": "2026-04-22",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776956888,
+      "_nanoseconds": 662000000
+    }
+  },
+  {
+    "id": "DzHJYWb6B7DPnhc8DSs9",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-07",
+    "customerId": "fccA6wjBqGVFHv2KXM0E",
+    "customerName": "محمد كارم محمود مشرف",
+    "adSource": "مهما كان موقعك داخل الشركة",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2026-01-18",
+    "closeDate": "2026-04-07",
+    "closingCycleDays": 79,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776699634,
+      "_nanoseconds": 4000000
+    }
+  },
+  {
+    "id": "EEyLg6q9PR2vWkaBHneR",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-25",
+    "customerId": "k4iWAXsASIIi0BUmwfBJ",
+    "customerName": "محمد فتح الباب محمد عبد الغني",
+    "adSource": "مين هو ال Business Developer ",
+    "programName": "BDP Online، BDS",
+    "programCount": 2,
+    "dealValue": 12000,
+    "firstContactDate": "2026-04-17",
+    "closeDate": "2026-04-25",
+    "closingCycleDays": 8,
+    "products": [
+      "bdp_online",
+      "bds"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777146343,
+      "_nanoseconds": 895000000
+    }
+  },
+  {
+    "id": "EYnowMs2ThHChOjNdTH8",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-27",
+    "customerId": "WN0Z3TJb17s8QDDrGtdt",
+    "customerName": "محمد نبوي محمد جاب الله",
+    "adSource": "متابعة upgrade مع عميل حاجز bdp",
+    "programName": "BDS",
+    "programCount": 1,
+    "dealValue": 5000,
+    "firstContactDate": "2025-11-26",
+    "closeDate": "2026-04-27",
+    "closingCycleDays": 152,
+    "products": [
+      "bds"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777323426,
+      "_nanoseconds": 719000000
+    }
+  },
+  {
+    "id": "F2y2Y0RWuyn17uPOs9lv",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-03",
+    "customerId": "IPX3sJTnbIeW3q2hfgBd",
+    "customerName": "احمد عماد محمد",
+    "adSource": "3شهور كفيله",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-01",
+    "closeDate": "2026-04-03",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_offline"
+    ],
+    "createdAt": {
+      "_seconds": 1776726589,
+      "_nanoseconds": 348000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729618,
+      "_nanoseconds": 284000000
+    }
+  },
+  {
+    "id": "FJnVrwY84tYWnCARkwGL",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-21",
+    "customerId": "cQcgcjp1x10BFZXksJuq",
+    "customerName": "مهند أيمن حلمي المنسي ",
+    "adSource": "مين هو ال Business Developer ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-14",
+    "closeDate": "2026-04-21",
+    "closingCycleDays": 7,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776974533,
+      "_nanoseconds": 488000000
+    }
+  },
+  {
+    "id": "FXBU7ss7uoEtDjphguUa",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-03",
+    "customerId": "35XYScaVOgeYWFKe5VXr",
+    "customerName": "فراس بشار احمد قمحيه",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-01",
+    "closeDate": "2026-04-03",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_online"
+    ],
+    "createdAt": {
+      "_seconds": 1776726589,
+      "_nanoseconds": 348000000
+    },
+    "adSource": "Referral",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729569,
+      "_nanoseconds": 197000000
+    }
+  },
+  {
+    "id": "Fag6HVlXwbyn64o4Urot",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerId": "Aqg1Jk1aOdXsz2jxjhSZ",
+    "customerName": "مصطفى احمد ابراهيم مراد",
+    "adSource": "مين هو ال business developer؟",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 8000,
+    "firstContactDate": "2025-10-01",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 196,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776289575,
+      "_nanoseconds": 626000000
+    }
+  },
+  {
+    "id": "Fhm4Wemw4nsdeXBiOEvz",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-24",
+    "customerId": "8A5Jo1KNcJDE06VWUWMz",
+    "customerName": "Moamen Mohamed Mabrouk Ahmed",
+    "adSource": "BDP in140h عرض الصحاب ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 6900,
+    "firstContactDate": "2026-04-22",
+    "closeDate": "2026-04-24",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777065747,
+      "_nanoseconds": 754000000
+    }
+  },
+  {
+    "id": "FpHuoFsRYeUuqfdkQr1T",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-26",
+    "customerId": "hST7EwtSe2yMBGrf8Tin",
+    "customerName": "مازن عبدالفتاح ميرغني حامد",
+    "adSource": "5 مكاسب لمطورى الأعمال ",
+    "programName": "IFP",
+    "programCount": 1,
+    "dealValue": 8000,
+    "firstContactDate": "2025-12-15",
+    "closeDate": "2026-04-26",
+    "closingCycleDays": 132,
+    "products": [
+      "ifp"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777218015,
+      "_nanoseconds": 575000000
+    }
+  },
+  {
+    "id": "GE6LjxahEHfQl5jn4dyn",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-01",
+    "customerId": "hT6aWTmlzR5bQ2tHBTvz",
+    "customerName": "احمد رمضان ابوالعلا محمد",
+    "adSource": "ال business developer هو واحد / واتساب",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-30",
+    "closeDate": "2026-04-01",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776699493,
+      "_nanoseconds": 574000000
+    }
+  },
+  {
+    "id": "GECDWOnKa99P1tf8Qlom",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-23",
+    "customerId": "0KU5DBRLw9ytlxg4PNyt",
+    "customerName": "ابراهيم أشرف عرفة أبوجبل",
+    "adSource": "عدم امتلاكك لمهارات التفاوض ",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2025-12-29",
+    "closeDate": "2026-04-23",
+    "closingCycleDays": 115,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776974533,
+      "_nanoseconds": 488000000
+    }
+  },
+  {
+    "id": "GEg2ss0nxtCLQe4Yh6Hj",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "gWM4XYlAYzi1AZNY49v0",
+    "customerName": "شهاب الدين احمد عبد الواحد",
+    "adSource": "عميل قديم",
+    "programName": "Ibn Souq",
+    "programCount": 1,
+    "dealValue": 5900,
+    "firstContactDate": "2026-04-20",
+    "closeDate": "2026-04-20",
+    "closingCycleDays": 0,
+    "products": [
+      "ibn_souq"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776714778,
+      "_nanoseconds": 859000000
+    }
+  },
+  {
+    "id": "GRLBcA8prrNdZDvSq0yw",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-11",
+    "customerName": "محمد منور محمود محمد",
+    "adSource": "عمل مكالمة مع روان",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2026-04-11",
+    "closeDate": "2026-04-11",
+    "closingCycleDays": 0,
+    "createdAt": {
+      "_seconds": 1775943599,
+      "_nanoseconds": 584000000
+    },
+    "programName": "Negotiation",
+    "closureType": "call",
+    "products": [
+      "negotiation"
+    ],
+    "updatedAt": {
+      "_seconds": 1776783972,
+      "_nanoseconds": 860000000
+    }
+  },
+  {
+    "id": "GjwUnaHbXQrU9HbVJX38",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-16",
+    "customerId": "Iivm5yqf2Muo1jE5YfJk",
+    "customerName": "خالد نزار خالد محجوب",
+    "dealValue": 13000,
+    "firstContactDate": "2026-04-15",
+    "closeDate": "2026-04-16",
+    "closingCycleDays": 1,
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776290680,
+      "_nanoseconds": 947000000
+    },
+    "programName": "BDP Online، BDS",
+    "adSource": "واتساب /BDP diploma 140  bdp+ bds",
+    "programCount": 2,
+    "products": [
+      "bdp_online",
+      "bds"
+    ],
+    "updatedAt": {
+      "_seconds": 1776620069,
+      "_nanoseconds": 102000000
+    }
+  },
+  {
+    "id": "GsGGWTIYP7aD7elunxpE",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-07",
+    "customerId": "7GmIOXqbWBUJ8pPJnFcn",
+    "customerName": "ولاء عبد الحميد محمد الكلاف",
+    "adSource": "كل تأخير فى تطوير مهاراتك يكلفك عملاء وفرص",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-06",
+    "closeDate": "2026-04-07",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776699634,
+      "_nanoseconds": 4000000
+    }
+  },
+  {
+    "id": "HLrMqnlHysyhzlHJGWpx",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "lmkh47oejn8HphOnHNeI",
+    "customerName": "عبدالله عصام الدين احمد عبدالرحمن",
+    "adSource": "عميل قديم حاجز bdp",
+    "programName": "BDS",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": null,
+    "closeDate": "2026-04-18",
+    "closingCycleDays": null,
+    "products": [
+      "bds"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776714490,
+      "_nanoseconds": 717000000
+    }
+  },
+  {
+    "id": "HRCtdO9rTBGtup2sNNFq",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-16",
+    "customerId": "xPFHYp0o9Im9dg9Teeac",
+    "customerName": "هاجر محمد عبد الحميد",
+    "adSource": "واتساب / لكل خريج bdi تجربة مختلفة ",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-12",
+    "closeDate": "2026-04-16",
+    "closingCycleDays": 4,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776290469,
+      "_nanoseconds": 792000000
+    }
+  },
+  {
+    "id": "Hu1OHyuWra49UmWJgP1j",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-19",
+    "customerId": "EjTuLWr6jBCRFsAfjqb8",
+    "customerName": "عبدالرحمن شهاب محمد عبده",
+    "adSource": "واتساب عميل قديم",
+    "programName": "Ibn Souq",
+    "programCount": 1,
+    "dealValue": 5900,
+    "firstContactDate": "2026-04-19",
+    "closeDate": "2026-04-19",
+    "closingCycleDays": 0,
+    "products": [
+      "ibn_souq"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776635562,
+      "_nanoseconds": 524000000
+    }
+  },
+  {
+    "id": "IP7m90SzPsQI7Xif8EM2",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-21",
+    "customerId": "BFg19B1lbttANQh8isK3",
+    "customerName": "Abdullah mohamed hassan saad",
+    "adSource": "Old",
+    "programName": "Ibn Souq",
+    "programCount": 1,
+    "dealValue": 5900,
+    "firstContactDate": null,
+    "closeDate": "2026-04-21",
+    "closingCycleDays": null,
+    "products": [
+      "ibn_souq"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776956456,
+      "_nanoseconds": 354000000
+    }
+  },
+  {
+    "id": "Ie1GWUwoT0MCHL1ADM47",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-02",
+    "customerId": "aea4Hw60CDQTJjEsy5Og",
+    "adSource": "فورم تيك توك",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-02-21",
+    "closeDate": "2026-04-02",
+    "closingCycleDays": 40,
+    "products": [
+      "bdp_offline"
+    ],
+    "createdAt": {
+      "_seconds": 1776726453,
+      "_nanoseconds": 690000000
+    },
+    "closureType": "self",
+    "customerName": "خالد شاكد عبدالله شاكر",
+    "updatedAt": {
+      "_seconds": 1776729644,
+      "_nanoseconds": 175000000
+    }
+  },
+  {
+    "id": "ImYAizq0fljOb7QyNCtx",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-17",
+    "customerId": "BC8cPZc9XTiOSMVikmjC",
+    "customerName": "Mohammed Mamdouh Mohammed Abdelziz",
+    "adSource": "Old ",
+    "programName": "Ibn Souq",
+    "programCount": 1,
+    "dealValue": 5900,
+    "firstContactDate": null,
+    "closeDate": "2026-04-17",
+    "closingCycleDays": null,
+    "products": [
+      "ibn_souq"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776377061,
+      "_nanoseconds": 139000000
+    }
+  },
+  {
+    "id": "ItCK87kCb8urEM6v4ta0",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "xwh7EnBQDI7Fep6MSPOL",
+    "customerName": "سالم سيد سالم شعبان ",
+    "adSource": "مين هو ال business developer ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-15",
+    "closeDate": "2026-04-18",
+    "closingCycleDays": 3,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776548681,
+      "_nanoseconds": 351000000
+    }
+  },
+  {
+    "id": "IvhJxRVydkvzsDNjnRdP",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-26",
+    "customerId": "n3vSRhowHKn1ZYv1GCFy",
+    "customerName": "محمد قطب سيد حسن",
+    "adSource": "التطوير المهنى الحقيقى ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-25",
+    "closeDate": "2026-04-26",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777226249,
+      "_nanoseconds": 654000000
+    }
+  },
+  {
+    "id": "JBoKgIGJtZRWid5xS1Ks",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-19",
+    "customerId": "rSPzt3OLSycVONyOCvIq",
+    "customerName": "ياسمين رمضان العشيري",
+    "adSource": "",
+    "programName": "Book",
+    "programCount": 1,
+    "dealValue": 625,
+    "firstContactDate": null,
+    "closeDate": "2026-04-19",
+    "closingCycleDays": null,
+    "products": [
+      "book"
+    ],
+    "createdAt": {
+      "_seconds": 1776728763,
+      "_nanoseconds": 35000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729006,
+      "_nanoseconds": 346000000
+    }
+  },
+  {
+    "id": "Jm7JcjacoHJOx1HmqFZ3",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-25",
+    "customerId": "Xa3LDjnLpgY4RgE5MEtw",
+    "customerName": "اميرة الجزولي سيد علي محمد احمد",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-23",
+    "closeDate": "2026-04-25",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_online"
+    ],
+    "createdAt": {
+      "_seconds": 1777151386,
+      "_nanoseconds": 357000000
+    },
+    "adSource": "هذا البرنامج غير متاح للجميع",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1777321484,
+      "_nanoseconds": 503000000
+    }
+  },
+  {
+    "id": "JxIGTMJuhvquEjJSJ7QB",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-21",
+    "customerId": "sgslOt3wvlBMPox85TbX",
+    "customerName": "Moutawa ibrahim",
+    "adSource": "Old",
+    "programName": "Ibn Souq",
+    "programCount": 1,
+    "dealValue": 5900,
+    "firstContactDate": null,
+    "closeDate": "2026-04-21",
+    "closingCycleDays": null,
+    "products": [
+      "ibn_souq"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776956456,
+      "_nanoseconds": 354000000
+    }
+  },
+  {
+    "id": "MBxPuc7eNPj6UoTOf5j7",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-27",
+    "customerId": "9LWpjCF1nYCZZ7LTo7yU",
+    "customerName": "رامي عبد المجيد ابراهيم ااخياط",
+    "adSource": "هل تري نفسك مطور اعمال ؟ / واتساب ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-24",
+    "closeDate": "2026-04-27",
+    "closingCycleDays": 3,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777323256,
+      "_nanoseconds": 410000000
+    }
+  },
+  {
+    "id": "MJeQmS8CXgEOe1qRYmSs",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "LVvkJKRXYETSySMRX9Op",
+    "customerName": "مصعب أحمد عثمان أحمد ",
+    "adSource": "لينكد ان ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-01-21",
+    "closeDate": "2026-04-20",
+    "closingCycleDays": 89,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776700370,
+      "_nanoseconds": 810000000
+    }
+  },
+  {
+    "id": "MVuaCVsIjaeNcQOKfTbO",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-19",
+    "customerId": "ibcuwpuRq3aMLVqMHOpK",
+    "customerName": "نيفين نبيل مصطفي الجندي ",
+    "adSource": "واتساب من غير اعلان",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-19",
+    "closeDate": "2026-04-19",
+    "closingCycleDays": 0,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776635681,
+      "_nanoseconds": 654000000
+    }
+  },
+  {
+    "id": "MbAMdW1utknzpbdlofiC",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-16",
+    "customerId": "5bwhhC36N20Rsf9zbjbJ",
+    "customerName": "محمد عبد العال عبد السيد عبد العال ",
+    "adSource": "واتساب BDP في 120 ساعة ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-03",
+    "closeDate": "2026-04-16",
+    "closingCycleDays": 13,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776290742,
+      "_nanoseconds": 798000000
+    }
+  },
+  {
+    "id": "Miy3DswnNyuYjJ39tHvb",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-26",
+    "customerId": "TOU0ASqjIwID6CmredX8",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 8000,
+    "firstContactDate": "2026-03-28",
+    "closeDate": "2026-04-26",
+    "closingCycleDays": 29,
+    "products": [
+      "bdp_online"
+    ],
+    "createdAt": {
+      "_seconds": 1777235758,
+      "_nanoseconds": 918000000
+    },
+    "adSource": "ليست كل البرامج التدريبيه تبني",
+    "closureType": "self",
+    "customerName": "محمود سالم محمود سالم",
+    "updatedAt": {
+      "_seconds": 1777321447,
+      "_nanoseconds": 672000000
+    }
+  },
+  {
+    "id": "NCpB1eK3br2u3getcpJE",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-22",
+    "customerId": "rtCfkarnYX8Lt4VuPxQR",
+    "customerName": "احمد محمود صالح محمود",
+    "adSource": "منغير اعلان/ واتساب ",
+    "programName": "BDP Online، BDS",
+    "programCount": 2,
+    "dealValue": 12000,
+    "firstContactDate": "2025-10-26",
+    "closeDate": "2026-04-22",
+    "closingCycleDays": 178,
+    "products": [
+      "bdp_online",
+      "bds"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776954725,
+      "_nanoseconds": 802000000
+    }
+  },
+  {
+    "id": "NUOBruRzN6DSgjq6yjaP",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerId": "Ol3pLYv0cVTcntQbrKOJ",
+    "customerName": "عبدالرحمن وائل صبحي محمد ",
+    "adSource": "المرجع الحقيقي لأي تجربة تعليمية هو ما يقوله من خاضها و طبقها",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-27",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 19,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776289758,
+      "_nanoseconds": 720000000
+    }
+  },
+  {
+    "id": "NuePlILEIJYQVztArZt9",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-25",
+    "customerId": "I3H5jPiig2z66Tr4P8sq",
+    "customerName": "جنيد الجنيد",
+    "programName": "Book",
+    "programCount": 1,
+    "dealValue": 650,
+    "firstContactDate": "2026-01-02",
+    "closeDate": "2026-04-25",
+    "closingCycleDays": 113,
+    "products": [
+      "book"
+    ],
+    "createdAt": {
+      "_seconds": 1777152371,
+      "_nanoseconds": 982000000
+    },
+    "adSource": "كومنت",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1777238329,
+      "_nanoseconds": 40000000
+    }
+  },
+  {
+    "id": "O1q0y0VsbEZ460SLqWSz",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "date": "2026-04-10",
+    "customerName": "عماد محمد محمد العويل",
+    "adSource": "فى كل مرحلة مهنية بييجى وقت تحتاج فيه تعيد التفكير",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-02-24",
+    "closeDate": "2026-04-10",
+    "closingCycleDays": 45,
+    "createdAt": {
+      "_seconds": 1775856442,
+      "_nanoseconds": 670000000
+    },
+    "programName": "BDP Online",
+    "closureType": "call",
+    "products": [
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776784008,
+      "_nanoseconds": 11000000
+    }
+  },
+  {
+    "id": "OLwtOXkSC1VcTUUvf6JN",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-25",
+    "customerId": "pYWtsz5QV26WGQZDtvui",
+    "customerName": "لبانه عبدالحميد حطبي",
+    "adSource": "عميله قديمه حاجزه معانا",
+    "programName": "Book، 2jjarkrwtividrkjvnym",
+    "programCount": 2,
+    "dealValue": 1275,
+    "firstContactDate": "2026-04-01",
+    "closeDate": "2026-04-25",
+    "closingCycleDays": 24,
+    "products": [
+      "book",
+      "2jjarkrwtividrkjvnym"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777323539,
+      "_nanoseconds": 407000000
+    }
+  },
+  {
+    "id": "OON5j0DCNUj0KKL5RNtV",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "bGX8Mnt3lyQkraK8Tra2",
+    "customerName": "حسام محمد ابراهيم سعيد ",
+    "adSource": "عميل قديم حاجز معانا BDP",
+    "programName": "BDS",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2025-12-01",
+    "closeDate": "2026-04-20",
+    "closingCycleDays": 140,
+    "products": [
+      "bds"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776711874,
+      "_nanoseconds": 697000000
+    }
+  },
+  {
+    "id": "OSIWAlprH7MQSjcXjcRv",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-21",
+    "customerId": "yefKBaKt388tOeAezUgP",
+    "customerName": "مجدي محمود صالح محمود",
+    "adSource": "Transform your business / واتساب ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-28",
+    "closeDate": "2026-04-21",
+    "closingCycleDays": 24,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776954105,
+      "_nanoseconds": 619000000
+    }
+  },
+  {
+    "id": "OlFHIupukAmJpjMlZKja",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "dPErow87wlFH7ajaMQl5",
+    "customerName": "Yasser adel hussien ahmed elsherai",
+    "programCount": 1,
+    "dealValue": 8000,
+    "firstContactDate": "2026-04-04",
+    "closeDate": "2026-04-18",
+    "closingCycleDays": 14,
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776469555,
+      "_nanoseconds": 499000000
+    },
+    "programName": "BDP Recorded",
+    "adSource": "تيك توك حجز البرنامج الأول مسجل",
+    "products": [
+      "bdp_recorded"
+    ],
+    "updatedAt": {
+      "_seconds": 1776776804,
+      "_nanoseconds": 529000000
+    }
+  },
+  {
+    "id": "P9moPUCLrTEBap5pC8H1",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-21",
+    "customerId": "oZUSDdzYTbjHSVAEgZgD",
+    "customerName": "عبدالله احمد عبدالله ابو الفتوح",
+    "adSource": "هل تري نفسك مطور اعمال / واتساب ",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-20",
+    "closeDate": "2026-04-21",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776954247,
+      "_nanoseconds": 736000000
+    }
+  },
+  {
+    "id": "PfTcUvYTTbtZjGqEpcuB",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-12",
+    "adSource": "هل فعلا التفاوض مهارة هتفرق فى شغلك؟",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2025-03-03",
+    "closeDate": "2026-04-12",
+    "closingCycleDays": 405,
+    "createdAt": {
+      "_seconds": 1775955117,
+      "_nanoseconds": 357000000
+    },
+    "programName": "Negotiation",
+    "closureType": "call",
+    "customerName": "أحمد محمد عبد الحميد",
+    "products": [
+      "negotiation"
+    ],
+    "updatedAt": {
+      "_seconds": 1776784020,
+      "_nanoseconds": 24000000
+    }
+  },
+  {
+    "id": "QI5KJU7VwcR8RMicoYWQ",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "l4MwiZBr1NXAR9yDUmnu",
+    "customerName": "محمد عصمت حسني عبد العزيز ",
+    "adSource": "في BDI احنا مش بس بنقدم تدريب ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-03",
+    "closeDate": "2026-04-20",
+    "closingCycleDays": 17,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776711959,
+      "_nanoseconds": 941000000
+    }
+  },
+  {
+    "id": "QULSiD4rqlel2pDemRAq",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-12",
+    "customerName": "Mohammed  Hussien manhy eskander",
+    "programCount": 1,
+    "dealValue": 5900,
+    "firstContactDate": "2026-04-11",
+    "closeDate": "2026-04-12",
+    "closingCycleDays": 1,
+    "createdAt": {
+      "_seconds": 1776030878,
+      "_nanoseconds": 566000000
+    },
+    "programName": "Ibn Souq",
+    "adSource": "واتساب",
+    "closureType": "call",
+    "products": [
+      "ibn_souq"
+    ],
+    "updatedAt": {
+      "_seconds": 1776619932,
+      "_nanoseconds": 467000000
+    }
+  },
+  {
+    "id": "RFQ7gaxKO0eV2KQ2zTTq",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-09",
+    "customerId": "Nkyc1FUIg8VZV2Pyq52V",
+    "customerName": "الشريف محمد أشرف أحمد",
+    "adSource": "هل الاحتفاظ بالسيولة دائما يحمي ",
+    "programName": "IFP",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-23",
+    "closeDate": "2026-04-09",
+    "closingCycleDays": 17,
+    "products": [
+      "ifp"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776699634,
+      "_nanoseconds": 4000000
+    }
+  },
+  {
+    "id": "RnfNs5bq4OYvG8ctLbvq",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-11",
+    "customerName": "Moataz mohamed mahmoud zaky",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2025-09-26",
+    "closeDate": "2026-04-11",
+    "closingCycleDays": 197,
+    "createdAt": {
+      "_seconds": 1775944446,
+      "_nanoseconds": 354000000
+    },
+    "programName": "BDP Online",
+    "adSource": "لايوجد",
+    "closureType": "call",
+    "products": [
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776619974,
+      "_nanoseconds": 104000000
+    }
+  },
+  {
+    "id": "TBpKlVqv4ManCYj2tkhn",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "date": "2026-04-09",
+    "customerName": "محمد احمد محمد حمزة ليل",
+    "adSource": "ليد خط روان",
+    "programCount": 1,
+    "dealValue": 18500,
+    "closeDate": "2026-04-09",
+    "createdAt": {
+      "_seconds": 1775771023,
+      "_nanoseconds": 455000000
+    },
+    "closingCycleDays": 2,
+    "firstContactDate": "2026-04-07",
+    "programName": "BDP Offline",
+    "closureType": "call",
+    "products": [
+      "bdp_offline"
+    ],
+    "updatedAt": {
+      "_seconds": 1776714247,
+      "_nanoseconds": 204000000
+    }
+  },
+  {
+    "id": "TPVT9COsqLPOmn7QvxxY",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-04",
+    "customerId": "HnPIUdxVsQ5AoKgMrOiD",
+    "customerName": "ايمان منصور طه شقير",
+    "adSource": "هل ترغب ان تكون ضمن افضل / واتساب",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-03",
+    "closeDate": "2026-04-04",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776700851,
+      "_nanoseconds": 212000000
+    },
+    "updatedAt": {
+      "_seconds": 1776776635,
+      "_nanoseconds": 431000000
+    }
+  },
+  {
+    "id": "UD7SnmRhxKXRhWHyC0py",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-11",
+    "customerName": "Yussuf Muhammad Ahmed Saleh",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2026-02-04",
+    "closeDate": "2026-04-11",
+    "closingCycleDays": 66,
+    "createdAt": {
+      "_seconds": 1775944446,
+      "_nanoseconds": 354000000
+    },
+    "programName": "Negotiation",
+    "adSource": "مهما كان موقعك داخل الشركه",
+    "closureType": "call",
+    "products": [
+      "negotiation"
+    ],
+    "updatedAt": {
+      "_seconds": 1776619980,
+      "_nanoseconds": 427000000
+    }
+  },
+  {
+    "id": "UdvC5X0UqnGjQUxiJM9d",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "fVcxI93Vg5H2wGECWwet",
+    "customerName": "Rana sayed Mohamed bayomi ",
+    "adSource": "داخل من إعلان الأونلاين  BDP diploma 140 h",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2026-04-16",
+    "closeDate": "2026-04-18",
+    "closingCycleDays": 2,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776548804,
+      "_nanoseconds": 219000000
+    }
+  },
+  {
+    "id": "Uj9HEsnyJAi9EMlsCaGV",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-13",
+    "customerName": "Youssef Reda Androus Gorgi",
+    "adSource": "فيدبالك العملاء ( متردد وعندك تخوف من التسجيل)",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-14",
+    "closeDate": "2026-04-13",
+    "closingCycleDays": 0,
+    "createdAt": {
+      "_seconds": 1776117382,
+      "_nanoseconds": 685000000
+    },
+    "programName": "BDP Offline",
+    "closureType": "call",
+    "products": [
+      "bdp_offline"
+    ],
+    "updatedAt": {
+      "_seconds": 1776620033,
+      "_nanoseconds": 407000000
+    }
+  },
+  {
+    "id": "UlPV4aE9gpiUSBj0HkA0",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-03",
+    "customerId": "OJIODL426h0EDBo3XF3m",
+    "customerName": "علي محمد حسن محمد",
+    "adSource": "صاحب مصطفي طارق مختار فهمي / ماسنجر",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-02",
+    "closeDate": "2026-04-03",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776700232,
+      "_nanoseconds": 180000000
+    }
+  },
+  {
+    "id": "UyVbY1GPbN0vFjqHmKjB",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-26",
+    "customerId": "jzRphxUiQeg0V1ElbVzJ",
+    "customerName": "محمود سعد جابر أبو زيد",
+    "adSource": "التفاوض مش إنك تطلع كسبان وتخسر الطرف التاني ",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2025-04-12",
+    "closeDate": "2026-04-26",
+    "closingCycleDays": 379,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777218015,
+      "_nanoseconds": 575000000
+    }
+  },
+  {
+    "id": "VPgX5gxizvqyFiLGWMrL",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-05",
+    "customerId": "IlqovioYGTJtGnAZpbyy",
+    "customerName": "يحيي عبدالسلام الحلبي",
+    "adSource": "‎ليست كل البرامج التدريبيه ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 14500,
+    "firstContactDate": "2026-03-30",
+    "closeDate": "2026-04-05",
+    "closingCycleDays": 6,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776726882,
+      "_nanoseconds": 415000000
+    }
+  },
+  {
+    "id": "VaXqt1bhFQptd133cZ4q",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-22",
+    "customerId": "NnX4Rfpslpaxub197xjT",
+    "customerName": "Ahmed Moawad Ahmed  Moawad",
+    "adSource": "Old",
+    "programName": "Ibn Souq",
+    "programCount": 1,
+    "dealValue": 5900,
+    "firstContactDate": null,
+    "closeDate": "2026-04-22",
+    "closingCycleDays": null,
+    "products": [
+      "ibn_souq"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776960634,
+      "_nanoseconds": 486000000
+    }
+  },
+  {
+    "id": "VfrlhgifYHCUl4RX7Tqk",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-22",
+    "customerId": "24egdtZssrRJ7axY05rh",
+    "customerName": "Salma Badr Abdallah Mohamed ",
+    "adSource": "من غير إعلان ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-16",
+    "closeDate": "2026-04-22",
+    "closingCycleDays": 6,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776956888,
+      "_nanoseconds": 662000000
+    }
+  },
+  {
+    "id": "ViLKjA5HmCUZH2A4Q9rb",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-04",
+    "customerId": "6l5CBckZg5WEWs3N1Gpf",
+    "customerName": "مي حسين توفيق همام",
+    "adSource": "3شهور كفيله",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-02",
+    "closeDate": "2026-04-04",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_offline"
+    ],
+    "createdAt": {
+      "_seconds": 1776726674,
+      "_nanoseconds": 335000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729554,
+      "_nanoseconds": 505000000
+    }
+  },
+  {
+    "id": "W7DcBEjk3DAzSWS2Xu4j",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "date": "2026-04-10",
+    "adSource": "المرجع الحقيقى لأى تجربة تعليمية هو ما يقوله من خاضها وطبقها",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-04",
+    "closeDate": "2026-04-10",
+    "closingCycleDays": 37,
+    "createdAt": {
+      "_seconds": 1775856442,
+      "_nanoseconds": 670000000
+    },
+    "programName": "BDP Online",
+    "closureType": "call",
+    "customerName": "عزة عبدالفتاح محمد الهندي",
+    "products": [
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776783979,
+      "_nanoseconds": 202000000
+    }
+  },
+  {
+    "id": "WNGEhIS6I12erHD7VXRF",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-25",
+    "customerId": "IgQlF4jnvHXgTmlpdvtj",
+    "programName": "BDP Online، IFP، Negotiation، BDS",
+    "programCount": 4,
+    "dealValue": 22000,
+    "firstContactDate": "2026-03-23",
+    "closeDate": "2026-04-25",
+    "closingCycleDays": 33,
+    "products": [
+      "bdp_online",
+      "ifp",
+      "negotiation",
+      "bds"
+    ],
+    "createdAt": {
+      "_seconds": 1777152456,
+      "_nanoseconds": 661000000
+    },
+    "adSource": "في BDI جمعنالك ال 6 كورسات",
+    "closureType": "self",
+    "customerName": "حسام رضا نافع  Hossam Reda Nafea",
+    "updatedAt": {
+      "_seconds": 1777238308,
+      "_nanoseconds": 579000000
+    }
+  },
+  {
+    "id": "WPFhSzi5IbCjyY4otrtF",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-09",
+    "customerId": "ujY750OnEfxJiZSQMIZd",
+    "customerName": "محمد عزالدين عبدالرحمن عيد",
+    "adSource": "3شهور كفيله",
+    "programName": "BDP Online، BDS",
+    "programCount": 2,
+    "dealValue": 12000,
+    "firstContactDate": "2026-04-02",
+    "closeDate": "2026-04-09",
+    "closingCycleDays": 7,
+    "products": [
+      "bdp_online",
+      "bds"
+    ],
+    "createdAt": {
+      "_seconds": 1776727315,
+      "_nanoseconds": 933000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729394,
+      "_nanoseconds": 773000000
+    }
+  },
+  {
+    "id": "WVfgQ6xrfy0Rxh3LIB7z",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-27",
+    "customerId": "2Gc5BmHynIENW5R8ZtxA",
+    "customerName": "Heba Saad  Khafaga",
+    "adSource": "من غير إعلان مع عرض الصحاب ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 6000,
+    "firstContactDate": "2026-04-22",
+    "closeDate": "2026-04-27",
+    "closingCycleDays": 5,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777324491,
+      "_nanoseconds": 229000000
+    }
+  },
+  {
+    "id": "XCLqMeuBb4HgmoaYbr3m",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-13",
+    "adSource": "Limited sites",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-09",
+    "closeDate": "2026-04-13",
+    "closingCycleDays": 35,
+    "createdAt": {
+      "_seconds": 1776117382,
+      "_nanoseconds": 685000000
+    },
+    "programName": "BDP Online",
+    "closureType": "call",
+    "customerName": "Yara Adel Salah Diab",
+    "products": [
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776620020,
+      "_nanoseconds": 995000000
+    }
+  },
+  {
+    "id": "XIRohNIJ1FJl9QkrUJJB",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-14",
+    "customerId": "NEv10s4TDTlAxm7bJcXN",
+    "customerName": "اميمه رشاد محمد عمر",
+    "adSource": "تعلم كيفية",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2025-12-13",
+    "closeDate": "2026-04-14",
+    "closingCycleDays": 122,
+    "products": [
+      "bdp_online"
+    ],
+    "createdAt": {
+      "_seconds": 1776193040,
+      "_nanoseconds": 771000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776193064,
+      "_nanoseconds": 15000000
+    }
+  },
+  {
+    "id": "XMKnvgei3jg8lzHpnF82",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-01",
+    "customerId": "9F7RW1NheaVmm0fqJq5o",
+    "customerName": "مني محمد محمد رفعت البسيوني",
+    "adSource": "هذا برنامج ليس متاحا للجميع / واتساب ",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 17500,
+    "firstContactDate": "2026-03-06",
+    "closeDate": "2026-04-01",
+    "closingCycleDays": 26,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776699977,
+      "_nanoseconds": 514000000
+    }
+  },
+  {
+    "id": "XMlJz2cbjDzV7rHrAjMf",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "DCd9BwnnrG8kwly8UTJf",
+    "customerName": "Shahira Salama",
+    "adSource": "Old ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": null,
+    "closeDate": "2026-04-20",
+    "closingCycleDays": null,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776721732,
+      "_nanoseconds": 949000000
+    }
+  },
+  {
+    "id": "YG9JYRSUPZpXcuDpDiWf",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-27",
+    "customerId": "Wvgs4xPd5du8NnnP007O",
+    "customerName": "Islam Ali Ahmed Badr",
+    "adSource": "من غير إعلان خد  عرض الصحاب ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 6900,
+    "firstContactDate": "2026-04-22",
+    "closeDate": "2026-04-27",
+    "closingCycleDays": 5,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777324491,
+      "_nanoseconds": 229000000
+    }
+  },
+  {
+    "id": "YrPIV4YUsj653n0WTHhD",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "wgRWiAtGoaOGIfnKqL02",
+    "customerName": "Mohamed Essam Mahmoud Hussien",
+    "adSource": "إعلان مهما كان موقعك داخل الشركه",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4000,
+    "firstContactDate": "2026-03-08",
+    "closeDate": "2026-04-20",
+    "closingCycleDays": 43,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776721570,
+      "_nanoseconds": 225000000
+    }
+  },
+  {
+    "id": "YybccckidZLqLA0wXO1s",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-22",
+    "customerId": "13S8itsSR0tCZ1nfs9Mj",
+    "customerName": "خالد حسن السعيد صالح",
+    "adSource": "عدم امتلاكك لمهارات التفاوض ",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2026-04-19",
+    "closeDate": "2026-04-22",
+    "closingCycleDays": 3,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776974533,
+      "_nanoseconds": 488000000
+    }
+  },
+  {
+    "id": "Z9D8VvgMnRvbPOXAiELF",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-17",
+    "customerId": "tcsSGkcLJLODPbgfipgA",
+    "customerName": " عمرو أحمد إبراهيم على رضوان  ",
+    "adSource": "مين هو ال business developer؟",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-17",
+    "closeDate": "2026-04-17",
+    "closingCycleDays": 0,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776462325,
+      "_nanoseconds": 611000000
+    }
+  },
+  {
+    "id": "ZXAOxuc28EzgvkdwYYp8",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-13",
+    "customerId": "1ho9K9Fp9pcNIvSdJPkD",
+    "customerName": "شريف معوض عبدالله معوض",
+    "adSource": "3شهور كفيله",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-11",
+    "closeDate": "2026-04-13",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_offline"
+    ],
+    "createdAt": {
+      "_seconds": 1776727925,
+      "_nanoseconds": 824000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729312,
+      "_nanoseconds": 517000000
+    }
+  },
+  {
+    "id": "ZxqEQFGsMBLxGyiBQJgQ",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-02",
+    "customerId": "CUpmVCkFPOAxD0Q7pACB",
+    "customerName": "نهى بشاتي ابو ضيف السيد ",
+    "adSource": "كيف تخرج من مشروعك ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-27",
+    "closeDate": "2026-04-02",
+    "closingCycleDays": 6,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776699634,
+      "_nanoseconds": 4000000
+    }
+  },
+  {
+    "id": "aGIGvXhzXvKAaBNx4CzJ",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-17",
+    "customerId": "zIIoTb3keY5b0ILaCP1i",
+    "adSource": "BDS + BDP",
+    "dealValue": 13000,
+    "firstContactDate": "2026-03-01",
+    "closeDate": "2026-04-17",
+    "closingCycleDays": 47,
+    "createdAt": {
+      "_seconds": 1776458835,
+      "_nanoseconds": 624000000
+    },
+    "closureType": "self",
+    "customerName": "عمرو محمود عويس",
+    "programName": "BDS، BDP Online",
+    "programCount": 2,
+    "products": [
+      "bds",
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776776638,
+      "_nanoseconds": 459000000
+    }
+  },
+  {
+    "id": "aggOPKIVpNwgOcLALc49",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerId": "seZxO9nCOQbTe2rtI3TI",
+    "customerName": "أحمد محمد بهاء الدين محمد سيد",
+    "adSource": "دبلومة business development professional انحدثت / واتساب",
+    "programName": "Ibn Souq",
+    "programCount": 1,
+    "dealValue": 6900,
+    "firstContactDate": "2026-04-10",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 5,
+    "products": [
+      "ibn_souq"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776248443,
+      "_nanoseconds": 333000000
+    }
+  },
+  {
+    "id": "bn9g52IIO8KSGek7a08f",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-01",
+    "customerId": "gKOXDxWBt3MzP45tr0Gg",
+    "customerName": "محمد حسن مجاهد محمد ",
+    "adSource": "المرجع الحقيقى لأى تجربة تعليمية هو ما يقوله من خاضها وطبقها ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-30",
+    "closeDate": "2026-04-01",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776699634,
+      "_nanoseconds": 4000000
+    }
+  },
+  {
+    "id": "bnOgONoSHrrdplnQdoET",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-04",
+    "customerId": "jpbcI7cKWMihKj0EMVKb",
+    "customerName": "وليد محمد رشاد الشربيني",
+    "adSource": "متابعات من خط حبيبة القديم ",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2025-08-28",
+    "closeDate": "2026-04-04",
+    "closingCycleDays": 219,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776699634,
+      "_nanoseconds": 4000000
+    }
+  },
+  {
+    "id": "bu54uLD7EEMjnQFX5eXC",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-16",
+    "customerId": "J0IkaKWp2jbiYiY1674K",
+    "customerName": "عبده حسن عبد الفتاح عبدالحليم ",
+    "adSource": "واتساب من غير اعلان",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 6900,
+    "firstContactDate": "2026-04-11",
+    "closeDate": "2026-04-16",
+    "closingCycleDays": 5,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776290859,
+      "_nanoseconds": 410000000
+    }
+  },
+  {
+    "id": "c2M1bS4ikrnc7GR02p3p",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "bBlYeWlsInMI7wBxsrJx",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-17",
+    "closeDate": "2026-04-18",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776465733,
+      "_nanoseconds": 286000000
+    },
+    "adSource": "في BDI جمعنالك 6 كورسات اساسيه",
+    "customerName": "Amr elsayed mahdy mostafa seyam",
+    "updatedAt": {
+      "_seconds": 1776465770,
+      "_nanoseconds": 535000000
+    }
+  },
+  {
+    "id": "c9KBYKBLGoNxYiF26r4Z",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-24",
+    "customerId": "0b6lsGSakjfqqZe8zHg2",
+    "customerName": "Hebatalla Emadeldin Ahmed Elbialy  هبه الله عماد الدين أحمد البيلي  01063077765",
+    "adSource": "",
+    "programName": "2jjarkrwtividrkjvnym",
+    "programCount": 1,
+    "dealValue": 650,
+    "firstContactDate": "2025-09-29",
+    "closeDate": "2026-04-24",
+    "closingCycleDays": 207,
+    "products": [
+      "2jjarkrwtividrkjvnym"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777066734,
+      "_nanoseconds": 954000000
+    }
+  },
+  {
+    "id": "cXvzyVfUe3MzkisuGH5I",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "date": "2026-04-10",
+    "customerName": "حسام الدين صالح عطية صالح",
+    "programCount": 1,
+    "dealValue": 5900,
+    "firstContactDate": "2026-04-09",
+    "closeDate": "2026-04-10",
+    "closingCycleDays": 1,
+    "createdAt": {
+      "_seconds": 1775773010,
+      "_nanoseconds": 117000000
+    },
+    "programName": "Ibn Souq",
+    "adSource": "واتساب",
+    "closureType": "call",
+    "products": [
+      "ibn_souq"
+    ],
+    "updatedAt": {
+      "_seconds": 1776619955,
+      "_nanoseconds": 525000000
+    }
+  },
+  {
+    "id": "clLLZ75JQOvPlXiodrmq",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-07",
+    "customerId": "uAmqsidBZsgM8zeoZqeQ",
+    "customerName": "محمد عبد الرحمن عمر بشير",
+    "adSource": "اعلان مش ظاهر",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-04",
+    "closeDate": "2026-04-07",
+    "closingCycleDays": 3,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776713363,
+      "_nanoseconds": 382000000
+    }
+  },
+  {
+    "id": "dCjYVns6B0ok72frP6cI",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "J1wUgVIriptwyVmYESWl",
+    "customerName": "عبدالرحمن سعد محمد شاهين",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2026-04-17",
+    "closeDate": "2026-04-18",
+    "closingCycleDays": 1,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776546197,
+      "_nanoseconds": 370000000
+    },
+    "adSource": "خط روان",
+    "updatedAt": {
+      "_seconds": 1776711541,
+      "_nanoseconds": 284000000
+    }
+  },
+  {
+    "id": "dhMqZvyzOhltr4spS5Em",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-16",
+    "customerId": "CktyBGRiv72CDW4hGDUm",
+    "customerName": "عبدالرؤوف محمود ريحان",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-01",
+    "closeDate": "2026-04-16",
+    "closingCycleDays": 15,
+    "products": [
+      "bdp_online"
+    ],
+    "createdAt": {
+      "_seconds": 1776728219,
+      "_nanoseconds": 725000000
+    },
+    "adSource": "Referral",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729260,
+      "_nanoseconds": 660000000
+    }
+  },
+  {
+    "id": "dlWQH5hPCNDCges4UiNl",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "5kfwmkKs3ZRyFc5tK8ir",
+    "customerName": "كيرلس عادل حبيب اقلاديوس ",
+    "adSource": "خط روان ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-01",
+    "closeDate": "2026-04-18",
+    "closingCycleDays": 48,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776546150,
+      "_nanoseconds": 661000000
+    }
+  },
+  {
+    "id": "e2AFfTCNs5jqOma37l87",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-14",
+    "customerId": "YXo9gjLECF43QboK4tt3",
+    "customerName": "Hamdy Tharwat Elsayed Elbahnacy ",
+    "adSource": "مهما كان موقعك داخل الشركه ",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4000,
+    "firstContactDate": "2026-04-14",
+    "closeDate": "2026-04-14",
+    "closingCycleDays": 0,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776203945,
+      "_nanoseconds": 179000000
+    }
+  },
+  {
+    "id": "eeAaALBIF8Uv2o2SsIic",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-07",
+    "customerId": "bSq9zHLQY6HB7aRmA1ch",
+    "customerName": "عمار ياسر احمد سعيد",
+    "adSource": "٢٠٢٦ هو العام ifp / واتساب ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 8000,
+    "firstContactDate": "2026-04-01",
+    "closeDate": "2026-04-07",
+    "closingCycleDays": 6,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776701369,
+      "_nanoseconds": 137000000
+    }
+  },
+  {
+    "id": "ep5EsWxvmmGRbCOJZhVj",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-03",
+    "customerId": "hBswDQ3W4vY7bLUs0m6Q",
+    "customerName": "ثريا صبحي احمد سليمان ",
+    "adSource": "ماهو تطوير الأعمال؟",
+    "programName": "BDP Online، IFP، Negotiation",
+    "programCount": 3,
+    "dealValue": 16500,
+    "firstContactDate": "2026-04-01",
+    "closeDate": "2026-04-03",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_online",
+      "ifp",
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776712694,
+      "_nanoseconds": 822000000
+    }
+  },
+  {
+    "id": "ewkfd3ZeWNR5zQ0xMW9Z",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-05",
+    "customerId": "Gzj3ONYsoey6XGag9AJV",
+    "customerName": "احمد محمد سيد عطيان",
+    "adSource": "خط روان",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-01",
+    "closeDate": "2026-04-05",
+    "closingCycleDays": 4,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776712989,
+      "_nanoseconds": 244000000
+    }
+  },
+  {
+    "id": "fHIp5oMLVSt02g9tKXXZ",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerId": "Wg9PbUBf2tDOMrQgaaFW",
+    "customerName": "محمود طارق محمود بدير",
+    "adSource": "whatsapp",
+    "programName": "IFP",
+    "programCount": 1,
+    "dealValue": 5500,
+    "firstContactDate": "2026-04-07",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 8,
+    "products": [
+      "ifp"
+    ],
+    "createdAt": {
+      "_seconds": 1776206198,
+      "_nanoseconds": 291000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776248332,
+      "_nanoseconds": 835000000
+    }
+  },
+  {
+    "id": "fX1CsPR5RDqxC9JEickA",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-17",
+    "customerId": "3oAPypNlU3vKh59uFsWS",
+    "customerName": "Mahmoud Gaber Ahmed Sayed",
+    "adSource": "التفاوض ليس مهاره اضافيه ",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4000,
+    "firstContactDate": "2026-04-15",
+    "closeDate": "2026-04-17",
+    "closingCycleDays": 2,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776377061,
+      "_nanoseconds": 139000000
+    }
+  },
+  {
+    "id": "fehPiCz5erYpn9T3xyJr",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "date": "2026-04-10",
+    "customerName": "اسامة محمد لطفى امام",
+    "dealValue": 21000,
+    "firstContactDate": "2026-02-09",
+    "closeDate": "2026-04-10",
+    "closingCycleDays": 60,
+    "createdAt": {
+      "_seconds": 1775772626,
+      "_nanoseconds": 141000000
+    },
+    "programName": "BDP Online، Negotiation، IFP، BDS",
+    "adSource": "في bdi جمعنالك / واتساب",
+    "programCount": 4,
+    "closureType": "self",
+    "products": [
+      "bdp_online",
+      "negotiation",
+      "ifp",
+      "bds"
+    ],
+    "updatedAt": {
+      "_seconds": 1776776618,
+      "_nanoseconds": 731000000
+    }
+  },
+  {
+    "id": "fwQcAa2xvx3QSWgd0NP4",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-09",
+    "customerId": "yT5UFYRFrJSXVDXhyYys",
+    "customerName": "محمد سعيد بشير عبد الكريم",
+    "adSource": "ماسنجر ",
+    "programName": "BDS",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2026-02-13",
+    "closeDate": "2026-04-09",
+    "closingCycleDays": 55,
+    "products": [
+      "bds"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776726274,
+      "_nanoseconds": 461000000
+    }
+  },
+  {
+    "id": "gC2J89PejSHQxybSSJv2",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-14",
+    "customerName": "سماح احمد محمد الشرقاوي",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-01-30",
+    "closeDate": "2026-04-14",
+    "closingCycleDays": 74,
+    "createdAt": {
+      "_seconds": 1776118237,
+      "_nanoseconds": 807000000
+    },
+    "programName": "BDP Online",
+    "adSource": "ال business developer هو واحد من اهم محاور",
+    "closureType": "call",
+    "products": [
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776783930,
+      "_nanoseconds": 381000000
+    }
+  },
+  {
+    "id": "gXLBQj2ocKr0xEn1Qzhl",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "date": "2026-04-09",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2025-05-07",
+    "closeDate": "2026-04-09",
+    "closingCycleDays": 337,
+    "createdAt": {
+      "_seconds": 1775771235,
+      "_nanoseconds": 618000000
+    },
+    "programName": "Negotiation",
+    "adSource": "لسه بتسأل ازاى تتفاوض كمحترف فى صفقاتك الجاية؟",
+    "closureType": "call",
+    "customerName": "سارية محمد احمد قرني عبدالكريم",
+    "products": [
+      "negotiation"
+    ],
+    "updatedAt": {
+      "_seconds": 1776783999,
+      "_nanoseconds": 318000000
+    }
+  },
+  {
+    "id": "gYXqYav2XldMMn0MyuiJ",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-09",
+    "customerId": "8FjV1FSFRldoc1bHB2dt",
+    "customerName": "محمد نيازي احمد شيمي",
+    "adSource": "Upgrade",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2025-10-28",
+    "closeDate": "2026-04-09",
+    "closingCycleDays": 163,
+    "products": [
+      "negotiation"
+    ],
+    "createdAt": {
+      "_seconds": 1776727315,
+      "_nanoseconds": 933000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729381,
+      "_nanoseconds": 740000000
+    }
+  },
+  {
+    "id": "ggGH2vinOjhtceldQbuA",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "noYO9WSBPfBOM8kKG4DX",
+    "customerName": "سما عبدالعظيم ادهم مبروك",
+    "adSource": "كم فرصة مرت امامك و قررت تأجيلها فقط لأنك لم تكن متأكد منها؟",
+    "programName": "IFP",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-11",
+    "closeDate": "2026-04-18",
+    "closingCycleDays": 7,
+    "products": [
+      "ifp"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776548681,
+      "_nanoseconds": 351000000
+    }
+  },
+  {
+    "id": "gtwSOPqcRS0I1rGK3zmH",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-21",
+    "customerId": "SDsP89HA8JSksmPO9VKS",
+    "customerName": "كمال سويدان",
+    "adSource": "عميل قديم حاجز معانا ",
+    "programName": "BDS",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": null,
+    "closeDate": "2026-04-21",
+    "closingCycleDays": null,
+    "products": [
+      "bds"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777323189,
+      "_nanoseconds": 787000000
+    }
+  },
+  {
+    "id": "h2NJR7UiL6syG0nNIGbm",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-01",
+    "customerId": "uyQZ6KeLf2GVEBbNyJps",
+    "customerName": "آلاء مجدي محمد انور",
+    "adSource": "صاحبة د. سارة محمد / واتساب",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-31",
+    "closeDate": "2026-04-01",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776699782,
+      "_nanoseconds": 982000000
+    }
+  },
+  {
+    "id": "iKGZSUrVWvuOwAa530nW",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-22",
+    "customerId": "jasIBrP8loYsc2KpruxA",
+    "customerName": "اسامة مصطفي جابر السحيمي",
+    "adSource": "ال business developer  هو واحد / واتساب",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-03-21",
+    "closeDate": "2026-04-22",
+    "closingCycleDays": 32,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776954843,
+      "_nanoseconds": 839000000
+    },
+    "updatedAt": {
+      "_seconds": 1777238352,
+      "_nanoseconds": 441000000
+    }
+  },
+  {
+    "id": "iQhRP8EZ2Y7lCjoVjZ7A",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "date": "2026-04-10",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-23",
+    "closeDate": "2026-04-10",
+    "closingCycleDays": 18,
+    "createdAt": {
+      "_seconds": 1775856442,
+      "_nanoseconds": 670000000
+    },
+    "programName": "BDP Online",
+    "adSource": "هل الاحتفاظ بالسيولة دائما يحمي",
+    "closureType": "call",
+    "customerName": "حامد محمدين محمد يمني",
+    "products": [
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776783990,
+      "_nanoseconds": 18000000
+    }
+  },
+  {
+    "id": "jO5zTZTeY2GFGqM0GCyj",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerName": "عبدالرحيم النور بابكر محمداحمد",
+    "adSource": "خط روان ",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-01-09",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 96,
+    "createdAt": {
+      "_seconds": 1776287677,
+      "_nanoseconds": 911000000
+    },
+    "programName": "BDP Online",
+    "normalizedAt": {
+      "_seconds": 1776880784,
+      "_nanoseconds": 419000000
+    },
+    "products": [
+      "bdp_online"
+    ]
+  },
+  {
+    "id": "k0AWiwlrVTUng92qnIaa",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "4AkHGIuXuNnp4xHEGP9x",
+    "adSource": "داخل من إعلان عمرو القديم",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4000,
+    "firstContactDate": "2026-02-27",
+    "closeDate": "2026-04-18",
+    "closingCycleDays": 50,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776548804,
+      "_nanoseconds": 219000000
+    },
+    "customerName": "Mohammed Khaled Mohammed Mahmoud",
+    "updatedAt": {
+      "_seconds": 1776620160,
+      "_nanoseconds": 85000000
+    }
+  },
+  {
+    "id": "k76BLEAoVfKu4WR1ZEGW",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-24",
+    "customerId": "YFDVPrtw1CEVElF33oVL",
+    "customerName": "Moaaz Mostafa Sayed Dardiry",
+    "adSource": "BDP in140h عرض الصحاب ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 6900,
+    "firstContactDate": "2026-04-22",
+    "closeDate": "2026-04-24",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777065747,
+      "_nanoseconds": 754000000
+    }
+  },
+  {
+    "id": "kIsy5KFH9EQKTetGB3VH",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "2PjQPnSh68fysj53xzVG",
+    "customerName": "Ahmed Mostafa Ahmed Ebeed ",
+    "adSource": "Old",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": null,
+    "closeDate": "2026-04-18",
+    "closingCycleDays": null,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776465733,
+      "_nanoseconds": 286000000
+    }
+  },
+  {
+    "id": "khPPqflA4v7joUeDMruW",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-08",
+    "customerId": "OkaJeoWlBjds7IQgJHV6",
+    "customerName": "عمرو طارق طلعت البرقوقي ",
+    "adSource": "ال business developer هو واحد / واتساب",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-07",
+    "closeDate": "2026-04-08",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776701369,
+      "_nanoseconds": 137000000
+    }
+  },
+  {
+    "id": "kmpqcLHadm2NsUGqAOL8",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-21",
+    "customerId": "Z1IXAUUSTOIBus2zhW7P",
+    "customerName": "ايهاب محمود سعيد عبد العزيز",
+    "programName": "Ibn Souq",
+    "programCount": 1,
+    "dealValue": 6900,
+    "firstContactDate": "2026-04-16",
+    "closeDate": "2026-04-21",
+    "closingCycleDays": 5,
+    "products": [
+      "ibn_souq"
+    ],
+    "createdAt": {
+      "_seconds": 1776954934,
+      "_nanoseconds": 618000000
+    },
+    "adSource": "ال business developer هو واحد / واتساب",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1777238338,
+      "_nanoseconds": 187000000
+    }
+  },
+  {
+    "id": "lAH8WJFqho65FuFSrgyt",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-21",
+    "customerId": "jGoLa1sQLSKNdPchZODH",
+    "customerName": "كريم محمد سيد فهمي",
+    "adSource": "منغير اعلان / ماسنجر",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-19",
+    "closeDate": "2026-04-21",
+    "closingCycleDays": 2,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776954169,
+      "_nanoseconds": 788000000
+    }
+  },
+  {
+    "id": "mP36THu3eMgx1ArVL4jO",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-19",
+    "customerId": "4EfW0aOPDqODALEePAob",
+    "customerName": "Ahmed abdel Azeem amer",
+    "adSource": "Upgrade / واتساب",
+    "programName": "IFP",
+    "programCount": 1,
+    "dealValue": 6000,
+    "firstContactDate": "2023-11-05",
+    "closeDate": "2026-04-19",
+    "closingCycleDays": 896,
+    "products": [
+      "ifp"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776726045,
+      "_nanoseconds": 470000000
+    }
+  },
+  {
+    "id": "mRrSA2uGW6UN5ZZvltKt",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerId": "Fj0kLu0QqqHQvrZbwhl1",
+    "customerName": "محمد طارق علي الذهبي ",
+    "adSource": "واتساب ",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 3950,
+    "firstContactDate": "2026-01-21",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 84,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776290379,
+      "_nanoseconds": 574000000
+    }
+  },
+  {
+    "id": "mVrfjFQh3nVCEB5rEG4Y",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "3WCpwQScNG203tFPFuBs",
+    "customerName": "محمد نبيل محمد حسانين",
+    "adSource": "مهارات عمرها ما كانت اختيارية لو هدفك تكون محترف في ال business ",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2025-09-14",
+    "closeDate": "2026-04-18",
+    "closingCycleDays": 216,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776548681,
+      "_nanoseconds": 351000000
+    }
+  },
+  {
+    "id": "nKJqCcJcous3xzyQu0IE",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-26",
+    "customerId": "yx8KVfnfFEIxMkeYUHi1",
+    "customerName": "احمد حسن احمد علدالنبي",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 5000,
+    "firstContactDate": "2025-10-26",
+    "closeDate": "2026-04-26",
+    "closingCycleDays": 182,
+    "products": [
+      "negotiation"
+    ],
+    "createdAt": {
+      "_seconds": 1777236277,
+      "_nanoseconds": 97000000
+    },
+    "adSource": "Upgrade",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1777321426,
+      "_nanoseconds": 947000000
+    }
+  },
+  {
+    "id": "nh3zR8PpasrYlLcVF8UQ",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-05",
+    "customerId": "he76byM7QeIfk1IFlId3",
+    "customerName": "كريم مرسي محمد مرسي",
+    "adSource": "Transform your business / واتساب",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2025-07-02",
+    "closeDate": "2026-04-05",
+    "closingCycleDays": 277,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776700851,
+      "_nanoseconds": 212000000
+    }
+  },
+  {
+    "id": "ooFN1ogJK2TAO5UcnIIY",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-14",
+    "customerName": "محمد محمد محمد بدير",
+    "adSource": "6 كورسات اساسية",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-03-22",
+    "closeDate": "2026-04-14",
+    "closingCycleDays": 23,
+    "createdAt": {
+      "_seconds": 1776118237,
+      "_nanoseconds": 807000000
+    },
+    "programName": "BDP Offline",
+    "closureType": "call",
+    "products": [
+      "bdp_offline"
+    ],
+    "updatedAt": {
+      "_seconds": 1776783946,
+      "_nanoseconds": 446000000
+    }
+  },
+  {
+    "id": "peUZEfWNaMCdSEq49Bmc",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-14",
+    "customerId": "RcFM9Uhe4k2YMw47Ralf",
+    "customerName": "عبدالرحمن رضا معاطي قشوع",
+    "adSource": "ال business developer هو واحد من أهم محاور التخطيط جوا اي شركة",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-01-06",
+    "closeDate": "2026-04-14",
+    "closingCycleDays": 98,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776203353,
+      "_nanoseconds": 737000000
+    }
+  },
+  {
+    "id": "ps4TEn6qhAa8Fo6a4VPa",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "C8vDeYCZ9vi2294I1jqu",
+    "customerName": "احمد محمود اسماعيل شاهين",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-15",
+    "closeDate": "2026-04-18",
+    "closingCycleDays": 3,
+    "products": [
+      "bdp_offline"
+    ],
+    "createdAt": {
+      "_seconds": 1776728687,
+      "_nanoseconds": 515000000
+    },
+    "adSource": "ليست كل البرامج التدريبيه",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729224,
+      "_nanoseconds": 793000000
+    }
+  },
+  {
+    "id": "q3jI9USQy0HtAJ8xqfT7",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-14",
+    "customerName": "سارة محمد ابراهيم عواد",
+    "adSource": "عايز تبقى business developer محترف ؟",
+    "programCount": 1,
+    "dealValue": 8000,
+    "firstContactDate": "2024-04-24",
+    "closeDate": "2026-04-14",
+    "closingCycleDays": 720,
+    "createdAt": {
+      "_seconds": 1776118237,
+      "_nanoseconds": 807000000
+    },
+    "programName": "BDP Recorded",
+    "closureType": "call",
+    "products": [
+      "bdp_recorded"
+    ],
+    "updatedAt": {
+      "_seconds": 1776699816,
+      "_nanoseconds": 263000000
+    }
+  },
+  {
+    "id": "qbLEHqaqx8DShl7RbhSi",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-01",
+    "customerId": "fDq1DZsql4O8RwJHDO5j",
+    "customerName": "أحمد محمد موسى سليم ",
+    "adSource": "عايز تعرف شركتك مستعدة تتوسع فى السوق ولا لسه مش ده الوقت المناسب ؟",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-01",
+    "closeDate": "2026-04-01",
+    "closingCycleDays": 0,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776699634,
+      "_nanoseconds": 4000000
+    }
+  },
+  {
+    "id": "qxaWMj0vJBiB4NB760ZW",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-22",
+    "customerId": "VuBi854FHEs24KnbhLqX",
+    "customerName": "أحمد محمد السعيد النادي",
+    "adSource": "عدم امتلاكك لمهارات التفاوض ",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2026-04-19",
+    "closeDate": "2026-04-22",
+    "closingCycleDays": 3,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776974533,
+      "_nanoseconds": 488000000
+    }
+  },
+  {
+    "id": "rPNTkZSeI2wDt0H3k4tJ",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-12",
+    "customerName": "محمد فؤاد محمد مصطفي الصريف",
+    "adSource": "جاهز تبدء رحلتك / واتساب ",
+    "programName": "BDP",
+    "programCount": 1,
+    "dealValue": 6900,
+    "firstContactDate": "2023-10-02",
+    "closeDate": "2026-04-12",
+    "closingCycleDays": 923,
+    "createdAt": {
+      "_seconds": 1776030386,
+      "_nanoseconds": 154000000
+    }
+  },
+  {
+    "id": "rfwFigd4ebx9FykBWK1I",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-26",
+    "customerId": "Cky6spPZPyARjh6iKqUS",
+    "customerName": "احمد رضا محمد عبد الحميد",
+    "adSource": "واتساب /اعلان 6 كورسات أساسية ",
+    "programName": "BDP Online، Book",
+    "programCount": 2,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-19",
+    "closeDate": "2026-04-26",
+    "closingCycleDays": 7,
+    "products": [
+      "bdp_online",
+      "book"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777236102,
+      "_nanoseconds": 844000000
+    }
+  },
+  {
+    "id": "sKfMyyop93A0ls65nSP8",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-27",
+    "customerId": "vmFdhmGFD2nrUUFijqeC",
+    "customerName": "احمد شعبان عبدالحليم",
+    "adSource": "ليست كل البرامج التدريبيه",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-24",
+    "closeDate": "2026-04-27",
+    "closingCycleDays": 3,
+    "products": [
+      "bdp_online"
+    ],
+    "createdAt": {
+      "_seconds": 1777321402,
+      "_nanoseconds": 778000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1777321419,
+      "_nanoseconds": 212000000
+    }
+  },
+  {
+    "id": "sQwIlQksfl3gMSBInApy",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-18",
+    "customerId": "elQ54dcwE5TgZcnTwzin",
+    "customerName": "عادل حسن العدلي",
+    "adSource": "",
+    "programName": "Book",
+    "programCount": 1,
+    "dealValue": 631,
+    "firstContactDate": null,
+    "closeDate": "2026-04-18",
+    "closingCycleDays": null,
+    "products": [
+      "book"
+    ],
+    "createdAt": {
+      "_seconds": 1776728687,
+      "_nanoseconds": 515000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1776729684,
+      "_nanoseconds": 803000000
+    }
+  },
+  {
+    "id": "tPMMe6zif790aVJASI7z",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-17",
+    "customerId": "ZExmvAgZlnsy8rPkSNm0",
+    "customerName": "كوثر حسنى عبدالعزيز",
+    "adSource": "اعلان اكتشف عالم ال Business development مع افضل سيستم",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2026-01-10",
+    "closeDate": "2026-04-17",
+    "closingCycleDays": 97,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776458914,
+      "_nanoseconds": 548000000
+    }
+  },
+  {
+    "id": "tmDMolzAP8fmoENJJE9L",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-19",
+    "customerId": "NGotAUZxeFu0EhPjaGxF",
+    "customerName": "Ghada Mohamed Elhassan Khalfalla",
+    "programCount": 1,
+    "dealValue": 650,
+    "firstContactDate": null,
+    "closeDate": "2026-04-19",
+    "closingCycleDays": null,
+    "products": [],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776700145,
+      "_nanoseconds": 837000000
+    },
+    "programName": "غير محدد",
+    "adSource": "حجزت ال Workshop",
+    "updatedAt": {
+      "_seconds": 1776713923,
+      "_nanoseconds": 591000000
+    }
+  },
+  {
+    "id": "uKu5UvwjLw89NdVn9Mpq",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerName": "هاني سمير علي أحمد",
+    "adSource": "ازاي تكون خبير",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-01-23",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 82,
+    "createdAt": {
+      "_seconds": 1776287784,
+      "_nanoseconds": 196000000
+    },
+    "programName": "BDP Online",
+    "normalizedAt": {
+      "_seconds": 1776880784,
+      "_nanoseconds": 419000000
+    },
+    "products": [
+      "bdp_online"
+    ]
+  },
+  {
+    "id": "uSnm3y14RIBvAvhBChwK",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-17",
+    "customerId": "kwQ1PtJTry6ROWzcRDhW",
+    "customerName": "محمود نبيل فهمي بكري",
+    "dealValue": 13000,
+    "firstContactDate": "2026-04-16",
+    "closeDate": "2026-04-17",
+    "closingCycleDays": 1,
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776462325,
+      "_nanoseconds": 611000000
+    },
+    "programName": "BDP Online، BDS",
+    "adSource": "مين هو ال business developer",
+    "programCount": 2,
+    "products": [
+      "bdp_online",
+      "bds"
+    ],
+    "updatedAt": {
+      "_seconds": 1776808875,
+      "_nanoseconds": 743000000
+    }
+  },
+  {
+    "id": "uUgVmdG3SwmpgNqhPYwv",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-25",
+    "customerId": "oCH7Jrzj2q6I5z3FoObw",
+    "customerName": "Islam Khaleel Mosbah Youssef",
+    "adSource": "إعلان التطور المهني الحقيقي",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-24",
+    "closeDate": "2026-04-25",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777149176,
+      "_nanoseconds": 910000000
+    }
+  },
+  {
+    "id": "unqMS9s6T1xnMlCLnl5J",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-25",
+    "customerId": "UQqMw7AoYZ9KhTno95tA",
+    "customerName": "ياسين محمد منصور",
+    "adSource": "مستعد تكون مطور اعمال محترف",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-03-28",
+    "closeDate": "2026-04-25",
+    "closingCycleDays": 28,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777323452,
+      "_nanoseconds": 535000000
+    }
+  },
+  {
+    "id": "uuoyRYnv5UvPftPWTKtB",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-03",
+    "customerId": "hh27ZogazM7NQokiOmj0",
+    "customerName": "مصطفي طارق مختار فهمي ",
+    "adSource": "٣ شهور كفيلة تغير شغلك / ماسنجر كومنت",
+    "programName": "BDP Offline",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-02",
+    "closeDate": "2026-04-03",
+    "closingCycleDays": 1,
+    "products": [
+      "bdp_offline"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776700232,
+      "_nanoseconds": 180000000
+    }
+  },
+  {
+    "id": "v6rDVrb7sjqaQUPmqNYE",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-25",
+    "customerId": "FJgyJ3P6Bte7hz2Al7u9",
+    "customerName": "Yassin Moamen Mohamed Mabrouk",
+    "adSource": "إعلان BDP in140h مع عرض الصحاب بتاع امبارح ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 6900,
+    "firstContactDate": "2026-04-22",
+    "closeDate": "2026-04-25",
+    "closingCycleDays": 3,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777149176,
+      "_nanoseconds": 910000000
+    }
+  },
+  {
+    "id": "vEiJVBMGP2AQlvpLbzdo",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-12",
+    "customerName": "Abdalla Anwer Badran Elsayed",
+    "dealValue": 13500,
+    "firstContactDate": "2026-04-03",
+    "closeDate": "2026-04-12",
+    "closingCycleDays": 9,
+    "createdAt": {
+      "_seconds": 1776030632,
+      "_nanoseconds": 34000000
+    },
+    "programName": "BDP Online، BDS",
+    "adSource": "واتساب",
+    "programCount": 2,
+    "closureType": "call",
+    "products": [
+      "bdp_online",
+      "bds"
+    ],
+    "updatedAt": {
+      "_seconds": 1776619912,
+      "_nanoseconds": 906000000
+    }
+  },
+  {
+    "id": "vLZns6trUSfrdhpJnOKf",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-20",
+    "customerId": "7XrRLSB1huTyGwIhdIqF",
+    "customerName": "Abdelzaher Saeed Abdelzaher Abdelaal عبدالظاهر سعيد عبدالظاهر عبدالعال  01110770891 abdelzahersaeed@gmail.com  ",
+    "adSource": "ال business developer هو واحد من اهم محاور التخطيط ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 7500,
+    "firstContactDate": "2026-04-16",
+    "closeDate": "2026-04-20",
+    "closingCycleDays": 4,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776636223,
+      "_nanoseconds": 78000000
+    }
+  },
+  {
+    "id": "w1D1BNmUJQQfOwysrdrb",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-15",
+    "customerId": "Hikv9333bezMUPRf3g3H",
+    "customerName": "عبد الفتاح محمد عبد الفتاح عبدالله",
+    "adSource": "منغير اعلان / ماسنجر ",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 8000,
+    "firstContactDate": "2026-03-27",
+    "closeDate": "2026-04-15",
+    "closingCycleDays": 19,
+    "products": [
+      "bdp_online"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776248025,
+      "_nanoseconds": 855000000
+    }
+  },
+  {
+    "id": "wXzPoVZalSvB4jC1VHdj",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "date": "2026-04-10",
+    "programCount": 1,
+    "dealValue": 18500,
+    "firstContactDate": "2026-04-09",
+    "closeDate": "2026-04-10",
+    "closingCycleDays": 1,
+    "createdAt": {
+      "_seconds": 1775773010,
+      "_nanoseconds": 117000000
+    },
+    "programName": "BDP Offline",
+    "adSource": "واتساب",
+    "closureType": "call",
+    "customerName": "وائل صبحي أحمد أحمد",
+    "products": [
+      "bdp_offline"
+    ],
+    "updatedAt": {
+      "_seconds": 1776619950,
+      "_nanoseconds": 154000000
+    }
+  },
+  {
+    "id": "wdTw40MGiQcDhUJgvzrX",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-08",
+    "customerId": "XhzhzzHLNtg4CWpjWIiD",
+    "customerName": "محمد عبد العزيز خطيطه ",
+    "adSource": "عميل قديم وتابعنا معاه بالبرنامج وحجز",
+    "programName": "IFP",
+    "programCount": 1,
+    "dealValue": 6000,
+    "firstContactDate": "2025-12-05",
+    "closeDate": "2026-04-08",
+    "closingCycleDays": 124,
+    "products": [
+      "ifp"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776713825,
+      "_nanoseconds": 895000000
+    }
+  },
+  {
+    "id": "wpYPSwWwYSmmulcWGFBt",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-12",
+    "programCount": 1,
+    "dealValue": 4500,
+    "firstContactDate": "2025-02-28",
+    "closeDate": "2026-04-12",
+    "closingCycleDays": 408,
+    "createdAt": {
+      "_seconds": 1776030348,
+      "_nanoseconds": 169000000
+    },
+    "programName": "Negotiation",
+    "adSource": "هل كادت صفقة أن تنجح... ثم خسرتها بسبب تفاوض غير مدروس",
+    "closureType": "call",
+    "customerName": "محمد مصطفى علي الشرقاوى",
+    "products": [
+      "negotiation"
+    ],
+    "updatedAt": {
+      "_seconds": 1776783956,
+      "_nanoseconds": 938000000
+    }
+  },
+  {
+    "id": "wuKvOXt6P3YfbGss5rKL",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-16",
+    "customerId": "6jXvKwdN5xJncpKRq21s",
+    "customerName": "غدير مجدي محمد جعفر",
+    "adSource": "واتساب",
+    "programCount": 1,
+    "dealValue": 0,
+    "firstContactDate": "2026-02-19",
+    "closeDate": "2026-04-16",
+    "closingCycleDays": 56,
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776292607,
+      "_nanoseconds": 582000000
+    },
+    "programName": "BDP Online",
+    "products": [
+      "bdp_online"
+    ],
+    "updatedAt": {
+      "_seconds": 1776620502,
+      "_nanoseconds": 162000000
+    }
+  },
+  {
+    "id": "xDMIFpaHsdd5R24HnCM0",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "date": "2026-04-13",
+    "customerName": "أحمد خالد جلال مصطفى رضوان",
+    "adSource": "خط روان",
+    "closeDate": "2026-04-13",
+    "createdAt": {
+      "_seconds": 1776031610,
+      "_nanoseconds": 898000000
+    },
+    "closureType": "self",
+    "closingCycleDays": 3,
+    "firstContactDate": "2026-04-10",
+    "dealValue": 12500,
+    "programName": "IFP، Negotiation",
+    "programCount": 2,
+    "products": [
+      "ifp",
+      "negotiation"
+    ],
+    "updatedAt": {
+      "_seconds": 1776714387,
+      "_nanoseconds": 324000000
+    }
+  },
+  {
+    "id": "xwX8kjHMg9rvmvHNG3b1",
+    "salesRepId": "nDSgpb7sLMfJOX0Bg9svYBkpgLl1",
+    "salesRepName": "حبيبية",
+    "teamName": null,
+    "date": "2026-04-25",
+    "customerId": "1G5Mp1556QHUIKmZDDjL",
+    "customerName": "Kholoud Mohamed Abdelmoneam Eldemery",
+    "adSource": "إعلان التفاوض ليس مهاره اضافيه",
+    "programName": "Negotiation",
+    "programCount": 1,
+    "dealValue": 4000,
+    "firstContactDate": "2026-04-24",
+    "closeDate": "2026-04-25",
+    "closingCycleDays": 1,
+    "products": [
+      "negotiation"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1777149176,
+      "_nanoseconds": 910000000
+    }
+  },
+  {
+    "id": "yPmjaHQ03qOsgfPQPDcb",
+    "salesRepId": "1v6CIKDzjgVRV1toIDpTXhgvSUd2",
+    "salesRepName": "صفاء",
+    "teamName": null,
+    "date": "2026-04-21",
+    "customerId": "6f2GxOl5ca4BanCmuZK8",
+    "customerName": "نور صفوت محمد فهمي",
+    "adSource": "السوق لن ينتظرك ",
+    "programName": "BDP Online، BDS",
+    "programCount": 2,
+    "dealValue": 13500,
+    "firstContactDate": "2026-04-11",
+    "closeDate": "2026-04-21",
+    "closingCycleDays": 10,
+    "products": [
+      "bdp_online",
+      "bds"
+    ],
+    "closureType": "call",
+    "createdAt": {
+      "_seconds": 1776974533,
+      "_nanoseconds": 488000000
+    }
+  },
+  {
+    "id": "yg56gzy4HsWIVwT8Fv1P",
+    "salesRepId": "gqWNPyjzrVbvNer2D25Kc8dTRyB2",
+    "salesRepName": "آية",
+    "teamName": null,
+    "date": "2026-04-27",
+    "customerId": "yeUyN80UVY3f7yYESWKb",
+    "customerName": "احمد محمد امين احمد",
+    "adSource": "رسايل تيك توك",
+    "programName": "BDP Online",
+    "programCount": 1,
+    "dealValue": 8000,
+    "firstContactDate": "2025-05-25",
+    "closeDate": "2026-04-27",
+    "closingCycleDays": 337,
+    "products": [
+      "bdp_online"
+    ],
+    "createdAt": {
+      "_seconds": 1777321328,
+      "_nanoseconds": 320000000
+    },
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1777321436,
+      "_nanoseconds": 744000000
+    }
+  },
+  {
+    "id": "zUHe4hIm4UGsNpLu3gcC",
+    "salesRepId": "8PgKkOhysqYsYrca8N5AVK6Wm2l2",
+    "salesRepName": "روضة",
+    "teamName": null,
+    "date": "2026-04-13",
+    "customerName": "على عبدالعاطى عبدالحميد هبيله",
+    "adSource": "اعلان في تطوير الاعمال",
+    "programCount": 1,
+    "dealValue": 7500,
+    "closeDate": "2026-04-13",
+    "createdAt": {
+      "_seconds": 1776116989,
+      "_nanoseconds": 621000000
+    },
+    "programName": "BDP Online",
+    "closureType": "self",
+    "products": [
+      "bdp_online"
+    ],
+    "closingCycleDays": 3,
+    "firstContactDate": "2026-04-10",
+    "updatedAt": {
+      "_seconds": 1776197609,
+      "_nanoseconds": 64000000
+    }
+  },
+  {
+    "id": "zsF37Ay3g3EUWrl7jnsV",
+    "salesRepId": "65JGEkH0u0gtofOhLXCkYFhfbVZ2",
+    "salesRepName": "ميرنا",
+    "teamName": null,
+    "date": "2026-04-24",
+    "customerId": "KHtiVA8XJ6QHacn7NLpG",
+    "customerName": "محمود علاء الدين Mahmoud Aladdin Helmy",
+    "programName": "2jjarkrwtividrkjvnym",
+    "programCount": 1,
+    "dealValue": 650,
+    "firstContactDate": "2024-05-01",
+    "closeDate": "2026-04-24",
+    "closingCycleDays": 723,
+    "products": [
+      "2jjarkrwtividrkjvnym"
+    ],
+    "createdAt": {
+      "_seconds": 1777152573,
+      "_nanoseconds": 20000000
+    },
+    "adSource": "اعلان مش بيفتح",
+    "closureType": "self",
+    "updatedAt": {
+      "_seconds": 1777377471,
+      "_nanoseconds": 659000000
+    }
+  }
+]

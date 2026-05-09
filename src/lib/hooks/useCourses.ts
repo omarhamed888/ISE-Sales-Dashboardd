@@ -10,17 +10,27 @@ export interface Course {
   order: number;
 }
 
+let coursesCache: Course[] | null = null;
+
 export function useCourses(includeInactive = false) {
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<Course[]>(coursesCache ?? []);
   useEffect(() => {
     // Fetch all courses without compound query (avoids composite index requirement)
-    return onSnapshot(collection(db, 'courses'), snap => {
-      let all = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Course[];
-      // Filter & sort client-side
-      if (!includeInactive) all = all.filter(c => c.isActive);
-      all.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-      setCourses(all);
-    });
+    return onSnapshot(
+      collection(db, 'courses'),
+      snap => {
+        let all = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Course[];
+        // Filter & sort client-side
+        if (!includeInactive) all = all.filter(c => c.isActive);
+        all.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        coursesCache = all;
+        setCourses(all);
+      },
+      err => {
+        console.error("courses listener:", err);
+        setCourses([]);
+      }
+    );
   }, [includeInactive]);
   return courses;
 }

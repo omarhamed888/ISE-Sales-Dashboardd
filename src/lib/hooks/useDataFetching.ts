@@ -69,7 +69,7 @@ export function useReports(filters: ReportFilters) {
     const unsubscribe = onSnapshot(
       q,
       (snap) => {
-        let data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as any));
+        let data: any[] = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
         if (filters.platform !== "all") {
           data = data.filter((r) => r.platform === filters.platform);
@@ -146,19 +146,19 @@ export function useDashboardStats(filters: ReportFilters) {
 
       if (p.funnel?.noReplyAfterGreeting) {
         noRepGreeting += p.funnel.noReplyAfterGreeting.reduce(
-          (a: number, b: any) => a + (b.count || 0),
+          (a: number, b: { count?: number }) => a + (b.count || 0),
           0
         );
       }
       if (p.funnel?.noReplyAfterDetails) {
         noRepDetails += p.funnel.noReplyAfterDetails.reduce(
-          (a: number, b: any) => a + (b.count || 0),
+          (a: number, b: { count?: number }) => a + (b.count || 0),
           0
         );
       }
       if (p.funnel?.noReplyAfterPrice) {
         noRepPrice += p.funnel.noReplyAfterPrice.reduce(
-          (a: number, b: any) => a + (b.count || 0),
+          (a: number, b: { count?: number }) => a + (b.count || 0),
           0
         );
       }
@@ -195,11 +195,18 @@ export function useTeamMembers() {
 
   useEffect(() => {
     const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snap) => {
-      const usersList = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setTeam(usersList);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        const usersList = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setTeam(usersList);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("team members listener:", err);
+        setLoading(false);
+      }
+    );
     return () => unsubscribe();
   }, []);
 
@@ -210,13 +217,13 @@ export function useAdsAnalysis(filters: ReportFilters) {
   const { reports, loading } = useReports(filters);
 
   const adsAnalytics = useMemo(() => {
-    const adsMap: Record<string, any> = {};
+    const adsMap: Record<string, { adName: string; totalHits: number; stageDrops: number[]; notes: string[] }> = {};
 
     reports.forEach((r) => {
       if (!r.parsedData?.funnel) return;
       const f = r.parsedData.funnel;
 
-      const incrementAd = (arr: any[], stageIdx: number) => {
+      const incrementAd = (arr: Array<{ adName?: string; count?: number; notes?: string }>, stageIdx: number) => {
         if (!Array.isArray(arr)) return;
         arr.forEach((item) => {
           const name = (item.adName || "").trim();
@@ -236,7 +243,7 @@ export function useAdsAnalysis(filters: ReportFilters) {
       incrementAd(f.repliedAfterPrice, 3);
     });
 
-    const resultArray = Object.values(adsMap).map((ad: any) => {
+    const resultArray = Object.values(adsMap).map((ad) => {
       const conversionVol = ad.stageDrops[3];
       const conversionRate =
         ad.totalHits > 0
