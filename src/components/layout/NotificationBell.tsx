@@ -3,11 +3,12 @@ import { collection, query, where, orderBy, onSnapshot, updateDoc, doc, writeBat
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { useNavigate } from "react-router-dom";
+import type { NotificationType } from "@/lib/services/notification-trigger-service";
 
 export interface SystemNotification {
   id: string;
   uid: string;
-  type: "new_excuse" | "missed_report" | "team_milestone" | "excuse_approved" | "excuse_rejected" | "reminder";
+  type: NotificationType;
   message: string;
   read: boolean;
   createdAt: any;
@@ -99,6 +100,11 @@ export function NotificationBell() {
       case "excuse_approved": return { icon: "check_circle", color: "text-emerald-500", bg: "bg-emerald-50" };
       case "excuse_rejected": return { icon: "cancel", color: "text-error", bg: "bg-red-50" };
       case "reminder": return { icon: "notifications_active", color: "text-amber-500", bg: "bg-amber-50" };
+      case "deadline_reminder": return { icon: "schedule", color: "text-orange-500", bg: "bg-orange-50" };
+      case "pre_deadline_countdown": return { icon: "timer", color: "text-orange-500", bg: "bg-orange-50" };
+      case "customer_followup": return { icon: "support_agent", color: "text-cyan-600", bg: "bg-cyan-50" };
+      case "media_buyer_missed_entry": return { icon: "campaign", color: "text-purple-600", bg: "bg-purple-50" };
+      case "anomaly_alert": return { icon: "warning", color: "text-red-600", bg: "bg-red-50" };
       default: return { icon: "notifications", color: "text-[#64748B]", bg: "bg-[#F7F9FC]" };
     }
   };

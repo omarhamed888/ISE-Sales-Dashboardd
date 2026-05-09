@@ -61,6 +61,9 @@ export interface GeminiObjection {
   id: string;
   text: string;
   count: number;
+  categoryId?: string;
+  source?: "catalog" | "custom";
+  suggestedResponse?: string;
 }
 
 export interface ParsedReportData {
@@ -265,6 +268,13 @@ interface RawGeminiOutput {
   detectedJobs?: any[];
   closedDeals?: any[];
   objections?: any[];
+}
+
+export interface ObjectionCategoryRef {
+  id: string;
+  label: string;
+  suggestedResponse?: string;
+  isActive?: boolean;
 }
 
 type ParseProgressStep = "send" | "analyze" | "extract";
@@ -511,16 +521,83 @@ function validateAndCorrect(rawOutput: RawGeminiOutput): RawGeminiOutput {
     id: typeof o.id === 'string' && o.id ? o.id : crypto.randomUUID(),
     text: typeof o.text === 'string' ? o.text.trim() : String(o.text || ""),
     count: typeof o.count === 'number' && o.count > 0 ? o.count : 1,
-  })).filter((o: GeminiObjection) => o.text !== "");
+    categoryId: typeof o.categoryId === "string" && o.categoryId ? o.categoryId : undefined,
+    source: (o.source === "catalog" ? "catalog" : "custom") as "catalog" | "custom",
+    suggestedResponse:
+      typeof o.suggestedResponse === "string" && o.suggestedResponse.trim()
+        ? o.suggestedResponse.trim()
+        : undefined,
+  })).filter((o) => String(o.text || "").trim() !== "");
 
   return out;
+}
+
+function normalizeArabicText(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ة/g, "ه");
+}
+
+export function matchObjectionsToCategories(
+  objections: GeminiObjection[],
+  categories: ObjectionCategoryRef[] = []
+): GeminiObjection[] {
+  if (!Array.isArray(objections) || objections.length === 0) return [];
+  const active = categories.filter((c) => c.isActive !== false && c.label?.trim());
+  if (active.length === 0) return objections;
+
+  const normalized = active.map((c) => ({
+    ...c,
+    key: normalizeArabicText(c.label),
+  }));
+
+  return objections.map((obj) => {
+    const key = normalizeArabicText(obj.text || "");
+    let best: (typeof normalized)[number] | null = null;
+    let bestScore = 0;
+
+    for (const c of normalized) {
+      if (!key || !c.key) continue;
+      let score = 0;
+      if (key === c.key) score = 100;
+      else if (key.includes(c.key) || c.key.includes(key)) score = 80;
+      else {
+        const keyParts = key.split(" ");
+        const catParts = c.key.split(" ");
+        const overlap = keyParts.filter((p) => catParts.includes(p)).length;
+        if (overlap > 0) score = overlap * 10;
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        best = c;
+      }
+    }
+
+    if (!best || bestScore < 20) {
+      return { ...obj, source: obj.source || "custom" };
+    }
+    return {
+      ...obj,
+      text: best.label,
+      categoryId: best.id,
+      source: "catalog",
+      suggestedResponse: best.suggestedResponse?.trim() || undefined,
+    };
+  });
 }
 
 export async function parseReport(
   rawText: string,
   platform: string = "واتساب",
   courses: string[] = [],
-  options: { forceRefresh?: boolean; onProgress?: (step: ParseProgressStep) => void } = {}
+  options: {
+    forceRefresh?: boolean;
+    onProgress?: (step: ParseProgressStep) => void;
+    objectionCategories?: ObjectionCategoryRef[];
+  } = {}
 ): Promise<{ parsedData: ParsedReportData; platform: string }> {
   if (rawText.trim().length < 20) {
     throw new Error("النص المدخل أقصر من أن يكون تقريراً. يرجى إدخال تفاصيل أوفى.");
@@ -614,7 +691,10 @@ export async function parseReport(
       programTrack: rawOutput.programTrack || "",
       sourceType: rawOutput.sourceType || platform,
       closedDeals: (rawOutput.closedDeals || []) as DealInput[],
-      objections: (rawOutput.objections || []) as GeminiObjection[],
+      objections: matchObjectionsToCategories(
+        (rawOutput.objections || []) as GeminiObjection[],
+        options.objectionCategories || []
+      ),
     },
     platform
   };

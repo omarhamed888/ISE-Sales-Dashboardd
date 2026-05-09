@@ -7,10 +7,12 @@ import { FilterBar } from "./FilterBar";
 import { FilterProvider } from "@/lib/filter-context";
 import { ToastProvider } from "@/components/ui/Toast";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { useScheduledNotifications } from "@/lib/hooks/useScheduledNotifications";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { user } = useAuth();
+  useScheduledNotifications();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 

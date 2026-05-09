@@ -7,6 +7,7 @@ import {
 import { db } from "@/lib/firebase";
 import { useCourses } from "@/lib/hooks/useCourses";
 import type { AppConfig } from "@/lib/hooks/useAppConfig";
+import { ObjectionCategoriesManager } from "@/components/settings/ObjectionCategoriesManager";
 
 const AR_DAY_TO_NUM: Record<string, number> = {
   السبت: 6,
@@ -566,6 +567,8 @@ export default function SettingsPage() {
                 </section>
                 </>
                 )}
+
+                {isSuperAdmin && <ObjectionCategoriesManager />}
 
                 {/* 3. Courses Management */}
                 <section className="bg-white border border-[#E2E8F0] rounded-[24px] overflow-hidden shadow-sm">

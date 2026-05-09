@@ -47,6 +47,9 @@ export interface Objection {
   id: string;
   text: string;
   count: number;
+  categoryId?: string;
+  source?: "catalog" | "custom";
+  suggestedResponse?: string;
 }
 
 export interface ParsedDeal {

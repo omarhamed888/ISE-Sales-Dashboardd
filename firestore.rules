@@ -106,9 +106,34 @@ service cloud.firestore {
 
     match /notifications/{notifId} {
       allow read: if isAdmin() || (isAuth() && resource.data.uid == request.auth.uid);
-      allow create: if isAdmin();
+      allow create: if isAdmin() || (
+        isAuth()
+        && request.resource.data.uid is string
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.type in [
+          'new_excuse',
+          'missed_report',
+          'team_milestone',
+          'excuse_approved',
+          'excuse_rejected',
+          'reminder',
+          'deadline_reminder',
+          'pre_deadline_countdown',
+          'customer_followup',
+          'media_buyer_missed_entry',
+          'anomaly_alert'
+        ]
+        && request.resource.data.message is string
+        && request.resource.data.read is bool
+        && request.resource.data.read == false
+      );
       allow update: if isAuth() && resource.data.uid == request.auth.uid;
       allow delete: if isSuperAdmin();
+    }
+
+    match /objection_categories/{categoryId} {
+      allow read: if isAuth();
+      allow create, update, delete: if isSuperAdmin();
     }
 
     match /courses/{courseId} {

@@ -1,7 +1,9 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { parseReport, clearParseCache } from "@/lib/services/gemini-parser";
 import { useCourses } from "@/lib/hooks/useCourses";
+import { useObjectionCategories } from "@/lib/hooks/useObjectionCategories";
 import { AdSelectDropdown } from "@/components/ads/AdSelectDropdown";
+import { ObjectionPicker } from "@/components/sales/ObjectionPicker";
 import type { ParsedReportData, ReportFunnel, FunnelStage, GeminiObjection } from "@/lib/services/gemini-parser";
 import { collection, addDoc, doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -84,6 +86,12 @@ interface FormStageEntries {
   details: FormAdEntry[];
   price: FormAdEntry[];
   closed: FormAdEntry[];
+}
+
+interface FormObjection extends GeminiObjection {
+  categoryId?: string;
+  source?: "catalog" | "custom";
+  suggestedResponse?: string;
 }
 
 const newEntry = (): FormAdEntry => ({ id: `entry-${Date.now()}-${Math.random()}`, adName: "", count: 0, notes: "" });
@@ -187,7 +195,8 @@ export default function SubmitReportPage() {
 
   // ── Direct form state ─────────────────────────────────────────────────
   const [formStages, setFormStages] = useState<FormStageEntries>(emptyFormStage());
-  const [formObjections, setFormObjections] = useState<GeminiObjection[]>([]);
+  const [formObjections, setFormObjections] = useState<FormObjection[]>([]);
+  const { categories: objectionCategories } = useObjectionCategories();
 
   // cycling messages during Gemini processing
   const cycleMsgs = ["جاري تحليل التقرير بالذكاء الاصطناعي...", "إرسال التقرير...", "تحليل البيانات...", "استخراج النتائج..."];
@@ -248,7 +257,14 @@ export default function SubmitReportPage() {
         setWasDirectEntry(data.entryMode === "form");
         setInputMode(data.entryMode === "form" ? "form" : "template");
         setReportText(typeof data.rawText === "string" ? data.rawText : "");
-        setFormObjections(Array.isArray(pd.objections) ? pd.objections : []);
+        setFormObjections(
+          Array.isArray(pd.objections)
+            ? pd.objections.map((o) => ({
+                ...o,
+                source: o.categoryId ? "catalog" : "custom",
+              }))
+            : []
+        );
         setIsConfirmed(false);
         setAppState("review");
       } catch (e: any) {
@@ -279,11 +295,14 @@ export default function SubmitReportPage() {
   }, []);
 
   const addObjection = useCallback(() => {
-    setFormObjections(prev => [...prev, { id: `obj-${Date.now()}-${Math.random()}`, text: "", count: 1 }]);
+    setFormObjections((prev) => [
+      ...prev,
+      { id: `obj-${Date.now()}-${Math.random()}`, text: "", count: 1, source: "custom" },
+    ]);
   }, []);
 
-  const updateObjection = useCallback((id: string, field: "text" | "count", value: string | number) => {
-    setFormObjections(prev => prev.map(o => o.id === id ? { ...o, [field]: value } : o));
+  const updateObjection = useCallback((id: string, patch: Partial<FormObjection>) => {
+    setFormObjections((prev) => prev.map((o) => (o.id === id ? { ...o, ...patch } : o)));
   }, []);
 
   const removeObjection = useCallback((id: string) => {
@@ -373,7 +392,7 @@ export default function SubmitReportPage() {
       salesNotes: "",
       programTrack: "",
       sourceType: formPlatform,
-      objections: formObjections.filter(o => o.text.trim() !== ""),
+      objections: formObjections.filter((o) => o.text.trim() !== ""),
     };
   };
 
@@ -403,6 +422,12 @@ export default function SubmitReportPage() {
       const courseNames = courses.map(c => c.name);
       const result = await parseReport(reportText, formPlatform, courseNames, {
         forceRefresh: forceReparse,
+        objectionCategories: objectionCategories.map((c) => ({
+          id: c.id,
+          label: c.label,
+          suggestedResponse: c.suggestedResponse,
+          isActive: c.isActive,
+        })),
         onProgress: (step) => {
           if (step === "send") setCycleIdx(1);
           if (step === "analyze") setCycleIdx(2);
@@ -751,29 +776,14 @@ export default function SubmitReportPage() {
                   </p>
                 ) : (
                   <div className="flex flex-col gap-2">
-                    {formObjections.map(obj => (
-                      <div key={obj.id} className="flex items-center gap-2">
-                        <input
-                          value={obj.text}
-                          onChange={e => updateObjection(obj.id, "text", e.target.value)}
-                          placeholder="نص الاعتراض... (مثال: السعر غالي)"
-                          className="flex-1 bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-3 py-2 text-[13px] font-bold text-[#1E293B] focus:border-[#2563EB] outline-none"
-                        />
-                        <input
-                          type="number"
-                          min={1}
-                          value={obj.count}
-                          onChange={e => updateObjection(obj.id, "count", Math.max(1, parseInt(e.target.value) || 1))}
-                          className="w-20 bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-3 py-2 text-[13px] font-bold text-[#1E293B] text-center focus:border-[#2563EB] outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeObjection(obj.id)}
-                          className="w-8 h-8 flex items-center justify-center rounded-xl text-[#94A3B8] hover:bg-red-50 hover:text-red-400 transition-colors flex-shrink-0 cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">delete</span>
-                        </button>
-                      </div>
+                    {formObjections.map((obj) => (
+                      <ObjectionPicker
+                        key={obj.id}
+                        value={obj}
+                        categories={objectionCategories}
+                        onChange={(next) => updateObjection(obj.id, next)}
+                        onRemove={() => removeObjection(obj.id)}
+                      />
                     ))}
                   </div>
                 )}
