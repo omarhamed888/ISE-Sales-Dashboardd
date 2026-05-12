@@ -75,8 +75,8 @@ export function RecentActivity({ reports, deals }: { reports: any[]; deals?: any
               <th className="px-6 py-3.5 text-xs font-semibold text-[#64748B] uppercase tracking-wide">التاريخ</th>
               <th className="px-6 py-3.5 text-xs font-semibold text-[#64748B] uppercase tracking-wide hidden md:table-cell">المنصة</th>
               <th className="px-6 py-3.5 text-xs font-semibold text-[#64748B] uppercase tracking-wide text-center">الرسائل</th>
-              <th className="px-6 py-3.5 text-xs font-semibold text-[#64748B] uppercase tracking-wide text-center hidden md:table-cell">التفاعل</th>
-              <th className="px-6 py-3.5 text-xs font-semibold text-[#64748B] uppercase tracking-wide text-center">التحويل</th>
+              <th className="px-6 py-3.5 text-xs font-semibold text-[#64748B] uppercase tracking-wide text-center hidden md:table-cell">الصفقات</th>
+              <th className="px-6 py-3.5 text-xs font-semibold text-[#64748B] uppercase tracking-wide text-center">الإغلاق</th>
               <th className="px-6 py-3.5 text-xs font-semibold text-[#64748B] uppercase tracking-wide text-left">عرض</th>
             </tr>
           </thead>

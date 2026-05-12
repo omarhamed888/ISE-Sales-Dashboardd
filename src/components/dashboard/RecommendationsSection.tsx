@@ -86,14 +86,14 @@ export function RecommendationsSection({ reports, deals }: { reports: any[]; dea
       list.push({
         urgency: "متوسط المدى",
         title: "تحليل الناجحين",
-        description: `ادرس الـ ${cur.interactions.toLocaleString('en-US')} تفاعل الناجح - ما القواسم المشتركة بين المهتمين؟`,
+        description: `ادرس الـ ${cur.interactions.toLocaleString('en-US')} صفقة مغلقة - ما القواسم المشتركة بين العملاء الناجحين؟`,
       });
     }
 
     list.push({
       urgency: "متوسط المدى",
       title: "تتبع المبيعات",
-      description: `كم من الـ ${cur.interactions.toLocaleString('en-US')} تفاعل تحول لعملاء فعليين؟ هذا المقياس الأهم`,
+      description: `الـ ${cur.interactions.toLocaleString('en-US')} صفقة مغلقة — تابع قيمة كل صفقة لتحسب الـ ROI الحقيقي`,
     });
 
     if (cur.conversionRate > 0) {

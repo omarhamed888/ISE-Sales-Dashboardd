@@ -66,9 +66,9 @@ export function KPICards({ reports, allReports, deals }: { reports: any[]; allRe
         iconColor="text-[#2563EB]"
       />
 
-      {/* Card 2: التفاعل الفعلي = الصفقات */}
+      {/* Card 2: الصفقات المغلقة */}
       <KPICard
-        label="الصفقات (تفاعل فعلي)"
+        label="الصفقات المغلقة"
         value={cur.interactions.toLocaleString('en-US')}
         icon="handshake"
         accentColor="border-r-[#10B981]"
@@ -86,7 +86,7 @@ export function KPICards({ reports, allReports, deals }: { reports: any[]; allRe
         iconColor="text-[#8B5CF6]"
       />
 
-      {/* Card 4: معدل الإغلاق */}
+      {/* Card 4: معدل الإغلاق = صفقات مغلقة / إجمالي رسائل */}
       <KPICard
         label="معدل الإغلاق"
         value={`${cur.conversionRate.toFixed(1)}%`}

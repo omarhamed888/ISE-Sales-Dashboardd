@@ -14,7 +14,7 @@ export function SalesRepComparisonChart({ data }: { data: SalesRepBucket[] }) {
   const chartData = data.map((r) => ({
     name: r.displayName,
     الرسائل: r.messages,
-    التفاعلات: r.interactions,
+    "الصفقات المغلقة": r.interactions,
   }));
 
   const singleRep = data.length <= 1;
@@ -60,7 +60,7 @@ export function SalesRepComparisonChart({ data }: { data: SalesRepBucket[] }) {
               formatter={(value) => <span style={{ color: "#2c3e50" }}>{value}</span>}
             />
             <Bar dataKey="الرسائل" fill="#3498db" radius={[4, 4, 0, 0]} maxBarSize={28} />
-            <Bar dataKey="التفاعلات" fill="#27ae60" radius={[4, 4, 0, 0]} maxBarSize={28} />
+            <Bar dataKey="الصفقات المغلقة" fill="#27ae60" radius={[4, 4, 0, 0]} maxBarSize={28} />
           </BarChart>
         </ResponsiveContainer>
       </div>

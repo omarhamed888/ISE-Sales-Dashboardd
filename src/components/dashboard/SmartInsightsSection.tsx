@@ -33,7 +33,7 @@ export function SmartInsightsSection({ reports, deals }: { reports: any[]; deals
     if (msMsgs > 0 && msIntr === 0) {
       issueList.push({
         variant: "critical",
-        text: `🚫 فشل ماسنجر الكامل: ${msMsgs.toLocaleString('en-US')} رسائل بدون أي تفاعل (0%) - يجب إيقاف الإنفاق فوراً`,
+        text: `🚫 فشل ماسنجر الكامل: ${msMsgs.toLocaleString('en-US')} رسائل بدون أي صفقة (0%) - يجب إيقاف الإنفاق فوراً`,
       });
     }
 
@@ -54,7 +54,7 @@ export function SmartInsightsSection({ reports, deals }: { reports: any[]; deals
     if (cur.conversionRate < 5 && tm > 0) {
       issueList.push({
         variant: "info",
-        text: `📉 معدل تحويل ضعيف: ${cur.conversionRate.toFixed(1)}% فقط من الرسائل تحولت لتفاعل حقيقي`,
+        text: `📉 معدل إغلاق ضعيف: ${cur.conversionRate.toFixed(1)}% فقط من الرسائل تحولت لصفقات مغلقة`,
       });
     }
 
@@ -101,7 +101,7 @@ export function SmartInsightsSection({ reports, deals }: { reports: any[]; deals
       if (mx - mn < 1.5) {
         const names = reps.map((r) => r.displayName).join("، ");
         const avg = (rates.reduce((a, b) => a + b, 0) / rates.length).toFixed(1);
-        pos.push(`⚖️ أداء متوازن: ${names} لديهم نفس معدل التحويل (${avg}%)`);
+        pos.push(`⚖️ أداء متوازن: ${names} لديهم نفس معدل الإغلاق (${avg}%)`);
       }
     }
 

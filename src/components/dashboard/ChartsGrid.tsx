@@ -60,21 +60,21 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
     const slices: { name: string; value: number; fill: string }[] = [];
     if (wa > 0) {
       slices.push({
-        name: `واتساب (${waI} تفاعل)`,
+        name: `واتساب (${waI} صفقة)`,
         value: wa,
         fill: "#3498db",
       });
     }
     if (ms > 0) {
       slices.push({
-        name: `ماسنجر (${msI} تفاعل)`,
+        name: `ماسنجر (${msI} صفقة)`,
         value: ms,
         fill: msI === 0 ? "#e8f5e9" : "#85c1e9",
       });
     }
     if (tk > 0) {
       slices.push({
-        name: `تيك توك (${tkI} تفاعل)`,
+        name: `تيك توك (${tkI} صفقة)`,
         value: tk,
         fill: tkI === 0 ? "#f2f2f2" : "#333333",
       });
@@ -142,7 +142,7 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
         </div>
       </DashboardChartCard>
 
-      <DashboardChartCard title="أداء المنصات" subtitle="إجمالي الرسائل والتفاعلات حسب المنصة">
+      <DashboardChartCard title="أداء المنصات" subtitle="إجمالي الرسائل والصفقات حسب المنصة">
         <div className="h-full w-full" dir="ltr">
           {donutData.length === 0 ? (
             <div className="flex h-full items-center justify-center text-sm font-semibold text-[#7f8c8d]" dir="rtl">
@@ -233,11 +233,11 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
         </div>
       </DashboardChartCard>
 
-      <DashboardChartCard title="معدل التحويل اليومي" subtitle="نسبة التفاعل الحقيقي لكل يوم">
+      <DashboardChartCard title="معدل الإغلاق اليومي" subtitle="نسبة الصفقات المغلقة لكل يوم">
         <DailyConversionChart data={dailyBuckets} />
       </DashboardChartCard>
 
-      <DashboardChartCard title="مقارنة أداء المندوبين" subtitle="الرسائل والتفاعلات لكل مندوب">
+      <DashboardChartCard title="مقارنة أداء المندوبين" subtitle="الرسائل والصفقات المغلقة لكل مندوب">
         <SalesRepComparisonChart data={repBuckets} />
       </DashboardChartCard>
 

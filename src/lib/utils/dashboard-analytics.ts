@@ -204,7 +204,7 @@ export function buildLeakCausesPieData(cur: ReturnType<typeof calculateAggregate
   }
   slices.push({ name: "تسرب بعد التفاصيل", value: d, fill: "#f9d99d" });
   slices.push({ name: "تسرب بعد السعر", value: p, fill: "#a3daf7" });
-  slices.push({ name: "تفاعل فعلي", value: intr, fill: "#27ae60" });
+  slices.push({ name: "صفقات مغلقة", value: intr, fill: "#27ae60" });
 
   const sum = slices.reduce((a, s) => a + s.value, 0);
   if (sum <= 0) return [];

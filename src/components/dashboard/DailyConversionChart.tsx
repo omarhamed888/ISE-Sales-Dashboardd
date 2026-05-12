@@ -65,7 +65,7 @@ export function DailyConversionChart({ data }: { data: DailyBucket[] }) {
               textAlign: "right",
               fontWeight: 600,
             }}
-            formatter={(value) => [`${value ?? 0}%`, "معدل التحويل"]}
+            formatter={(value) => [`${value ?? 0}%`, "معدل الإغلاق"]}
             labelFormatter={(_, payload) =>
               payload?.[0]?.payload?.labelDayMonth
                 ? String(payload[0].payload.labelDayMonth)

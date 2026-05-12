@@ -111,7 +111,7 @@ export function TeamStatusSummary({ allReports, deals }: { allReports: any[]; de
                   </span>
                   <div className="flex gap-3">
                     <span className="text-[10px] font-bold text-[#64748B] bg-white border border-[#E2E8F0] px-2 py-0.5 rounded-md">{msgs} رسالة</span>
-                    <span className="text-[10px] font-bold text-[#64748B] bg-white border border-[#E2E8F0] px-2 py-0.5 rounded-md">{intr} تفاعل</span>
+                    <span className="text-[10px] font-bold text-[#64748B] bg-white border border-[#E2E8F0] px-2 py-0.5 rounded-md">{intr} صفقة</span>
                   </div>
                   {/* Progress bar */}
                   <div className="w-full h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
