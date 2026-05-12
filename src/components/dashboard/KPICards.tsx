@@ -32,7 +32,7 @@ export function KPICards({ reports, allReports, deals }: { reports: any[]; allRe
   const { filter } = useFilter();
   const cur = calculateAggregates(reports, deals);
   const prevReports = getDashboardPreviousPeriodReports(allReports, filter);
-  const prev = calculateAggregates(prevReports, deals);
+  const prev = calculateAggregates(prevReports);
   const pctDelta = (current: number, previous: number) => {
     if (!previous) return 0;
     return ((current - previous) / previous) * 100;

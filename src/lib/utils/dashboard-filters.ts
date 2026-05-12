@@ -108,6 +108,7 @@ export function getDashboardPreviousPeriodReports(
 /** Closed deals whose closeDate falls in the same dashboard window as reports (اليوم / الأسبوع / الشهر / الإجمالي). */
 export function filterDealsByDashboardDate(deals: any[], filter: FilterState): any[] {
   return deals.filter((d) => {
+    if (filter.salesRep !== "all" && d.salesRepId !== filter.salesRep) return false;
     if (filter.bookingType && filter.bookingType !== "all") {
       const bt = d.bookingType || (d.closureType === "call" ? "call_booking" : "self_booking");
       if (bt !== filter.bookingType) return false;

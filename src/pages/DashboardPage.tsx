@@ -3,7 +3,7 @@ import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { useFilter } from "@/lib/filter-context";
-import { filterReports } from "@/lib/utils/dashboard-filters";
+import { filterReports, filterDealsByDashboardDate } from "@/lib/utils/dashboard-filters";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { TeamStatusSummary } from "@/components/dashboard/TeamStatusSummary";
@@ -60,6 +60,7 @@ export default function DashboardPage() {
   }, [user?.uid]);
 
   const currentReports = useMemo(() => filterReports(allReports, filter), [allReports, filter]);
+  const filteredDeals = useMemo(() => filterDealsByDashboardDate(allDeals, filter), [allDeals, filter]);
 
   if (loading) {
     return (
@@ -128,20 +129,20 @@ export default function DashboardPage() {
         ) : (
            <>
               {/* SECTION 1: KPI Cards */}
-              <KPICards reports={currentReports} allReports={allReports} deals={allDeals} />
+              <KPICards reports={currentReports} allReports={allReports} deals={filteredDeals} />
 
               {/* SECTION 1b: Marketing KPI (auto-hides when no spend data) */}
               <MarketingKPICards deals={allDeals} />
 
               {/* SECTION 2: Charts */}
               <Suspense fallback={<SkeletonChart />}>
-                <ChartsGrid reports={currentReports} deals={allDeals} />
+                <ChartsGrid reports={currentReports} deals={filteredDeals} />
               </Suspense>
 
               {/* SECTION 3: AI Insights + Recommendations */}
               <Suspense fallback={<SkeletonChart />}>
-                <SmartInsightsSection reports={currentReports} deals={allDeals} />
-                <RecommendationsSection reports={currentReports} deals={allDeals} />
+                <SmartInsightsSection reports={currentReports} deals={filteredDeals} />
+                <RecommendationsSection reports={currentReports} deals={filteredDeals} />
               </Suspense>
 
               {/* SECTION 4: Rejection Analytics */}
@@ -184,7 +185,7 @@ export default function DashboardPage() {
               <TeamStatusSummary allReports={allReports} deals={allDeals} />
 
               {/* SECTION 6: Recent Activity */}
-              <RecentActivity reports={currentReports} deals={allDeals} />
+              <RecentActivity reports={currentReports} deals={filteredDeals} />
 
            </>
         )}

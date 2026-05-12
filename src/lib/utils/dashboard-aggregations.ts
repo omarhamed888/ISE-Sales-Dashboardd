@@ -115,6 +115,12 @@ export function calculateAggregates(reports: any[], deals?: any[]) {
     funnel.success += processStage(f.repliedAfterPrice, "success");
   });
 
+  if (dealsByKey && dealsByKey.size > 0) {
+    let directCount = 0;
+    for (const c of dealsByKey.values()) directCount += c;
+    interactions = directCount;
+  }
+
   const conversionRate = calcConversionRate(interactions, totalMessages);
 
   type LeakStage = "بعد التحية" | "بعد التفاصيل" | "بعد السعر";
