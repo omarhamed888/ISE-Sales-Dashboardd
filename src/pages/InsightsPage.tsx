@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useInsightsReports } from "@/lib/hooks/useDataFetching";
+import { getAllDeals } from "@/lib/services/deals-service";
 import {
   generateAIInsights,
   type AIInsightsResult,
@@ -65,9 +66,18 @@ export default function InsightsPage() {
   const [selectedSavedId, setSelectedSavedId] = useState<string | null>(null);
 
   const { reports, loading: reportsLoading } = useInsightsReports(selectedPeriod);
+  const [allDeals, setAllDeals] = useState<any[]>([]);
   const periodLabel = getPeriodLabel(selectedPeriod);
   const dateFrom = getDateFromYmd(selectedPeriod);
   const dateTo = getTodayYmd();
+
+  useEffect(() => {
+    let cancelled = false;
+    getAllDeals()
+      .then((d) => { if (!cancelled) setAllDeals(d as any[]); })
+      .catch(() => { if (!cancelled) setAllDeals([]); });
+    return () => { cancelled = true; };
+  }, []);
 
   const loadSavedInsights = useCallback(async () => {
     try {
@@ -101,6 +111,7 @@ export default function InsightsPage() {
       dateFrom,
       dateTo,
       reports,
+      deals: allDeals,
     });
 
     if (res.ok) {

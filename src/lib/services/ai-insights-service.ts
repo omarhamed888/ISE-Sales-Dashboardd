@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { ParsedReportData } from "@/lib/services/gemini-parser";
 import { normalizeReportDateKey } from "@/lib/utils/report-dates";
-import { calcInteractionsFromParsedData } from "@/lib/utils/dashboard-aggregations";
+import { calcInteractionsFromParsedData, buildDealsCountByReportKey, getDealCountForReport } from "@/lib/utils/dashboard-aggregations";
 import { trackAIUsage } from "@/lib/services/ai-usage-service";
 
 export type InsightPeriod = "today" | "week" | "month" | "all";
@@ -74,9 +74,9 @@ function reportMessages(pd: any): number {
   return tm;
 }
 
-function reportInteractions(pd: any): number {
+function reportInteractions(pd: any, dealCount?: number): number {
   if (!pd) return 0;
-  return calcInteractionsFromParsedData(pd);
+  return calcInteractionsFromParsedData(pd, dealCount);
 }
 
 function getFunnel(r: ReportDocument) {
@@ -133,16 +133,22 @@ export function buildInsightsContext(params: {
   dateFrom: string;
   dateTo: string;
   reports: ReportDocument[];
+  deals?: any[];
 }): string {
-  const { period, periodLabel, dateFrom, dateTo, reports } = params;
+  const { period, periodLabel, dateFrom, dateTo, reports, deals } = params;
 
   if (reports.length === 0) {
     return "";
   }
 
+  const dealsByKey = deals ? buildDealsCountByReportKey(deals) : undefined;
+
   const totalMessages = reports.reduce((sum, r) => sum + reportMessages(r.parsedData), 0);
   const totalInteractions = reports.reduce(
-    (sum, r) => sum + reportInteractions(r.parsedData),
+    (sum, r) => {
+      const dc = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
+      return sum + reportInteractions(r.parsedData, dc);
+    },
     0
   );
   const conversionRate =
@@ -166,8 +172,9 @@ export function buildInsightsContext(params: {
   reports.forEach((r) => {
     const p = r.platform ?? "غير محدد";
     if (!platformMap[p]) platformMap[p] = { messages: 0, interactions: 0 };
+    const dc = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
     platformMap[p].messages += reportMessages(r.parsedData);
-    platformMap[p].interactions += reportInteractions(r.parsedData);
+    platformMap[p].interactions += reportInteractions(r.parsedData, dc);
   });
 
   const platformLines = Object.entries(platformMap)
@@ -183,8 +190,9 @@ export function buildInsightsContext(params: {
   reports.forEach((r) => {
     const name = r.salesRepName ?? "غير محدد";
     if (!repMap[name]) repMap[name] = { messages: 0, interactions: 0, days: 0 };
+    const dc = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
     repMap[name].messages += reportMessages(r.parsedData);
-    repMap[name].interactions += reportInteractions(r.parsedData);
+    repMap[name].interactions += reportInteractions(r.parsedData, dc);
     repMap[name].days += 1;
   });
 
@@ -245,7 +253,8 @@ export function buildInsightsContext(params: {
     if (!d) return;
     if (!dayMap[d]) dayMap[d] = { messages: 0, interactions: 0 };
     dayMap[d].messages += reportMessages(r.parsedData);
-    dayMap[d].interactions += reportInteractions(r.parsedData);
+    const dc = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
+    dayMap[d].interactions += reportInteractions(r.parsedData, dc);
   });
 
   const dayLines = Object.entries(dayMap)
@@ -452,8 +461,9 @@ export async function generateAIInsights(params: {
   dateFrom: string;
   dateTo: string;
   reports: ReportDocument[];
+  deals?: any[];
 }): Promise<GenerateInsightsResponse> {
-  const { period, periodLabel, dateFrom, dateTo, reports } = params;
+  const { period, periodLabel, dateFrom, dateTo, reports, deals } = params;
 
   const totalMessages = reports.reduce((s, r) => s + reportMessages(r.parsedData), 0);
 
@@ -481,6 +491,7 @@ export async function generateAIInsights(params: {
     dateFrom,
     dateTo,
     reports,
+    deals,
   });
 
   if (!contextText) {
@@ -499,6 +510,7 @@ export async function generateAIInsights(params: {
       dateFrom,
       dateTo,
       reports: reducedReports,
+      deals,
     })}`;
     tokenEstimate = estimateTokens(finalContext);
   }

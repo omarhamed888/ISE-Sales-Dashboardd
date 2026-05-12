@@ -28,10 +28,10 @@ const ACCENT: Record<Urgency, string> = {
   "متوسط المدى": "border-t-[#10B981]",
 };
 
-export function RecommendationsSection({ reports }: { reports: any[] }) {
+export function RecommendationsSection({ reports, deals }: { reports: any[]; deals?: any[] }) {
   const cards = useMemo(() => {
-    const cur = calculateAggregates(reports);
-    const platform = getPlatformStats(reports);
+    const cur = calculateAggregates(reports, deals);
+    const platform = getPlatformStats(reports, deals);
     const tm = cur.totalMessages;
 
     const priceLeakPct =
@@ -106,7 +106,7 @@ export function RecommendationsSection({ reports }: { reports: any[] }) {
 
     list.sort((a, b) => URGENCY_ORDER[a.urgency] - URGENCY_ORDER[b.urgency]);
     return list;
-  }, [reports]);
+  }, [reports, deals]);
 
   return (
     <section className="w-full bg-white rounded-2xl border border-[#E2E8F0] shadow-sm p-6" dir="rtl">

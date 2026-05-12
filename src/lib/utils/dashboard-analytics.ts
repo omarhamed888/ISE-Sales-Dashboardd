@@ -71,17 +71,18 @@ export interface FunnelBarRow {
   label: string;
 }
 
-/** Remaining audience at each stage; «بعد السعر» uses real interactions (رد بعد السعر) only. */
+/** Remaining audience at each stage; final bar = actual deals (الصفقات). */
 export function buildConversionFunnelBars(cur: ReturnType<typeof calculateAggregates>): FunnelBarRow[] {
   const tm = cur.totalMessages;
   const base = Math.max(tm, 1);
   const g = cur.funnel.greeting;
   const d = cur.funnel.details;
-  const intr = cur.interactions;
+  const p = cur.funnel.price;
+  const deals = cur.interactions;
 
   const afterGreeting = g > 0 ? Math.max(0, tm - g) : tm;
   const afterDetails = Math.max(0, afterGreeting - d);
-  const afterPrice = intr;
+  const afterPrice = Math.max(0, afterDetails - p);
 
   const rows: { name: string; count: number }[] = [
     { name: "إجمالي الرسائل", count: tm },
@@ -91,8 +92,8 @@ export function buildConversionFunnelBars(cur: ReturnType<typeof calculateAggreg
   }
   rows.push(
     { name: "بعد التفاصيل", count: afterDetails },
-    { name: "بعد السعر (باقيين)", count: afterPrice },
-    { name: "تفاعل فعلي", count: intr }
+    { name: "بعد السعر", count: afterPrice },
+    { name: "الصفقات", count: deals },
   );
 
   const drops: number[] = [];

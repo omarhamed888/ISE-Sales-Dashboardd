@@ -9,12 +9,12 @@ import {
 
 type IssueItem = { text: string; variant: "critical" | "info" };
 
-export function SmartInsightsSection({ reports }: { reports: any[] }) {
+export function SmartInsightsSection({ reports, deals }: { reports: any[]; deals?: any[] }) {
   const { issues, positives } = useMemo(() => {
-    const cur = calculateAggregates(reports);
-    const platform = getPlatformStats(reports);
-    const daily = buildDailyBuckets(reports);
-    const reps = buildSalesRepBuckets(reports);
+    const cur = calculateAggregates(reports, deals);
+    const platform = getPlatformStats(reports, deals);
+    const daily = buildDailyBuckets(reports, deals);
+    const reps = buildSalesRepBuckets(reports, deals);
     const tm = cur.totalMessages;
 
     const priceLeakPct =
@@ -113,7 +113,7 @@ export function SmartInsightsSection({ reports }: { reports: any[] }) {
     }
 
     return { issues: issueList, positives: pos };
-  }, [reports]);
+  }, [reports, deals]);
 
   return (
     <div className="w-full bg-white rounded-2xl border border-[#E2E8F0] shadow-sm p-6" dir="rtl">

@@ -140,8 +140,8 @@ export default function DashboardPage() {
 
               {/* SECTION 3: AI Insights + Recommendations */}
               <Suspense fallback={<SkeletonChart />}>
-                <SmartInsightsSection reports={currentReports} />
-                <RecommendationsSection reports={currentReports} />
+                <SmartInsightsSection reports={currentReports} deals={allDeals} />
+                <RecommendationsSection reports={currentReports} deals={allDeals} />
               </Suspense>
 
               {/* SECTION 4: Rejection Analytics */}

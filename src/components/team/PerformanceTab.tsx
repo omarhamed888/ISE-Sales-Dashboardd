@@ -19,7 +19,7 @@ interface PerformanceTabProps {
 }
 
 export function PerformanceTab({ users, reports, deals, allReports, onEdit }: PerformanceTabProps) {
-    const teamAgg = calculateAggregates(reports);
+    const teamAgg = calculateAggregates(reports, deals);
     const teamAverage = teamAgg.conversionRate || 0;
 
     const teamNames = useMemo(() => {
