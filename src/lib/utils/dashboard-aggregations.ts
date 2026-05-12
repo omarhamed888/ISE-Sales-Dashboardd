@@ -1,8 +1,13 @@
 /** Placeholder / known-bad ad labels from legacy Gemini parses — excluded from ad-level charts. */
 export const DASHBOARD_IGNORED_AD_NAMES = new Set(["عام", "طموح"]);
 
-/** Real interactions = sum of counts in repliedAfterPrice only (never noReplyAfterPrice). */
-export function calcInteractionsFromParsedData(pd: any): number {
+/**
+ * Real interactions are now backed by the `deals` collection (closed deals).
+ * - When `dealCount` is provided → return it (the authoritative source).
+ * - Otherwise → fallback to `repliedAfterPrice` (legacy / single-report displays).
+ */
+export function calcInteractionsFromParsedData(pd: any, dealCount?: number): number {
+  if (typeof dealCount === "number") return dealCount;
   if (!pd) return 0;
   const f = pd.funnel ?? pd.funnels;
   if (f && Array.isArray(f.repliedAfterPrice)) {
@@ -18,6 +23,30 @@ export function calcInteractionsFromParsedData(pd: any): number {
   );
 }
 
+/** Build map of deal counts keyed by `${salesRepId}|${date}`. */
+export function buildDealsCountByReportKey(deals: any[]): Map<string, number> {
+  const map = new Map<string, number>();
+  for (const d of deals || []) {
+    const repId = d?.salesRepId;
+    const rawDate = typeof d?.date === "string" ? d.date : "";
+    const date = rawDate.split("T")[0];
+    if (!repId || !date) continue;
+    const key = `${repId}|${date}`;
+    map.set(key, (map.get(key) || 0) + 1);
+  }
+  return map;
+}
+
+/** Look up deal count for a single report from a pre-built map. */
+export function getDealCountForReport(report: any, dealsByKey?: Map<string, number>): number {
+  if (!dealsByKey) return 0;
+  const repId = report?.salesRepId;
+  const rawDate = typeof report?.date === "string" ? report.date : "";
+  const date = rawDate.split("T")[0];
+  if (!repId || !date) return 0;
+  return dealsByKey.get(`${repId}|${date}`) || 0;
+}
+
 export function calcConversionRate(interactions: number, totalMessages: number): number {
   if (totalMessages <= 0) return 0;
   return Math.min(100, parseFloat(((interactions / totalMessages) * 100).toFixed(1)));
@@ -29,7 +58,8 @@ function shouldIncludeAdRow(adName: string | undefined): boolean {
   return !DASHBOARD_IGNORED_AD_NAMES.has(n);
 }
 
-export function calculateAggregates(reports: any[]) {
+export function calculateAggregates(reports: any[], deals?: any[]) {
+  const dealsByKey = deals ? buildDealsCountByReportKey(deals) : undefined;
   let totalMessages = 0;
   let interactions = 0;
   const funnel = { greeting: 0, details: 0, price: 0, success: 0 };
@@ -44,7 +74,8 @@ export function calculateAggregates(reports: any[]) {
       (typeof pd.totalMessages === "number" ? pd.totalMessages : null) ??
       pd.summary?.totalMessages ??
       0;
-    const intr = calcInteractionsFromParsedData(pd);
+    const dealCount = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
+    const intr = calcInteractionsFromParsedData(pd, dealCount);
 
     if (tm === 0) return;
 

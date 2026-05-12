@@ -28,13 +28,13 @@ import {
   LabelList,
 } from "recharts";
 
-export function ChartsGrid({ reports }: { reports: any[] }) {
-  const cur = calculateAggregates(reports);
-  const platform = useMemo(() => getPlatformStats(reports), [reports]);
+export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }) {
+  const cur = useMemo(() => calculateAggregates(reports, deals), [reports, deals]);
+  const platform = useMemo(() => getPlatformStats(reports, deals), [reports, deals]);
   const funnelData = useMemo(() => buildConversionFunnelBars(cur), [cur]);
-  const dailyBuckets = useMemo(() => buildDailyBuckets(reports), [reports]);
+  const dailyBuckets = useMemo(() => buildDailyBuckets(reports, deals), [reports, deals]);
   const leakPie = useMemo(() => buildLeakCausesPieData(cur), [cur]);
-  const repBuckets = useMemo(() => buildSalesRepBuckets(reports), [reports]);
+  const repBuckets = useMemo(() => buildSalesRepBuckets(reports, deals), [reports, deals]);
 
   const dropOffAdData = useMemo(() => {
     return Object.entries(cur.adsData)

@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { normalizeReportDateKey, formatYmdLocal } from "@/lib/utils/report-dates";
-import { calcInteractionsFromParsedData } from "@/lib/utils/dashboard-aggregations";
+import {
+  calcInteractionsFromParsedData,
+  buildDealsCountByReportKey,
+  getDealCountForReport,
+} from "@/lib/utils/dashboard-aggregations";
 
 type Rep = { uid: string; name: string };
 
@@ -22,9 +26,10 @@ function latestReportForRepOnDate(
   });
 }
 
-export function TeamStatusSummary({ allReports }: { allReports: any[] }) {
+export function TeamStatusSummary({ allReports, deals }: { allReports: any[]; deals?: any[] }) {
   const [reps, setReps] = useState<Rep[]>([]);
   const [loading, setLoading] = useState(true);
+  const dealsByKey = useMemo(() => deals ? buildDealsCountByReportKey(deals) : undefined, [deals]);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,7 +84,8 @@ export function TeamStatusSummary({ allReports }: { allReports: any[] }) {
           const rpt = latestReportForRepOnDate(allReports, rep.uid, todayKey);
           const pd = rpt?.parsedData;
           const msgs = pd?.totalMessages ?? 0;
-          const intr = calcInteractionsFromParsedData(pd);
+          const dealCount = rpt && dealsByKey ? getDealCountForReport(rpt, dealsByKey) : undefined;
+          const intr = calcInteractionsFromParsedData(pd, dealCount);
           const submitted = !!rpt;
 
           return (

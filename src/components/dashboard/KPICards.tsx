@@ -28,11 +28,11 @@ function KPICard({ label, value, icon, accentColor, bgTint, iconColor, valueColo
   );
 }
 
-export function KPICards({ reports, allReports }: { reports: any[]; allReports: any[] }) {
+export function KPICards({ reports, allReports, deals }: { reports: any[]; allReports: any[]; deals?: any[] }) {
   const { filter } = useFilter();
-  const cur = calculateAggregates(reports);
+  const cur = calculateAggregates(reports, deals);
   const prevReports = getDashboardPreviousPeriodReports(allReports, filter);
-  const prev = calculateAggregates(prevReports);
+  const prev = calculateAggregates(prevReports, deals);
   const pctDelta = (current: number, previous: number) => {
     if (!previous) return 0;
     return ((current - previous) / previous) * 100;
@@ -66,11 +66,11 @@ export function KPICards({ reports, allReports }: { reports: any[]; allReports: 
         iconColor="text-[#2563EB]"
       />
 
-      {/* Card 2: استجابة بعد السعر */}
+      {/* Card 2: التفاعل الفعلي = الصفقات */}
       <KPICard
-        label="استجابة بعد السعر"
+        label="الصفقات (تفاعل فعلي)"
         value={cur.interactions.toLocaleString('en-US')}
-        icon="price_check"
+        icon="handshake"
         accentColor="border-r-[#10B981]"
         bgTint="bg-[#ECFDF5]"
         iconColor="text-[#10B981]"

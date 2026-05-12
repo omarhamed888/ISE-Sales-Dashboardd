@@ -1,8 +1,11 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { formatReportDateArabicLong } from "@/lib/utils/report-dates";
 import {
   calcInteractionsFromParsedData,
   calcConversionRate,
+  buildDealsCountByReportKey,
+  getDealCountForReport,
 } from "@/lib/utils/dashboard-aggregations";
 
 function platformBadge(platform: string | undefined) {
@@ -36,7 +39,8 @@ function rowConversionStyle(cr: number) {
   return "bg-red-50 text-red-700 border border-red-100";
 }
 
-export function RecentActivity({ reports }: { reports: any[] }) {
+export function RecentActivity({ reports, deals }: { reports: any[]; deals?: any[] }) {
+  const dealsByKey = useMemo(() => deals ? buildDealsCountByReportKey(deals) : undefined, [deals]);
   if (reports.length === 0) {
     return (
       <div className="bg-white rounded-2xl p-10 border border-[#E2E8F0] shadow-sm flex flex-col items-center justify-center min-h-[300px] gap-3">
@@ -80,7 +84,8 @@ export function RecentActivity({ reports }: { reports: any[] }) {
             {sorted.slice(0, 10).map((r, idx) => {
               const pd = r.parsedData;
               const msgs = pd?.totalMessages ?? pd?.summary?.totalMessages ?? 0;
-              const intr = calcInteractionsFromParsedData(pd);
+              const dealCount = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
+              const intr = calcInteractionsFromParsedData(pd, dealCount);
               const cr = calcConversionRate(intr, msgs);
               const dateKey = typeof r.date === "string" ? r.date : "";
               const dateLabel =

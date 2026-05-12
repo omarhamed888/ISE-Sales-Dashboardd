@@ -7,7 +7,7 @@ export interface AppUser {
   uid: string;
   email: string;
   name: string;
-  role: 'sales' | 'admin' | 'superadmin';
+  role: 'sales' | 'admin' | 'superadmin' | 'media_buyer';
   isActive: boolean;
   teamName?: string;
   programTrack?: string;

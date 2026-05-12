@@ -24,17 +24,24 @@ interface Employee {
   id: string;
   name: string;
   email: string;
-  role: "sales" | "admin" | "superadmin";
+  role: "sales" | "admin" | "superadmin" | "media_buyer";
   isActive: boolean;
   addedAt?: any;
 }
 
-type FormRole = "sales" | "admin";
+type FormRole = "sales" | "admin" | "media_buyer";
 
 const ROLE_LABELS: Record<string, string> = {
   sales: "مبيعات",
   admin: "مشرف",
   superadmin: "مدير النظام",
+  media_buyer: "ميديا باير",
+};
+
+const ROLE_ICONS: Record<FormRole, string> = {
+  sales: "person",
+  admin: "admin_panel_settings",
+  media_buyer: "campaign",
 };
 
 /* ────────────────────────────────────────────────────────────
@@ -253,15 +260,14 @@ export default function AccessPage() {
               {/* Role */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-bold text-[#1E293B]">الدور الوظيفي</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {(["sales", "admin"] as FormRole[]).map((r) => (
+                <div className="grid grid-cols-3 gap-2">
+                  {(["sales", "admin", "media_buyer"] as FormRole[]).map((r) => (
                     <button key={r} type="button" onClick={() => setRole(r)}
-                      className={`flex items-center gap-2 px-3 md:px-4 py-3 rounded-xl border-2 transition-all text-sm font-bold ${
+                      className={`flex items-center justify-center gap-1.5 px-2 md:px-3 py-3 rounded-xl border-2 transition-all text-xs font-bold ${
                         role === r ? "border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]" : "border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B] hover:border-[#2563EB]/40"
                       }`}>
-                      <span className="material-symbols-outlined text-[18px]">{r === "sales" ? "person" : "admin_panel_settings"}</span>
-                      {ROLE_LABELS[r]}
-                      {role === r && <span className="material-symbols-outlined text-[16px] mr-auto">check_circle</span>}
+                      <span className="material-symbols-outlined text-[16px] shrink-0">{ROLE_ICONS[r]}</span>
+                      <span className="truncate">{ROLE_LABELS[r]}</span>
                     </button>
                   ))}
                 </div>

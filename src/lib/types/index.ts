@@ -4,13 +4,32 @@ export interface AppUser {
   id: string;
   name: string;
   email: string;
-  role: "sales" | "admin" | "superadmin";
+  role: "sales" | "admin" | "superadmin" | "media_buyer";
   isActive: boolean;
   teamName?: string;
   programTrack?: string;
   addedAt: Timestamp;
   addedBy?: string;
   lastLogin?: Timestamp;
+}
+
+export interface AdSpendEntry {
+  id: string;
+  date: string;                    // YYYY-MM-DD
+  adId: string;
+  adName: string;
+  platform: "facebook" | "instagram" | "tiktok" | "messenger" | "whatsapp";
+  spend: number;                   // currency from app_config
+  leadsReported: number;
+  reach?: number;
+  impressions?: number;
+  clicks?: number;
+  notes?: string;
+  source: "manual" | "meta_api";
+  mediaBuyerId: string;
+  mediaBuyerName: string;
+  createdAt: Timestamp;
+  updatedAt?: Timestamp;
 }
 
 export interface Ad {

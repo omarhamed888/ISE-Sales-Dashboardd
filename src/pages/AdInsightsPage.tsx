@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import type { Ad, SalesReport } from "@/lib/types";
+import type { Ad, SalesReport, AdSpendEntry } from "@/lib/types";
 import { getAdsDeepStats } from "@/components/ads/AdsAggregator";
 import { Skeleton, SkeletonCard, SkeletonChart, SkeletonText } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { getAllDeals } from "@/lib/services/deals-service";
 
 const STATE_CONFIG: Record<string, { label: string; classes: string; icon: string }> = {
   قوي:   { label: "قوي",   classes: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: "trending_up" },
@@ -18,6 +19,8 @@ export default function AdInsightsPage() {
   const { id } = useParams<{ id: string }>();
   const [ad, setAd] = useState<Ad | null>(null);
   const [stats, setStats] = useState<ReturnType<typeof getAdsDeepStats>[number] | null>(null);
+  const [adSpend, setAdSpend] = useState<AdSpendEntry[]>([]);
+  const [adDeals, setAdDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,9 +32,10 @@ export default function AdInsightsPage() {
 
     (async () => {
       try {
-        const [adSnap, reportsSnap] = await Promise.all([
+        const [adSnap, reportsSnap, allDeals] = await Promise.all([
           getDoc(doc(db, "ads", id)),
           getDocs(collection(db, "reports")),
+          getAllDeals(),
         ]);
 
         if (cancelled) return;
@@ -44,6 +48,16 @@ export default function AdInsightsPage() {
         const allStats = getAdsDeepStats(reports);
         const adStats = allStats.find(s => s.name === adData.name) ?? null;
         setStats(adStats);
+
+        // Load spend entries for THIS ad only (by adId)
+        const spendSnap = await getDocs(query(collection(db, "ad_spend"), where("adId", "==", id)));
+        if (cancelled) return;
+        const spendList = spendSnap.docs.map((d) => ({ id: d.id, ...d.data() } as any)) as AdSpendEntry[];
+        setAdSpend(spendList);
+
+        // Filter deals to those whose adSource matches this ad's name
+        const dealsForAd = (allDeals as any[]).filter((d) => (d.adSource || "").trim() === adData.name);
+        setAdDeals(dealsForAd);
       } catch {
         if (!cancelled) setError("حدث خطأ في تحميل البيانات");
       } finally {
@@ -53,6 +67,23 @@ export default function AdInsightsPage() {
 
     return () => { cancelled = true; };
   }, [id]);
+
+  // Compute spend economics for this ad
+  const economics = useMemo(() => {
+    const totalSpend = adSpend.reduce((s, e) => s + (Number(e.spend) || 0), 0);
+    const totalLeadsReported = adSpend.reduce((s, e) => s + (Number(e.leadsReported) || 0), 0);
+    const totalRevenue = adDeals.reduce((s, d) => s + (Number(d.dealValue) || 0), 0);
+    const dealsCount = adDeals.length;
+    const cpl = totalLeadsReported > 0 ? totalSpend / totalLeadsReported : 0;
+    const cpa = dealsCount > 0 ? totalSpend / dealsCount : 0;
+    const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
+    return { totalSpend, totalLeadsReported, totalRevenue, dealsCount, cpl, cpa, roas };
+  }, [adSpend, adDeals]);
+
+  // Last 30 days of spend (sorted desc)
+  const recentSpend = useMemo(() => {
+    return [...adSpend].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 30);
+  }, [adSpend]);
 
   if (loading) return (
     <div className="max-w-3xl mx-auto font-body pb-16 space-y-5 animate-in fade-in duration-300" dir="rtl">
@@ -200,6 +231,87 @@ export default function AdInsightsPage() {
           )}
         </>
       )}
+
+      {/* ── Ad Economics (cost data from media buyers) ─────────── */}
+      {adSpend.length > 0 && (
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] p-5 mt-5 shadow-sm">
+          <h3 className="text-[14px] font-black text-[#1E293B] mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-[#F59E0B]">payments</span>
+            اقتصاديات الإعلان
+          </h3>
+
+          {/* Top KPIs */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+            <EconKpi label="إجمالي المصروف" value={`${economics.totalSpend.toLocaleString('en-US', { maximumFractionDigits: 0 })} ج`} color="text-[#2563EB]" />
+            <EconKpi label="CPL" value={economics.cpl > 0 ? `${economics.cpl.toFixed(1)} ج` : '—'} color="text-[#F59E0B]" />
+            <EconKpi label="CPA" value={economics.cpa > 0 ? `${economics.cpa.toFixed(0)} ج` : '—'} color="text-[#8B5CF6]" />
+            <EconKpi
+              label="ROAS"
+              value={economics.roas > 0 ? `${economics.roas.toFixed(2)}x` : '—'}
+              color={economics.roas >= 3 ? "text-emerald-600" : economics.roas >= 1 ? "text-amber-600" : "text-red-600"}
+            />
+          </div>
+
+          {/* Compare reported vs actual deals */}
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            <div className="bg-[#F8FAFC] rounded-xl p-3 border border-[#E2E8F0]">
+              <p className="text-[10px] font-bold text-[#64748B] uppercase">Leads (المنصة)</p>
+              <p className="text-2xl font-black text-[#1E293B] mt-1">{economics.totalLeadsReported}</p>
+            </div>
+            <div className="bg-[#F8FAFC] rounded-xl p-3 border border-[#E2E8F0]">
+              <p className="text-[10px] font-bold text-[#64748B] uppercase">صفقات / إيراد</p>
+              <p className="text-2xl font-black text-[#1E293B] mt-1">
+                {economics.dealsCount} <span className="text-[12px] text-emerald-600">({economics.totalRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })} ج)</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Spend history table */}
+          {recentSpend.length > 0 && (
+            <div>
+              <h4 className="text-[12px] font-black text-[#64748B] mb-2 uppercase">سجل المصروف (آخر 30 يوم)</h4>
+              <div className="overflow-x-auto border border-[#E2E8F0] rounded-xl">
+                <table className="w-full text-right text-[12px]">
+                  <thead className="bg-[#F7F9FC] border-b border-[#E2E8F0]">
+                    <tr>
+                      <th className="p-2.5 font-bold text-[#64748B] text-xs">التاريخ</th>
+                      <th className="p-2.5 font-bold text-[#64748B] text-xs">المنصة</th>
+                      <th className="p-2.5 font-bold text-[#64748B] text-xs text-center">المصروف</th>
+                      <th className="p-2.5 font-bold text-[#64748B] text-xs text-center">Leads</th>
+                      <th className="p-2.5 font-bold text-[#64748B] text-xs text-center">CPL</th>
+                      <th className="p-2.5 font-bold text-[#64748B] text-xs">الميديا باير</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentSpend.map((s) => {
+                      const cpl = s.leadsReported > 0 ? (s.spend / s.leadsReported).toFixed(1) : '—';
+                      return (
+                        <tr key={s.id} className="border-b border-[#E2E8F0] last:border-0 hover:bg-[#F7F9FC]/50">
+                          <td className="p-2.5 font-bold text-[#1E293B]">{s.date}</td>
+                          <td className="p-2.5 text-[11px] text-[#64748B]">{s.platform}</td>
+                          <td className="p-2.5 text-center font-bold text-[#1E293B]">{s.spend.toLocaleString('en-US', { maximumFractionDigits: 0 })}</td>
+                          <td className="p-2.5 text-center text-[#64748B]">{s.leadsReported}</td>
+                          <td className="p-2.5 text-center font-bold text-amber-700">{cpl}</td>
+                          <td className="p-2.5 text-[11px] text-[#64748B]">{s.mediaBuyerName}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EconKpi({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div className="bg-[#F8FAFC] rounded-xl p-3 border border-[#E2E8F0]">
+      <p className="text-[10px] font-bold text-[#64748B] uppercase truncate">{label}</p>
+      <p className={`text-xl font-black mt-1 ${color}`}>{value}</p>
     </div>
   );
 }

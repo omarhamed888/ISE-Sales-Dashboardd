@@ -17,10 +17,16 @@ const AccessPage = lazy(() => import('@/pages/AccessPage'));
 const DealsAnalyticsPage = lazy(() => import('@/pages/DealsAnalyticsPage'));
 const AdsManagementPage = lazy(() => import('@/pages/AdsManagementPage'));
 const AdInsightsPage = lazy(() => import('@/pages/AdInsightsPage'));
+const SpendEntryPage = lazy(() => import('@/pages/SpendEntryPage'));
+const SpendHistoryPage = lazy(() => import('@/pages/SpendHistoryPage'));
+const MarketingInsightsPage = lazy(() => import('@/pages/MarketingInsightsPage'));
+const MetaIntegrationPage = lazy(() => import('@/pages/MetaIntegrationPage'));
+
+type AppRole = "sales" | "admin" | "superadmin" | "media_buyer";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: ("sales" | "admin" | "superadmin")[];
+  allowedRoles?: AppRole[];
 }
 
 function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
@@ -42,12 +48,14 @@ function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   // Handle conditional root redirect based on role
   if (location.pathname === '/') {
     if (user.role === 'sales') return <Navigate to="/submit-report" replace />;
+    if (user.role === 'media_buyer') return <Navigate to="/spend-entry" replace />;
     return <Navigate to="/dashboard" replace />;
   }
 
   // Check role authorization if allowedRoles is provided
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     if (user.role === 'sales') return <Navigate to="/submit-report" replace />;
+    if (user.role === 'media_buyer') return <Navigate to="/spend-entry" replace />;
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -93,6 +101,12 @@ export default function App() {
       <Route path="/my-reports" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><MyReportsPage /></AppLayout></ProtectedRoute>} />
       <Route path="/deals" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><DealsPage /></AppLayout></ProtectedRoute>} />
       <Route path="/my-deals" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><MyDealsPage /></AppLayout></ProtectedRoute>} />
+
+      {/* Media Buyer Routes */}
+      <Route path="/spend-entry" element={<ProtectedRoute allowedRoles={["media_buyer", "admin", "superadmin"]}><AppLayout><SpendEntryPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/spend-history" element={<ProtectedRoute allowedRoles={["media_buyer", "admin", "superadmin"]}><AppLayout><SpendHistoryPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/marketing-insights" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><MarketingInsightsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/integrations/meta" element={<ProtectedRoute allowedRoles={["media_buyer", "admin", "superadmin"]}><AppLayout><MetaIntegrationPage /></AppLayout></ProtectedRoute>} />
 
       {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />

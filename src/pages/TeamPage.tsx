@@ -8,6 +8,7 @@ import { filterReports, filterDealsByDashboardDate } from '@/lib/utils/dashboard
 import { PerformanceTab } from '@/components/team/PerformanceTab';
 import { AttendanceTab } from '@/components/team/AttendanceTab';
 import { ExcusesTab } from '@/components/team/ExcusesTab';
+import { MediaBuyersTab } from '@/components/team/MediaBuyersTab';
 import { AddMemberModal } from '@/components/team/AddMemberModal';
 import { EditMemberModal } from '@/components/team/EditMemberModal';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -125,7 +126,8 @@ export default function TeamPage() {
                     [
                         { id: 0, label: "قياس الأداء", icon: "monitoring" },
                         { id: 1, label: "سجل الحضور", icon: "calendar_month" },
-                        { id: 2, label: "الأعذار", icon: "assignment_late" }
+                        { id: 2, label: "الأعذار", icon: "assignment_late" },
+                        { id: 3, label: "الميديا باير", icon: "campaign" }
                     ] as { id: number; label: string; icon: string; badge?: number }[]
                 ).map((tab, idx) => (
                     <button
@@ -165,6 +167,9 @@ export default function TeamPage() {
                 )}
                 {activeTab === 2 && (
                     <ExcusesTab excuses={excuses} users={users} />
+                )}
+                {activeTab === 3 && (
+                    <MediaBuyersTab users={users} />
                 )}
             </div>
 

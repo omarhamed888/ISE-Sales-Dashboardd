@@ -7,8 +7,10 @@ import { filterReports } from "@/lib/utils/dashboard-filters";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { TeamStatusSummary } from "@/components/dashboard/TeamStatusSummary";
+import { MarketingKPICards } from "@/components/dashboard/MarketingKPICards";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton, SkeletonChart } from "@/components/ui/Skeleton";
+import { getAllDeals } from "@/lib/services/deals-service";
 const ChartsGrid = lazy(() => import("@/components/dashboard/ChartsGrid").then((m) => ({ default: m.ChartsGrid })));
 const SmartInsightsSection = lazy(() => import("@/components/dashboard/SmartInsightsSection").then((m) => ({ default: m.SmartInsightsSection })));
 const RecommendationsSection = lazy(() => import("@/components/dashboard/RecommendationsSection").then((m) => ({ default: m.RecommendationsSection })));
@@ -17,6 +19,7 @@ const DealCycleSection = lazy(() => import("@/components/dashboard/DealCycleSect
 
 export default function DashboardPage() {
   const [allReports, setAllReports] = useState<any[]>([]);
+  const [allDeals, setAllDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { filter } = useFilter();
@@ -42,6 +45,18 @@ export default function DashboardPage() {
       }
     );
     return () => unsubscribe();
+  }, [user?.uid]);
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setAllDeals([]);
+      return;
+    }
+    let cancelled = false;
+    getAllDeals()
+      .then((d) => { if (!cancelled) setAllDeals(d as any[]); })
+      .catch(() => { if (!cancelled) setAllDeals([]); });
+    return () => { cancelled = true; };
   }, [user?.uid]);
 
   const currentReports = useMemo(() => filterReports(allReports, filter), [allReports, filter]);
@@ -113,11 +128,14 @@ export default function DashboardPage() {
         ) : (
            <>
               {/* SECTION 1: KPI Cards */}
-              <KPICards reports={currentReports} allReports={allReports} />
+              <KPICards reports={currentReports} allReports={allReports} deals={allDeals} />
+
+              {/* SECTION 1b: Marketing KPI (auto-hides when no spend data) */}
+              <MarketingKPICards deals={allDeals} />
 
               {/* SECTION 2: Charts */}
               <Suspense fallback={<SkeletonChart />}>
-                <ChartsGrid reports={currentReports} />
+                <ChartsGrid reports={currentReports} deals={allDeals} />
               </Suspense>
 
               {/* SECTION 3: AI Insights + Recommendations */}
@@ -163,18 +181,11 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex-1 h-px bg-[#E2E8F0]" />
               </div>
-              <TeamStatusSummary allReports={allReports} />
+              <TeamStatusSummary allReports={allReports} deals={allDeals} />
 
               {/* SECTION 6: Recent Activity */}
-              <RecentActivity reports={currentReports} />
+              <RecentActivity reports={currentReports} deals={allDeals} />
 
-              {/* Coming Soon: Marketing Dashboard */}
-              <div className="mt-4 border-2 border-dashed border-[#E2E8F0] rounded-2xl p-8 text-center bg-[#F8FAFC]">
-                <span className="material-symbols-outlined text-[40px] text-[#CBD5E1] block mb-3">campaign</span>
-                <h3 className="text-base font-bold text-[#64748B] mb-1">Marketing Dashboard</h3>
-                <p className="text-[#94A3B8] text-sm mb-3">تحليل الإنفاق الإعلاني • ROAS • CAC • LTV:CAC</p>
-                <span className="inline-block bg-[#EFF6FF] text-[#2563EB] text-xs font-bold px-4 py-1.5 rounded-full border border-[#2563EB]/10">Coming Soon</span>
-              </div>
            </>
         )}
      </div>

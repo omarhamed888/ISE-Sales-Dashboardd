@@ -2,6 +2,8 @@ import {
   calculateAggregates,
   calcInteractionsFromParsedData,
   calcConversionRate,
+  buildDealsCountByReportKey,
+  getDealCountForReport,
 } from "@/lib/utils/dashboard-aggregations";
 import type { PlatformStats, DailyBucket, SalesRepBucket, LeakPieSlice } from "@/lib/types";
 export type { DailyBucket, SalesRepBucket, LeakPieSlice, PlatformStats };
@@ -33,7 +35,8 @@ export function classifyPlatform(platformRaw: string | undefined): PlatformKey {
   return "messenger";
 }
 
-export function getPlatformStats(reports: any[]): PlatformStats {
+export function getPlatformStats(reports: any[], deals?: any[]): PlatformStats {
+  const dealsByKey = deals ? buildDealsCountByReportKey(deals) : undefined;
   const out: PlatformStats = {
     whatsapp: { messages: 0, interactions: 0 },
     messenger: { messages: 0, interactions: 0 },
@@ -47,7 +50,8 @@ export function getPlatformStats(reports: any[]): PlatformStats {
       (typeof pd.totalMessages === "number" ? pd.totalMessages : null) ??
       pd.summary?.totalMessages ??
       0;
-    const intr = calcInteractionsFromParsedData(pd);
+    const dealCount = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
+    const intr = calcInteractionsFromParsedData(pd, dealCount);
     if (msgs === 0) return;
     const key = classifyPlatform(r.platform);
     out[key].messages += msgs;
@@ -119,7 +123,8 @@ export function buildConversionFunnelBars(cur: ReturnType<typeof calculateAggreg
   });
 }
 
-export function buildDailyBuckets(reports: any[]): DailyBucket[] {
+export function buildDailyBuckets(reports: any[], deals?: any[]): DailyBucket[] {
+  const dealsByKey = deals ? buildDealsCountByReportKey(deals) : undefined;
   const map = new Map<string, DailyBucket>();
   reports.forEach((r) => {
     const k = normalizeReportDateKey(r);
@@ -127,7 +132,8 @@ export function buildDailyBuckets(reports: any[]): DailyBucket[] {
     const pd = r.parsedData;
     if (!pd) return;
     const msgs = pd.totalMessages ?? pd.summary?.totalMessages ?? 0;
-    const intr = calcInteractionsFromParsedData(pd);
+    const dealCount = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
+    const intr = calcInteractionsFromParsedData(pd, dealCount);
     if (!map.has(k)) {
       map.set(k, {
         dateKey: k,
@@ -157,13 +163,15 @@ function shortRepName(name: string): string {
   return first.length > 12 ? `${first.slice(0, 10)}…` : first;
 }
 
-export function buildSalesRepBuckets(reports: any[]): SalesRepBucket[] {
+export function buildSalesRepBuckets(reports: any[], deals?: any[]): SalesRepBucket[] {
+  const dealsByKey = deals ? buildDealsCountByReportKey(deals) : undefined;
   const map = new Map<string, { messages: number; interactions: number }>();
   reports.forEach((r) => {
     const pd = r.parsedData;
     if (!pd) return;
     const msgs = pd.totalMessages ?? pd.summary?.totalMessages ?? 0;
-    const intr = calcInteractionsFromParsedData(pd);
+    const dealCount = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
+    const intr = calcInteractionsFromParsedData(pd, dealCount);
     if (msgs === 0) return;
     const key = (r.salesRepName as string)?.trim() || "غير مسجل";
     if (!map.has(key)) map.set(key, { messages: 0, interactions: 0 });

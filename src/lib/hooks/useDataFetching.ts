@@ -8,7 +8,10 @@ import {
   DASHBOARD_IGNORED_AD_NAMES,
   calcInteractionsFromParsedData,
   calcConversionRate,
+  buildDealsCountByReportKey,
+  getDealCountForReport,
 } from "@/lib/utils/dashboard-aggregations";
+import { getAllDeals } from "@/lib/services/deals-service";
 import type { InsightPeriod } from "@/lib/services/ai-insights-service";
 import { mapInsightPeriodToDateRange } from "@/lib/utils/insights-period";
 
@@ -116,6 +119,15 @@ export function useInsightsReports(period: InsightPeriod) {
 
 export function useDashboardStats(filters: ReportFilters) {
   const { reports, loading } = useReports(filters);
+  const [deals, setDeals] = useState<any[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getAllDeals()
+      .then((d) => { if (!cancelled) setDeals(d as any[]); })
+      .catch(() => { if (!cancelled) setDeals([]); });
+    return () => { cancelled = true; };
+  }, []);
 
   const stats = useMemo(() => {
     if (reports.length === 0) {
@@ -128,6 +140,7 @@ export function useDashboardStats(filters: ReportFilters) {
       };
     }
 
+    const dealsByKey = buildDealsCountByReportKey(deals);
     let totalMessages = 0;
     let interactions = 0;
 
@@ -142,7 +155,7 @@ export function useDashboardStats(filters: ReportFilters) {
       if (tm === 0) return;
 
       totalMessages += tm;
-      interactions += calcInteractionsFromParsedData(p);
+      interactions += calcInteractionsFromParsedData(p, getDealCountForReport(r, dealsByKey));
 
       if (p.funnel?.noReplyAfterGreeting) {
         noRepGreeting += p.funnel.noReplyAfterGreeting.reduce(
@@ -184,7 +197,7 @@ export function useDashboardStats(filters: ReportFilters) {
       highestDropCount,
       highestDropStage,
     };
-  }, [reports]);
+  }, [reports, deals]);
 
   return { stats, loading };
 }

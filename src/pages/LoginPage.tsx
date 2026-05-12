@@ -99,8 +99,8 @@ export default function LoginPage() {
               ) : (
                 <>
                   {/* Brand Elements */}
-                  <div className="w-20 h-20 bg-[#2563EB] rounded-3xl flex items-center justify-center mb-6 text-white shadow-lg shadow-[#2563EB]/30">
-                    <span className="material-symbols-outlined text-[40px]" style={{ fontVariationSettings: "'FILL' 1" }}>query_stats</span>
+                  <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mb-6 shadow-lg shadow-[#2563EB]/20 border border-[#E2E8F0]">
+                    <img src={config.companyLogo || "/logo.png"} alt="logo" className="h-14 w-14 object-contain" />
                   </div>
 
                   <h1 className="text-3xl font-black text-[#0F172A] mb-1 tracking-tight" dir="ltr">

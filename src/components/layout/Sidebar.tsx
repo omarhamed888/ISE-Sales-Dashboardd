@@ -10,14 +10,15 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: { is
   const role = user?.role || "sales";
 
   const adminLinks = [
-    { href: "/dashboard",      icon: "dashboard",       label: "لوحة القيادة" },
-    { href: "/team",           icon: "groups",          label: "الفريق" },
-    { href: "/ads",            icon: "ads_click",       label: "الإعلانات" },
-    { href: "/ads-management", icon: "manage_search",   label: "إدارة الإعلانات" },
-    { href: "/reports",        icon: "assessment",      label: "التقارير" },
-    { href: "/insights",       icon: "auto_awesome",    label: "الرؤى" },
-    { href: "/deals-analytics",icon: "handshake",       label: "تحليل الصفقات" },
-    { href: "/access",         icon: "manage_accounts", label: "صلاحيات الوصول" },
+    { href: "/dashboard",          icon: "dashboard",       label: "لوحة القيادة" },
+    { href: "/team",               icon: "groups",          label: "الفريق" },
+    { href: "/ads",                icon: "ads_click",       label: "الإعلانات" },
+    { href: "/ads-management",     icon: "manage_search",   label: "إدارة الإعلانات" },
+    { href: "/marketing-insights", icon: "campaign",        label: "تحليل التسويق" },
+    { href: "/reports",            icon: "assessment",      label: "التقارير" },
+    { href: "/insights",           icon: "auto_awesome",    label: "الرؤى" },
+    { href: "/deals-analytics",    icon: "handshake",       label: "تحليل الصفقات" },
+    { href: "/access",             icon: "manage_accounts", label: "صلاحيات الوصول" },
   ];
 
   const salesLinks = [
@@ -27,12 +28,25 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: { is
     { href: "/my-deals",      icon: "emoji_events",  label: "صفقاتي" },
   ];
 
+  const mediaBuyerLinks = [
+    { href: "/spend-entry",     icon: "post_add",      label: "إدخال مصروف اليوم" },
+    { href: "/spend-history",   icon: "history",       label: "سجل المصروفات" },
+    { href: "/ads-management",  icon: "manage_search", label: "الإعلانات" },
+    { href: "/integrations/meta", icon: "link",        label: "ربط Meta" },
+  ];
+
   const isActive = (href: string) => pathname.startsWith(href);
 
-  const roleLabel = role === "superadmin" ? "مدير النظام" : role === "admin" ? "مشرف" : "مبيعات";
+  const roleLabel =
+    role === "superadmin" ? "مدير النظام" :
+    role === "admin"      ? "مشرف" :
+    role === "media_buyer" ? "ميديا باير" :
+    "مبيعات";
   const roleColor = (role === "admin" || role === "superadmin")
     ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
-    : "bg-white/10 text-slate-300 border border-white/10";
+    : role === "media_buyer"
+      ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+      : "bg-white/10 text-slate-300 border border-white/10";
 
   const NavItem = ({ href, icon, label }: { href: string; icon: string; label: string }) => {
     const active = isActive(href);
@@ -114,26 +128,11 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: { is
               )}
               {adminLinks.map(item => <NavItem key={item.href} {...item} />)}
 
-              {/* Divider */}
-              <div className={`my-2 h-px bg-white/8 ${isCollapsed ? "mx-3" : "mx-4"}`} />
-
-              {/* Coming soon */}
-              <div
-                title={isCollapsed ? "لوحة التسويق" : undefined}
-                className={`flex items-center gap-3 rounded-xl cursor-not-allowed opacity-40
-                  ${isCollapsed ? "justify-center mx-2 p-3" : "mx-3 px-3 py-2.5"} text-slate-500`}
-              >
-                <span className="material-symbols-outlined text-[20px] shrink-0">campaign</span>
-                {!isCollapsed && (
-                  <>
-                    <span className="text-[13.5px] font-semibold flex-1">لوحة التسويق</span>
-                    <span className="text-[9px] font-black bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full">قريباً</span>
-                  </>
-                )}
-              </div>
-
               {role === "superadmin" && (
-                <NavItem href="/settings" icon="settings" label="الإعدادات" />
+                <>
+                  <div className={`my-2 h-px bg-white/8 ${isCollapsed ? "mx-3" : "mx-4"}`} />
+                  <NavItem href="/settings" icon="settings" label="الإعدادات" />
+                </>
               )}
             </>
           )}
@@ -144,6 +143,15 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: { is
                 <span className="px-5 pt-1 pb-1.5 text-[10px] font-black text-slate-500 uppercase tracking-widest">القائمة</span>
               )}
               {salesLinks.map(item => <NavItem key={item.href} {...item} />)}
+            </>
+          )}
+
+          {role === "media_buyer" && (
+            <>
+              {!isCollapsed && (
+                <span className="px-5 pt-1 pb-1.5 text-[10px] font-black text-slate-500 uppercase tracking-widest">الميديا</span>
+              )}
+              {mediaBuyerLinks.map(item => <NavItem key={item.href} {...item} />)}
             </>
           )}
         </nav>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { collection, query, where, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
@@ -6,7 +6,10 @@ import { Link } from "react-router-dom";
 import {
   calcInteractionsFromParsedData,
   calcConversionRate,
+  buildDealsCountByReportKey,
+  getDealCountForReport,
 } from "@/lib/utils/dashboard-aggregations";
+import { getMyDeals } from "@/lib/services/deals-service";
 import { logRuntimeError } from "@/lib/services/runtime-logging-service";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useToast } from "@/components/ui/Toast";
@@ -21,12 +24,14 @@ export default function MyReportsPage() {
     const { showToast } = useToast();
     const { user } = useAuth();
     const [reports, setReports] = useState<any[]>([]);
+    const [myDeals, setMyDeals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [streak, setStreak] = useState(0);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [statusMsg, setStatusMsg] = useState<string | null>(null);
     const [visibleCount, setVisibleCount] = useState(20);
     const visibleReports = reports.slice(0, visibleCount);
+    const dealsByKey = useMemo(() => buildDealsCountByReportKey(myDeals), [myDeals]);
 
     useEffect(() => {
         if (!user) return;
@@ -96,6 +101,15 @@ export default function MyReportsPage() {
         };
 
         fetchMyData();
+    }, [user]);
+
+    useEffect(() => {
+        if (!user) return;
+        let cancelled = false;
+        getMyDeals(user.uid, user.name)
+            .then((d) => { if (!cancelled) setMyDeals(d as any[]); })
+            .catch(() => { if (!cancelled) setMyDeals([]); });
+        return () => { cancelled = true; };
     }, [user]);
 
     const handleDeleteReport = async (reportId: string, e: React.MouseEvent) => {
@@ -179,7 +193,7 @@ export default function MyReportsPage() {
                     <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">إجمالي التفاعلات</p>
                     <p className="text-4xl font-black text-[#0F172A]">
                         {reports.reduce(
-                            (sum, r) => sum + calcInteractionsFromParsedData(r.parsedData),
+                            (sum, r) => sum + calcInteractionsFromParsedData(r.parsedData, getDealCountForReport(r, dealsByKey)),
                             0
                         )}
                     </p>
@@ -197,7 +211,7 @@ export default function MyReportsPage() {
                                 0
                             );
                             const intr = reports.reduce(
-                                (s, r) => s + calcInteractionsFromParsedData(r.parsedData),
+                                (s, r) => s + calcInteractionsFromParsedData(r.parsedData, getDealCountForReport(r, dealsByKey)),
                                 0
                             );
                             return calcConversionRate(intr, tm).toFixed(1);
@@ -241,14 +255,14 @@ export default function MyReportsPage() {
                               <p className="text-[13px] font-black text-[#1E293B]">{report.parsedData?.totalMessages || 0}</p>
                             </div>
                             <div className="bg-[#F8FAFC] rounded-lg p-2">
-                              <p className="text-[9px] font-bold text-[#64748B]">التفاعل</p>
-                              <p className="text-[13px] font-black text-[#1E293B]">{calcInteractionsFromParsedData(report.parsedData)}</p>
+                              <p className="text-[9px] font-bold text-[#64748B]">الصفقات</p>
+                              <p className="text-[13px] font-black text-[#1E293B]">{calcInteractionsFromParsedData(report.parsedData, getDealCountForReport(report, dealsByKey))}</p>
                             </div>
                             <div className="bg-[#F8FAFC] rounded-lg p-2">
                               <p className="text-[9px] font-bold text-[#64748B]">التحويل</p>
                               <p className="text-[11px] font-black text-[#1E293B]">
                                 {report.parsedData?.totalMessages > 0
-                                  ? ((calcInteractionsFromParsedData(report.parsedData) / report.parsedData.totalMessages) * 100).toFixed(1) + '%'
+                                  ? ((calcInteractionsFromParsedData(report.parsedData, getDealCountForReport(report, dealsByKey)) / report.parsedData.totalMessages) * 100).toFixed(1) + '%'
                                   : '—'}
                               </p>
                             </div>
@@ -308,7 +322,7 @@ export default function MyReportsPage() {
                                     </td>
                                     <td className="p-4 font-bold text-[#1E293B] text-center">{report.parsedData?.totalMessages || 0}</td>
                                     <td className="p-4 font-bold text-[#1E293B] text-center">
-                                        {calcInteractionsFromParsedData(report.parsedData)}
+                                        {calcInteractionsFromParsedData(report.parsedData, getDealCountForReport(report, dealsByKey))}
                                     </td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg w-max">

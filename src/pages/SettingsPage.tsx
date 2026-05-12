@@ -8,6 +8,7 @@ import { db } from "@/lib/firebase";
 import { useCourses } from "@/lib/hooks/useCourses";
 import type { AppConfig } from "@/lib/hooks/useAppConfig";
 import { ObjectionCategoriesManager } from "@/components/settings/ObjectionCategoriesManager";
+import { uploadCompanyLogo } from "@/lib/services/logo-upload";
 
 const AR_DAY_TO_NUM: Record<string, number> = {
   السبت: 6,
@@ -91,12 +92,13 @@ export default function SettingsPage() {
         reminderTime: "16:00"
     });
 
+    // Logo upload
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [uploadingLogo, setUploadingLogo] = useState(false);
+    const [logoFeedback, setLogoFeedback] = useState<string | null>(null);
+
     // Ads Settings
-    const [adNames, setAdNames] = useState([
-        { id: "1", name: "عام" },
-        { id: "2", name: "إعلان العقارات" },
-        { id: "3", name: "باقة ريادة الأعمال" }
-    ]);
+    const [adNames, setAdNames] = useState<{ id: string; name: string }[]>([]);
     const [newAdName, setNewAdName] = useState("");
 
     // Users
@@ -104,7 +106,7 @@ export default function SettingsPage() {
     const [loadingUsers, setLoadingUsers] = useState(true);
 
     // System Data
-    const [systemData, setSystemData] = useState({ reportCount: 0, storageUsed: "25.4 MB" });
+    const [systemData, setSystemData] = useState({ reportCount: 0 });
     const [aiMonthlyRequests, setAiMonthlyRequests] = useState(0);
 
     // Courses (show ALL including inactive in settings)
@@ -172,6 +174,9 @@ export default function SettingsPage() {
                 ]);
                 if (settingsSnap.exists()) {
                     const d = settingsSnap.data() as Partial<AppConfig>;
+                    if (typeof d.companyLogo === "string" && d.companyLogo.trim()) {
+                        setLogoPreview(d.companyLogo.trim());
+                    }
                     setSettings((prev) => ({
                         companyName:
                             typeof d.companyName === "string" && d.companyName.trim()
@@ -290,6 +295,24 @@ export default function SettingsPage() {
             alert("تعذّر حفظ الإعدادات. تحقق من الاتصال أو الصلاحيات.");
         } finally {
             setSavingSettings(false);
+        }
+    };
+
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploadingLogo(true);
+        setLogoFeedback(null);
+        try {
+            const url = await uploadCompanyLogo(file);
+            setLogoPreview(url);
+            setLogoFeedback("تم رفع اللوجو بنجاح.");
+            window.setTimeout(() => setLogoFeedback(null), 4000);
+        } catch (err: any) {
+            setLogoFeedback(err.message || "تعذّر رفع اللوجو.");
+        } finally {
+            setUploadingLogo(false);
+            e.target.value = "";
         }
     };
 
@@ -504,6 +527,40 @@ export default function SettingsPage() {
                                value={settings.companyName} onChange={e => setSettings({...settings, companyName: e.target.value})}
                                className="w-full md:w-1/2 bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-4 py-3 font-black text-[#1E293B] focus:border-[#2563EB] outline-none"
                             />
+                        </div>
+
+                        <div>
+                            <label className="text-[12px] font-bold text-[#64748B] block mb-2">لوجو الشركة</label>
+                            <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#E2E8F0] flex items-center justify-center overflow-hidden shrink-0">
+                                    <img
+                                        src={logoPreview || "/logo.png"}
+                                        alt="logo"
+                                        className="h-12 w-12 object-contain"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <label className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-[13px] cursor-pointer transition-colors ${uploadingLogo ? "bg-[#E2E8F0] text-[#94A3B8] cursor-not-allowed" : "bg-[#EFF6FF] text-[#2563EB] hover:bg-[#DBEAFE] border border-[#2563EB]/20"}`}>
+                                        <span className="material-symbols-outlined text-[18px]">
+                                            {uploadingLogo ? "progress_activity" : "upload"}
+                                        </span>
+                                        {uploadingLogo ? "جاري الرفع..." : "تغيير اللوجو"}
+                                        <input
+                                            type="file"
+                                            accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                                            className="hidden"
+                                            onChange={handleLogoUpload}
+                                            disabled={uploadingLogo}
+                                        />
+                                    </label>
+                                    <p className="text-[11px] text-[#94A3B8]">PNG, JPG, SVG, WebP — بحد أقصى 2 ميجا</p>
+                                    {logoFeedback && (
+                                        <p className={`text-[12px] font-bold ${logoFeedback.includes("بنجاح") ? "text-emerald-600" : "text-red-500"}`}>
+                                            {logoFeedback}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         <div>
@@ -758,10 +815,10 @@ export default function SettingsPage() {
                         </div>
                         <div className="border border-[#E2E8F0] rounded-xl p-4 bg-[#F7F9FC] flex justify-between items-center">
                             <div>
-                                <p className="text-[11px] font-bold text-[#64748B]">مساحة التخزين المستهلكة تقديرياً</p>
-                                <p className="text-[24px] font-black text-[#1E293B]">{systemData.storageUsed}</p>
+                                <p className="text-[11px] font-bold text-[#64748B]">عدد المستخدمين</p>
+                                <p className="text-[24px] font-black text-[#1E293B]">{users.length}</p>
                             </div>
-                            <span className="material-symbols-outlined text-[#2563EB] text-[32px] opacity-20">cloud_done</span>
+                            <span className="material-symbols-outlined text-[#2563EB] text-[32px] opacity-20">group</span>
                         </div>
                         <div className="border border-[#E2E8F0] rounded-xl p-4 bg-[#F7F9FC] flex justify-between items-center">
                             <div>
