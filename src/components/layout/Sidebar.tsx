@@ -15,6 +15,7 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: { is
     { href: "/ads",                icon: "ads_click",       label: "الإعلانات" },
     { href: "/ads-management",     icon: "manage_search",   label: "إدارة الإعلانات" },
     { href: "/marketing-insights", icon: "campaign",        label: "تحليل التسويق" },
+    { href: "/meta-insights",      icon: "insights",        label: "تحليلات Meta" },
     { href: "/reports",            icon: "assessment",      label: "التقارير" },
     { href: "/insights",           icon: "auto_awesome",    label: "الرؤى" },
     { href: "/deals-analytics",    icon: "handshake",       label: "تحليل الصفقات" },
@@ -32,6 +33,7 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: { is
     { href: "/spend-entry",     icon: "post_add",      label: "إدخال مصروف اليوم" },
     { href: "/spend-history",   icon: "history",       label: "سجل المصروفات" },
     { href: "/ads-management",  icon: "manage_search", label: "الإعلانات" },
+    { href: "/meta-insights",   icon: "insights",      label: "تحليلات Meta" },
     { href: "/integrations/meta", icon: "link",        label: "ربط Meta" },
   ];
 

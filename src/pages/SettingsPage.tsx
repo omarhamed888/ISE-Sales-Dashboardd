@@ -97,10 +97,6 @@ export default function SettingsPage() {
     const [uploadingLogo, setUploadingLogo] = useState(false);
     const [logoFeedback, setLogoFeedback] = useState<string | null>(null);
 
-    // Ads Settings
-    const [adNames, setAdNames] = useState<{ id: string; name: string }[]>([]);
-    const [newAdName, setNewAdName] = useState("");
-
     // Users
     const [users, setUsers] = useState<any[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
@@ -168,10 +164,7 @@ export default function SettingsPage() {
         if (!isSuperAdmin) return;
         (async () => {
             try {
-                const [settingsSnap, adSnap] = await Promise.all([
-                    getDoc(doc(db, "app_config", "settings")),
-                    getDoc(doc(db, "metadata", "adNames")),
-                ]);
+                const settingsSnap = await getDoc(doc(db, "app_config", "settings"));
                 if (settingsSnap.exists()) {
                     const d = settingsSnap.data() as Partial<AppConfig>;
                     if (typeof d.companyLogo === "string" && d.companyLogo.trim()) {
@@ -190,18 +183,6 @@ export default function SettingsPage() {
                                 ? `${String(d.reportDeadlineHour).padStart(2, "0")}:00`
                                 : prev.reminderTime,
                     }));
-                }
-                if (adSnap.exists()) {
-                    const raw = adSnap.data()?.names;
-                    if (Array.isArray(raw) && raw.length > 0) {
-                        const strNames = raw.filter((n): n is string => typeof n === "string" && Boolean(n.trim()));
-                        setAdNames(
-                            strNames.map((name, i) => ({
-                                id: `meta-${i}-${name.trim().slice(0, 24)}`,
-                                name: name.trim(),
-                            }))
-                        );
-                    }
                 }
             } catch (e) {
                 console.error(e);
@@ -280,14 +261,7 @@ export default function SettingsPage() {
                 } satisfies Partial<AppConfig>,
                 { merge: true }
             );
-            const adNameList = adNames.map((a) => a.name.trim()).filter(Boolean);
-            await setDoc(
-                doc(db, "metadata", "adNames"),
-                { names: adNameList, updatedAt: serverTimestamp() },
-                { merge: true }
-            );
-            window.dispatchEvent(new Event("ise-metadata-adnames-updated"));
-            setSettingsFeedback("تم حفظ الإعدادات وأسماء الإعلانات.");
+            setSettingsFeedback("تم حفظ الإعدادات.");
             window.setTimeout(() => setSettingsFeedback(null), 4000);
         } catch (e) {
             console.error(e);
@@ -359,18 +333,6 @@ export default function SettingsPage() {
         } finally {
             setExportingCsv(false);
         }
-    };
-
-    const addAdName = () => {
-        const trimmed = newAdName.trim();
-        if (!trimmed) return;
-        if (adNames.some((a) => a.name.trim().toLowerCase() === trimmed.toLowerCase())) return;
-        setAdNames([...adNames, { id: Date.now().toString(), name: trimmed }]);
-        setNewAdName("");
-    };
-
-    const removeAdName = (id: string) => {
-        setAdNames(adNames.filter(a => a.id !== id));
     };
 
     const updateUserRole = async (userId: string, newRole: string) => {
@@ -588,41 +550,28 @@ export default function SettingsPage() {
                 )}
 
                 {isSuperAdmin && (
-                <>
-                {/* 2. Ad Names Configuration */}
-                <section className="bg-white border border-[#E2E8F0] rounded-[24px] overflow-hidden shadow-sm">
-                    <div className="p-6 border-b border-[#E2E8F0] bg-[#F7F9FC]">
-                        <h3 className="text-[15px] font-black text-[#1E293B] flex items-center gap-2">
-                            <span className="material-symbols-outlined text-amber-500">campaign</span>
-                            2. الإعلانات المعرّفة
-                        </h3>
-                    </div>
-                    <div className="p-6">
-                        <p className="text-[12px] font-bold text-[#64748B] mb-4">
-                            تُستخدم في فلاتر التقارير ولوحة التحكم. تُحفظ مع زر «تأكيد وحفظ الإعدادات» في الأسفل.
-                        </p>
-
-                        <div className="flex flex-wrap gap-2 mb-6">
-                            {adNames.map(ad => (
-                                <div key={ad.id} className="bg-white border border-[#E2E8F0] shadow-sm text-[#1E293B] font-bold text-[12px] px-3 py-1.5 rounded-lg flex items-center gap-2">
-                                    {ad.name}
-                                    <button type="button" onClick={() => removeAdName(ad.id)} className="text-error/50 hover:text-error transition-colors flex items-center"><span className="material-symbols-outlined text-[14px]">close</span></button>
-                                </div>
-                            ))}
+                <section className="bg-gradient-to-l from-[#EFF6FF] to-white border border-[#BFDBFE] rounded-[24px] overflow-hidden shadow-sm">
+                    <div className="p-6 flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-[#2563EB]/10 flex items-center justify-center text-[#2563EB] shrink-0">
+                            <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>campaign</span>
                         </div>
-
-                        <div className="flex gap-2 max-w-sm">
-                            <input
-                               value={newAdName} onChange={e => setNewAdName(e.target.value)}
-                               onKeyDown={e => e.key === 'Enter' && addAdName()}
-                               placeholder="اسم إعلان جديد..."
-                               className="flex-1 bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-4 py-2 font-bold text-[13px] text-[#1E293B] focus:border-[#2563EB] outline-none"
-                            />
-                            <button type="button" onClick={addAdName} className="bg-[#1E293B] text-white px-4 py-2 rounded-xl font-bold hover:bg-black transition-colors text-[13px]">إضافة</button>
+                        <div className="flex-1">
+                            <h3 className="text-[15px] font-black text-[#1E293B] mb-1">
+                                إدارة الإعلانات
+                            </h3>
+                            <p className="text-[12px] font-bold text-[#64748B] mb-3 leading-relaxed">
+                                إدارة الإعلانات انتقلت إلى صفحة مستقلة بإمكانيات أوسع (إضافة بالجملة، حالة، روابط الإعلان).
+                            </p>
+                            <a
+                                href="/ads-management"
+                                className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-4 py-2 rounded-xl text-[13px] font-black hover:bg-[#1D4ED8] transition-colors"
+                            >
+                                <span className="material-symbols-outlined text-[16px]">open_in_new</span>
+                                فتح إدارة الإعلانات
+                            </a>
                         </div>
                     </div>
                 </section>
-                </>
                 )}
 
                 {isSuperAdmin && <ObjectionCategoriesManager />}

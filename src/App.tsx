@@ -21,6 +21,7 @@ const SpendEntryPage = lazy(() => import('@/pages/SpendEntryPage'));
 const SpendHistoryPage = lazy(() => import('@/pages/SpendHistoryPage'));
 const MarketingInsightsPage = lazy(() => import('@/pages/MarketingInsightsPage'));
 const MetaIntegrationPage = lazy(() => import('@/pages/MetaIntegrationPage'));
+const MetaInsightsPage = lazy(() => import('@/pages/MetaInsightsPage'));
 
 type AppRole = "sales" | "admin" | "superadmin" | "media_buyer";
 
@@ -93,8 +94,8 @@ export default function App() {
       {/* Access Management (admin + superadmin) */}
       <Route path="/access" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><AccessPage /></AppLayout></ProtectedRoute>} />
       <Route path="/deals-analytics" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><DealsAnalyticsPage /></AppLayout></ProtectedRoute>} />
-      <Route path="/ads-management" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><AdsManagementPage /></AppLayout></ProtectedRoute>} />
-      <Route path="/ads-management/:id" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><AdInsightsPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/ads-management" element={<ProtectedRoute allowedRoles={["admin", "superadmin", "media_buyer"]}><AppLayout><AdsManagementPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/ads-management/:id" element={<ProtectedRoute allowedRoles={["admin", "superadmin", "media_buyer"]}><AppLayout><AdInsightsPage /></AppLayout></ProtectedRoute>} />
 
       {/* Sales Routes */}
       <Route path="/submit-report" element={<ProtectedRoute allowedRoles={["sales"]}><AppLayout><SubmitReportPage /></AppLayout></ProtectedRoute>} />
@@ -107,6 +108,7 @@ export default function App() {
       <Route path="/spend-history" element={<ProtectedRoute allowedRoles={["media_buyer", "admin", "superadmin"]}><AppLayout><SpendHistoryPage /></AppLayout></ProtectedRoute>} />
       <Route path="/marketing-insights" element={<ProtectedRoute allowedRoles={["admin", "superadmin"]}><AppLayout><MarketingInsightsPage /></AppLayout></ProtectedRoute>} />
       <Route path="/integrations/meta" element={<ProtectedRoute allowedRoles={["media_buyer", "admin", "superadmin"]}><AppLayout><MetaIntegrationPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/meta-insights" element={<ProtectedRoute allowedRoles={["media_buyer", "admin", "superadmin"]}><AppLayout><MetaInsightsPage /></AppLayout></ProtectedRoute>} />
 
       {/* Catch-all redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />
