@@ -354,3 +354,105 @@ export function computeDealCycleStats(deals: Deal[]): {
 
   return { company, byTeam };
 }
+
+// ── Weekly closed deals by deal category ─────────────────────────────────────
+export interface WeeklyDealBucket {
+  weekLabel: string;       // "الأسبوع 1"
+  weekIndex: number;       // 1..5
+  core: number;
+  side: number;
+  total: number;
+}
+
+function parseDealDate(raw: unknown): Date | null {
+  if (typeof raw !== 'string' || !raw.trim()) return null;
+  const cleaned = raw.split('T')[0];
+  const d = new Date(cleaned);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Build a 4-5 week breakdown of closed deals split by dealCategory (core/side).
+ * Weeks are calendar-based: 1–7, 8–14, 15–21, 22–28, 29–end-of-month.
+ */
+export function computeWeeklyDealsByCategory(
+  deals: Deal[],
+  year: number,
+  month: number // 0-indexed (Jan = 0)
+): WeeklyDealBucket[] {
+  const buckets: WeeklyDealBucket[] = [
+    { weekLabel: 'الأسبوع 1', weekIndex: 1, core: 0, side: 0, total: 0 },
+    { weekLabel: 'الأسبوع 2', weekIndex: 2, core: 0, side: 0, total: 0 },
+    { weekLabel: 'الأسبوع 3', weekIndex: 3, core: 0, side: 0, total: 0 },
+    { weekLabel: 'الأسبوع 4', weekIndex: 4, core: 0, side: 0, total: 0 },
+  ];
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  if (daysInMonth > 28) {
+    buckets.push({ weekLabel: 'الأسبوع 5', weekIndex: 5, core: 0, side: 0, total: 0 });
+  }
+
+  for (const deal of deals) {
+    const closeDate = parseDealDate(deal.closeDate) || parseDealDate(deal.date);
+    if (!closeDate) continue;
+    if (closeDate.getFullYear() !== year || closeDate.getMonth() !== month) continue;
+
+    const day = closeDate.getDate();
+    const weekIdx = Math.min(Math.ceil(day / 7), buckets.length) - 1;
+    const bucket = buckets[weekIdx];
+    if (!bucket) continue;
+
+    const category: 'core' | 'side' = deal.dealCategory === 'side' ? 'side' : 'core';
+    bucket[category] += 1;
+    bucket.total += 1;
+  }
+
+  return buckets;
+}
+
+// ── Days-to-close distribution ───────────────────────────────────────────────
+export interface DaysToCloseBucket {
+  rangeLabel: string;     // "0–3 أيام"
+  segment: string;        // "Fast Close"
+  segmentAr: string;      // "إغلاق سريع"
+  count: number;
+  pct: number;
+  fill: string;
+}
+
+/**
+ * Group closed deals by their closingCycleDays into 5 named buckets.
+ * - 0–3 days   → Fast Close
+ * - 4–7 days   → Short Cycle
+ * - 8–14 days  → Medium
+ * - 15–30 days → Long
+ * - 31+ days   → Very Long
+ */
+export function computeDaysToCloseDistribution(deals: Deal[]): DaysToCloseBucket[] {
+  const buckets: Omit<DaysToCloseBucket, 'pct'>[] = [
+    { rangeLabel: '0–3 أيام', segment: 'Fast Close', segmentAr: 'إغلاق سريع', count: 0, fill: '#10B981' },
+    { rangeLabel: '4–7 أيام', segment: 'Short Cycle', segmentAr: 'دورة قصيرة', count: 0, fill: '#84CC16' },
+    { rangeLabel: '8–14 يوم', segment: 'Medium', segmentAr: 'متوسط', count: 0, fill: '#F59E0B' },
+    { rangeLabel: '15–30 يوم', segment: 'Long', segmentAr: 'طويل', count: 0, fill: '#F97316' },
+    { rangeLabel: '+30 يوم', segment: 'Very Long', segmentAr: 'طويل جداً', count: 0, fill: '#EF4444' },
+  ];
+
+  let total = 0;
+  for (const deal of deals) {
+    const cycle = deal.closingCycleDays;
+    if (typeof cycle !== 'number' || !Number.isFinite(cycle) || cycle < 0) continue;
+    let idx: number;
+    if (cycle <= 3) idx = 0;
+    else if (cycle <= 7) idx = 1;
+    else if (cycle <= 14) idx = 2;
+    else if (cycle <= 30) idx = 3;
+    else idx = 4;
+    buckets[idx].count += 1;
+    total += 1;
+  }
+
+  return buckets.map((b) => ({
+    ...b,
+    pct: total > 0 ? parseFloat(((b.count / total) * 100).toFixed(1)) : 0,
+  }));
+}

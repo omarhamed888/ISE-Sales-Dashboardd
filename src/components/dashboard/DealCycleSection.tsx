@@ -1,6 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { getAllDeals, computeDealCycleStats, type DealCycleStats } from '@/lib/services/deals-service';
+import {
+  getAllDeals,
+  computeDealCycleStats,
+  computeWeeklyDealsByCategory,
+  computeDaysToCloseDistribution,
+  type DealCycleStats,
+} from '@/lib/services/deals-service';
+import type { Deal } from '@/lib/types';
+import { WeeklyClosedDealsChart } from '@/components/dashboard/WeeklyClosedDealsChart';
+import { DaysToCloseChart } from '@/components/dashboard/DaysToCloseChart';
+
+const AR_MONTHS = [
+  'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+];
 
 const TEAM_COLORS = [
   '#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
@@ -19,16 +33,46 @@ function CycleStat({ label, value, sub }: { label: string; value: string | numbe
 
 export function DealCycleSection() {
   const [loading, setLoading] = useState(true);
+  const [deals, setDeals] = useState<Deal[]>([]);
   const [company, setCompany] = useState<DealCycleStats | null>(null);
   const [byTeam, setByTeam] = useState<DealCycleStats[]>([]);
 
+  const now = new Date();
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
+
   useEffect(() => {
-    getAllDeals().then(deals => {
-      const stats = computeDealCycleStats(deals);
+    getAllDeals().then(allDeals => {
+      setDeals(allDeals);
+      const stats = computeDealCycleStats(allDeals);
       setCompany(stats.company);
       setByTeam(stats.byTeam);
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
+
+  const weeklyData = useMemo(
+    () => computeWeeklyDealsByCategory(deals, selectedYear, selectedMonth),
+    [deals, selectedYear, selectedMonth]
+  );
+
+  const daysToCloseData = useMemo(
+    () => computeDaysToCloseDistribution(deals),
+    [deals]
+  );
+
+  const monthOptions = useMemo(() => {
+    const out: { value: string; label: string }[] = [];
+    const cur = new Date(selectedYear, selectedMonth, 1);
+    cur.setMonth(cur.getMonth() + 1);
+    for (let i = 0; i < 12; i++) {
+      cur.setMonth(cur.getMonth() - 1);
+      out.push({
+        value: `${cur.getFullYear()}-${cur.getMonth()}`,
+        label: `${AR_MONTHS[cur.getMonth()]} ${cur.getFullYear()}`,
+      });
+    }
+    return out;
+  }, [selectedYear, selectedMonth]);
 
   if (loading) {
     return (
@@ -79,6 +123,54 @@ export function DealCycleSection() {
             value={company.totalRevenue.toLocaleString('en-US')}
             sub="جنيه"
           />
+        </div>
+      </div>
+
+      {/* Weekly closed deals by category */}
+      <div className="bg-white border border-[#E2E8F0] rounded-[24px] p-6 shadow-sm lg:col-span-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h3 className="text-[15px] font-black text-[#1E293B] flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#2563EB]">calendar_view_week</span>
+            الصفقات المغلقة لكل أسبوع — حسب نوع الصفقة
+          </h3>
+          <select
+            value={`${selectedYear}-${selectedMonth}`}
+            onChange={(e) => {
+              const [y, m] = e.target.value.split('-').map(Number);
+              setSelectedYear(y);
+              setSelectedMonth(m);
+            }}
+            className="bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-3 py-1.5 text-[12px] font-bold text-[#1E293B] focus:border-[#2563EB] outline-none"
+            dir="rtl"
+          >
+            {monthOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+        <div className="h-[280px]">
+          <WeeklyClosedDealsChart data={weeklyData} />
+        </div>
+      </div>
+
+      {/* Days to close distribution */}
+      <div className="bg-white border border-[#E2E8F0] rounded-[24px] p-6 shadow-sm lg:col-span-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h3 className="text-[15px] font-black text-[#1E293B] flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#10B981]">timer</span>
+            توزيع أيام إغلاق الصفقات
+            <span className="text-[11px] font-bold text-[#94A3B8] mr-1">(كل الوقت)</span>
+          </h3>
+          <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold text-[#64748B]">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#10B981]" />Fast (0–3)</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#84CC16]" />Short (4–7)</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#F59E0B]" />Medium (8–14)</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#F97316]" />Long (15–30)</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#EF4444]" />Very Long (+30)</span>
+          </div>
+        </div>
+        <div className="h-[280px]">
+          <DaysToCloseChart data={daysToCloseData} />
         </div>
       </div>
 
