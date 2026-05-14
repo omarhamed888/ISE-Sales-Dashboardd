@@ -8,7 +8,6 @@ import { filterReports, filterDealsByDashboardDate } from '@/lib/utils/dashboard
 import { PerformanceTab } from '@/components/team/PerformanceTab';
 import { AttendanceTab } from '@/components/team/AttendanceTab';
 import { ExcusesTab } from '@/components/team/ExcusesTab';
-import { MediaBuyersTab } from '@/components/team/MediaBuyersTab';
 import { AddMemberModal } from '@/components/team/AddMemberModal';
 import { EditMemberModal } from '@/components/team/EditMemberModal';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -77,7 +76,8 @@ export default function TeamPage() {
         return () => { uSub(); rSub(); dSub(); eSub(); clearTimeout(t); };
     }, [user?.uid]);
 
-    const activeUsersCount = users.filter(u => u.isActive !== false).length;
+    const salesUsers = users.filter(u => u.isActive !== false && u.role === "sales");
+    const activeUsersCount = salesUsers.length;
 
     // We apply global filters to reports to calculate specific performance accurately
     const filteredReports = filterReports(reports, filter);
@@ -126,8 +126,7 @@ export default function TeamPage() {
                     [
                         { id: 0, label: "قياس الأداء", icon: "monitoring" },
                         { id: 1, label: "سجل الحضور", icon: "calendar_month" },
-                        { id: 2, label: "الأعذار", icon: "assignment_late" },
-                        { id: 3, label: "الميديا باير", icon: "campaign" }
+                        { id: 2, label: "الأعذار", icon: "assignment_late" }
                     ] as { id: number; label: string; icon: string; badge?: number }[]
                 ).map((tab, idx) => (
                     <button
@@ -152,7 +151,7 @@ export default function TeamPage() {
             <div>
                 {activeTab === 0 && (
                     <PerformanceTab 
-                        users={users.filter(u => u.isActive !== false)} 
+                        users={salesUsers} 
                         reports={filteredReports} 
                         deals={filteredDeals}
                         allReports={reports}
@@ -161,15 +160,12 @@ export default function TeamPage() {
                 )}
                 {activeTab === 1 && (
                     <AttendanceTab 
-                        users={users.filter(u => u.isActive !== false)} 
+                        users={salesUsers} 
                         reports={reports} 
                     />
                 )}
                 {activeTab === 2 && (
                     <ExcusesTab excuses={excuses} users={users} />
-                )}
-                {activeTab === 3 && (
-                    <MediaBuyersTab users={users} />
                 )}
             </div>
 

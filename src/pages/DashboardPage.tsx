@@ -12,8 +12,6 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton, SkeletonChart } from "@/components/ui/Skeleton";
 import { getAllDeals } from "@/lib/services/deals-service";
 const ChartsGrid = lazy(() => import("@/components/dashboard/ChartsGrid").then((m) => ({ default: m.ChartsGrid })));
-const SmartInsightsSection = lazy(() => import("@/components/dashboard/SmartInsightsSection").then((m) => ({ default: m.SmartInsightsSection })));
-const RecommendationsSection = lazy(() => import("@/components/dashboard/RecommendationsSection").then((m) => ({ default: m.RecommendationsSection })));
 const RejectionAnalyticsSection = lazy(() => import("@/components/dashboard/RejectionAnalyticsSection").then((m) => ({ default: m.RejectionAnalyticsSection })));
 const DealCycleSection = lazy(() => import("@/components/dashboard/DealCycleSection").then((m) => ({ default: m.DealCycleSection })));
 
@@ -139,13 +137,7 @@ export default function DashboardPage() {
                 <ChartsGrid reports={currentReports} deals={filteredDeals} />
               </Suspense>
 
-              {/* SECTION 3: AI Insights + Recommendations */}
-              <Suspense fallback={<SkeletonChart />}>
-                <SmartInsightsSection reports={currentReports} deals={filteredDeals} />
-                <RecommendationsSection reports={currentReports} deals={filteredDeals} />
-              </Suspense>
-
-              {/* SECTION 4: Rejection Analytics */}
+              {/* SECTION 3: Rejection Analytics */}
               <>
                 <div className="flex items-center gap-3 my-1">
                   <div className="flex-1 h-px bg-[#E2E8F0]" />

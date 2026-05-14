@@ -86,7 +86,7 @@ export async function deleteAdSpendEntry(id: string): Promise<void> {
   await deleteDoc(doc(db, COLLECTION, id));
 }
 
-/** Get a single buyer's spend (for SpendHistoryPage / their own dashboard). */
+/** Get a single buyer's spend (kept for admin lookups by buyer id, when historical entries exist). */
 export async function getMyAdSpend(mediaBuyerId: string, days = 30): Promise<AdSpendEntry[]> {
   const q = query(
     collection(db, COLLECTION),

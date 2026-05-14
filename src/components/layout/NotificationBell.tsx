@@ -103,7 +103,6 @@ export function NotificationBell() {
       case "deadline_reminder": return { icon: "schedule", color: "text-orange-500", bg: "bg-orange-50" };
       case "pre_deadline_countdown": return { icon: "timer", color: "text-orange-500", bg: "bg-orange-50" };
       case "customer_followup": return { icon: "support_agent", color: "text-cyan-600", bg: "bg-cyan-50" };
-      case "media_buyer_missed_entry": return { icon: "campaign", color: "text-purple-600", bg: "bg-purple-50" };
       case "anomaly_alert": return { icon: "warning", color: "text-red-600", bg: "bg-red-50" };
       default: return { icon: "notifications", color: "text-[#64748B]", bg: "bg-[#F7F9FC]" };
     }

@@ -52,8 +52,8 @@ export function PerformanceTab({ users, reports, deals, allReports, onEdit }: Pe
     // Sort users by performance natively
     const usersWithStats = users.map(u => {
         const uReports = reports.filter(r => r.salesRepId === u.id || r.salesRepName === u.name);
-        const agg = calculateAggregates(uReports);
         const uDeals = deals.filter((d) => d.salesRepId === u.id || d.salesRepName === u.name);
+        const agg = calculateAggregates(uReports, uDeals);
         const dealCount = uDeals.length;
         const cycleVals = uDeals
             .map((d) => d.closingCycleDays)

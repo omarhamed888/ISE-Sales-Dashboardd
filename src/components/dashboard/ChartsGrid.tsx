@@ -3,12 +3,12 @@ import { calculateAggregates } from "@/lib/utils/dashboard-aggregations";
 import {
   buildConversionFunnelBars,
   buildDailyBuckets,
-  buildLeakCausesPieData,
+  buildDealLeadMonthBuckets,
   buildSalesRepBuckets,
   getPlatformStats,
 } from "@/lib/utils/dashboard-analytics";
 import { DashboardChartCard } from "@/components/dashboard/DashboardChartCard";
-import { LeakCausesPieChart } from "@/components/dashboard/LeakCausesPieChart";
+import { DealLeadMonthChart } from "@/components/dashboard/DealLeadMonthChart";
 import { DailyConversionChart } from "@/components/dashboard/DailyConversionChart";
 import { SalesRepComparisonChart } from "@/components/dashboard/SalesRepComparisonChart";
 import {
@@ -33,7 +33,7 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
   const platform = useMemo(() => getPlatformStats(reports, deals), [reports, deals]);
   const funnelData = useMemo(() => buildConversionFunnelBars(cur), [cur]);
   const dailyBuckets = useMemo(() => buildDailyBuckets(reports, deals), [reports, deals]);
-  const leakPie = useMemo(() => buildLeakCausesPieData(cur), [cur]);
+  const leadMonthBuckets = useMemo(() => buildDealLeadMonthBuckets(deals ?? []), [deals]);
   const repBuckets = useMemo(() => buildSalesRepBuckets(reports, deals), [reports, deals]);
 
   const dropOffAdData = useMemo(() => {
@@ -241,8 +241,11 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
         <SalesRepComparisonChart data={repBuckets} />
       </DashboardChartCard>
 
-      <DashboardChartCard title="توزيع مراحل التسرب" subtitle="توزيع التسرب عبر مراحل قمع التحويل">
-        <LeakCausesPieChart data={leakPie} />
+      <DashboardChartCard
+        title="عمر العميل عند الإغلاق"
+        subtitle="هل الصفقة قُفلت في نفس شهر التواصل، أم رجعت من شهر سابق؟"
+      >
+        <DealLeadMonthChart data={leadMonthBuckets} />
       </DashboardChartCard>
 
       <DashboardChartCard

@@ -22,7 +22,6 @@ export type NotificationType =
   | "deadline_reminder"
   | "pre_deadline_countdown"
   | "customer_followup"
-  | "media_buyer_missed_entry"
   | "anomaly_alert";
 
 export type NotificationPayload = {

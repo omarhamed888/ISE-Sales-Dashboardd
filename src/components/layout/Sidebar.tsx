@@ -29,26 +29,15 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: { is
     { href: "/my-deals",      icon: "emoji_events",  label: "صفقاتي" },
   ];
 
-  const mediaBuyerLinks = [
-    { href: "/spend-entry",     icon: "post_add",      label: "إدخال مصروف اليوم" },
-    { href: "/spend-history",   icon: "history",       label: "سجل المصروفات" },
-    { href: "/ads-management",  icon: "manage_search", label: "الإعلانات" },
-    { href: "/meta-insights",   icon: "insights",      label: "تحليلات Meta" },
-    { href: "/integrations/meta", icon: "link",        label: "ربط Meta" },
-  ];
-
   const isActive = (href: string) => pathname.startsWith(href);
 
   const roleLabel =
     role === "superadmin" ? "مدير النظام" :
     role === "admin"      ? "مشرف" :
-    role === "media_buyer" ? "ميديا باير" :
     "مبيعات";
   const roleColor = (role === "admin" || role === "superadmin")
     ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
-    : role === "media_buyer"
-      ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-      : "bg-white/10 text-slate-300 border border-white/10";
+    : "bg-white/10 text-slate-300 border border-white/10";
 
   const NavItem = ({ href, icon, label }: { href: string; icon: string; label: string }) => {
     const active = isActive(href);
@@ -145,15 +134,6 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: { is
                 <span className="px-5 pt-1 pb-1.5 text-[10px] font-black text-slate-500 uppercase tracking-widest">القائمة</span>
               )}
               {salesLinks.map(item => <NavItem key={item.href} {...item} />)}
-            </>
-          )}
-
-          {role === "media_buyer" && (
-            <>
-              {!isCollapsed && (
-                <span className="px-5 pt-1 pb-1.5 text-[10px] font-black text-slate-500 uppercase tracking-widest">الميديا</span>
-              )}
-              {mediaBuyerLinks.map(item => <NavItem key={item.href} {...item} />)}
             </>
           )}
         </nav>

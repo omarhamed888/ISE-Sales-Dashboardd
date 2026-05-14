@@ -17,10 +17,6 @@ service cloud.firestore {
       return getRole() == 'superadmin';
     }
 
-    function isMediaBuyer() {
-      return getRole() == 'media_buyer';
-    }
-
     function isUserDocOwner(userId) {
       return isAuth() && request.auth.uid == userId;
     }
@@ -32,41 +28,31 @@ service cloud.firestore {
       allow create: if (
         isAdmin()
         && request.resource.data.email is string
-        && request.resource.data.role in ['sales', 'admin', 'superadmin', 'media_buyer']
+        && request.resource.data.role in ['sales', 'admin', 'superadmin']
         && request.resource.data.isActive is bool
       ) || (
         // Self-migration: user writes their own UID-keyed doc on first login (legacy doc ID fix)
         isAuth()
         && request.auth.uid == userId
         && request.resource.data.email == request.auth.token.email
-        && request.resource.data.role in ['sales', 'admin', 'superadmin', 'media_buyer']
+        && request.resource.data.role in ['sales', 'admin', 'superadmin']
         && request.resource.data.isActive is bool
       );
       allow update: if (isAdmin() || isUserDocOwner(userId));
       allow delete: if isSuperAdmin();
     }
 
-    // Ad spend entered by media buyers (manual or via Meta API later).
+    // Ad spend now flows in automatically from Meta API via Cloud Functions (Admin SDK
+    // bypasses these rules). We keep admin read/update access for manual review/correction.
     match /ad_spend/{spendId} {
-      allow read: if isAdmin()
-                  || (isAuth() && resource.data.mediaBuyerId == request.auth.uid);
-      allow create: if isAuth()
-        && (isMediaBuyer() || isAdmin())
-        && request.resource.data.mediaBuyerId == request.auth.uid
+      allow read: if isAdmin();
+      allow create, update: if isAdmin()
         && request.resource.data.date is string
         && request.resource.data.adId is string
         && request.resource.data.spend is number
         && request.resource.data.spend >= 0
         && request.resource.data.leadsReported is int
         && request.resource.data.leadsReported >= 0;
-      allow update: if isAdmin() || (
-        isAuth()
-        && (isMediaBuyer())
-        && resource.data.mediaBuyerId == request.auth.uid
-        && request.resource.data.mediaBuyerId == resource.data.mediaBuyerId
-        && request.resource.data.adId == resource.data.adId
-        && request.resource.data.date == resource.data.date
-      );
       allow delete: if isSuperAdmin();
     }
 
@@ -148,7 +134,6 @@ service cloud.firestore {
           'deadline_reminder',
           'pre_deadline_countdown',
           'customer_followup',
-          'media_buyer_missed_entry',
           'anomaly_alert'
         ]
         && request.resource.data.message is string
@@ -258,14 +243,14 @@ service cloud.firestore {
     }
 
     match /app_config/meta_integration {
-      allow read: if isAdmin() || isMediaBuyer();
+      allow read: if isAdmin();
       allow create, update: if isSuperAdmin();
       allow delete: if false;
     }
 
     match /ads/{adId} {
       allow read: if isAuth();
-      allow create, update: if isAdmin() || isMediaBuyer();
+      allow create, update: if isAdmin();
       allow delete: if isAdmin();
     }
   }

@@ -2,9 +2,13 @@
 export const DASHBOARD_IGNORED_AD_NAMES = new Set(["عام", "طموح"]);
 
 /**
- * Real interactions are now backed by the `deals` collection (closed deals).
+ * Real interactions for dashboard charts and KPIs are now sourced directly from the
+ * `deals` collection (see buildDailyBuckets / buildSalesRepBuckets / calculateAggregates).
+ * This helper is retained for:
+ *   - Single-report displays where deal data is not loaded.
+ *   - Legacy aggregate paths (e.g. getPlatformStats) that still pre-compute per-report counts.
  * - When `dealCount` is provided → return it (the authoritative source).
- * - Otherwise → fallback to `repliedAfterPrice` (legacy / single-report displays).
+ * - Otherwise → fallback to `repliedAfterPrice` from the report's funnel.
  */
 export function calcInteractionsFromParsedData(pd: any, dealCount?: number): number {
   if (typeof dealCount === "number") return dealCount;

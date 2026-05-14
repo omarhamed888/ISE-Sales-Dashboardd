@@ -4,7 +4,7 @@ export interface AppUser {
   id: string;
   name: string;
   email: string;
-  role: "sales" | "admin" | "superadmin" | "media_buyer";
+  role: "sales" | "admin" | "superadmin";
   isActive: boolean;
   teamName?: string;
   programTrack?: string;
@@ -201,13 +201,6 @@ export interface SalesRepBucket {
   messages: number;
   interactions: number;
   conversionRate: number;
-}
-
-export interface LeakPieSlice {
-  name: string;
-  value: number;
-  pct: number;
-  fill: string;
 }
 
 export interface PlatformStats {

@@ -5,13 +5,26 @@ import {
   buildDealsCountByReportKey,
   getDealCountForReport,
 } from "@/lib/utils/dashboard-aggregations";
-import type { PlatformStats, DailyBucket, SalesRepBucket, LeakPieSlice } from "@/lib/types";
-export type { DailyBucket, SalesRepBucket, LeakPieSlice, PlatformStats };
+import type { PlatformStats, DailyBucket, SalesRepBucket } from "@/lib/types";
+export type { DailyBucket, SalesRepBucket, PlatformStats };
 import {
   normalizeReportDateKey,
   formatReportDateArabicShort,
   parseYmdToDate,
 } from "@/lib/utils/report-dates";
+
+/** Extract YYYY-MM-DD key from a deal's closeDate (preferred) or fallback date. */
+function dealDateKey(d: any): string | null {
+  const raw =
+    typeof d?.closeDate === "string" && d.closeDate.trim()
+      ? d.closeDate.trim()
+      : typeof d?.date === "string"
+        ? d.date.trim()
+        : "";
+  if (!raw) return null;
+  const key = raw.split("T")[0];
+  return /^\d{4}-\d{2}-\d{2}$/.test(key) ? key : null;
+}
 
 const AR_MONTHS = [
   "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
@@ -35,6 +48,12 @@ export function classifyPlatform(platformRaw: string | undefined): PlatformKey {
   return "messenger";
 }
 
+/**
+ * Per-platform totals. Messages come from reports (authoritative per platform). Interactions
+ * here are the *report-matched* deal counts — `Deal` does not carry a platform field, so deals
+ * with no matching report on the same `salesRepId|date` are not attributed to any platform.
+ * The KPI/chart totals use the unified deal-based path, so a small mismatch here is expected.
+ */
 export function getPlatformStats(reports: any[], deals?: any[]): PlatformStats {
   const dealsByKey = deals ? buildDealsCountByReportKey(deals) : undefined;
   const out: PlatformStats = {
@@ -124,31 +143,47 @@ export function buildConversionFunnelBars(cur: ReturnType<typeof calculateAggreg
   });
 }
 
+/**
+ * Daily buckets combining two independent sources:
+ *  - `msgs` are summed from reports keyed by their business date.
+ *  - `interactions` are summed directly from closed deals keyed by `closeDate` (fallback `date`).
+ * This matches the KPI aggregate (which counts deals directly) — deals without a matching report
+ * on the same `salesRepId|date` still contribute to the daily interactions total.
+ */
 export function buildDailyBuckets(reports: any[], deals?: any[]): DailyBucket[] {
-  const dealsByKey = deals ? buildDealsCountByReportKey(deals) : undefined;
   const map = new Map<string, DailyBucket>();
-  reports.forEach((r) => {
-    const k = normalizeReportDateKey(r);
-    if (!k) return;
-    const pd = r.parsedData;
-    if (!pd) return;
-    const msgs = pd.totalMessages ?? pd.summary?.totalMessages ?? 0;
-    const dealCount = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
-    const intr = calcInteractionsFromParsedData(pd, dealCount);
-    if (!map.has(k)) {
-      map.set(k, {
+
+  const ensure = (k: string): DailyBucket => {
+    let e = map.get(k);
+    if (!e) {
+      e = {
         dateKey: k,
         label: formatReportDateArabicShort(k),
         labelDayMonth: formatReportDateArabicDayMonth(k),
         msgs: 0,
         interactions: 0,
         conversionRate: 0,
-      });
+      };
+      map.set(k, e);
     }
-    const e = map.get(k)!;
-    e.msgs += msgs;
-    e.interactions += intr;
+    return e;
+  };
+
+  reports.forEach((r) => {
+    const k = normalizeReportDateKey(r);
+    if (!k) return;
+    const pd = r.parsedData;
+    if (!pd) return;
+    const msgs = pd.totalMessages ?? pd.summary?.totalMessages ?? 0;
+    ensure(k).msgs += msgs;
   });
+
+  (deals ?? []).forEach((d) => {
+    const k = dealDateKey(d);
+    if (!k) return;
+    ensure(k).interactions += 1;
+  });
+
   const list = Array.from(map.values()).sort((a, b) => a.dateKey.localeCompare(b.dateKey));
   list.forEach((e) => {
     e.conversionRate = calcConversionRate(e.interactions, e.msgs);
@@ -164,22 +199,35 @@ function shortRepName(name: string): string {
   return first.length > 12 ? `${first.slice(0, 10)}…` : first;
 }
 
+/**
+ * Per-rep buckets. Messages come from reports; interactions are summed from closed deals
+ * directly so the per-rep numbers match the dashboard KPI and /deals-analytics.
+ */
 export function buildSalesRepBuckets(reports: any[], deals?: any[]): SalesRepBucket[] {
-  const dealsByKey = deals ? buildDealsCountByReportKey(deals) : undefined;
   const map = new Map<string, { messages: number; interactions: number }>();
+  const ensure = (key: string) => {
+    let e = map.get(key);
+    if (!e) {
+      e = { messages: 0, interactions: 0 };
+      map.set(key, e);
+    }
+    return e;
+  };
+
   reports.forEach((r) => {
     const pd = r.parsedData;
     if (!pd) return;
     const msgs = pd.totalMessages ?? pd.summary?.totalMessages ?? 0;
-    const dealCount = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
-    const intr = calcInteractionsFromParsedData(pd, dealCount);
     if (msgs === 0) return;
     const key = (r.salesRepName as string)?.trim() || "غير مسجل";
-    if (!map.has(key)) map.set(key, { messages: 0, interactions: 0 });
-    const e = map.get(key)!;
-    e.messages += msgs;
-    e.interactions += intr;
+    ensure(key).messages += msgs;
   });
+
+  (deals ?? []).forEach((d) => {
+    const key = (d.salesRepName as string)?.trim() || "غير مسجل";
+    ensure(key).interactions += 1;
+  });
+
   return Array.from(map.entries())
     .map(([name, v]) => ({
       name,
@@ -191,30 +239,108 @@ export function buildSalesRepBuckets(reports: any[], deals?: any[]): SalesRepBuc
     .sort((a, b) => b.messages - a.messages);
 }
 
-/** Percentages are share of sum of included slice values (interactions uses KPI aggregate for consistency). */
-export function buildLeakCausesPieData(cur: ReturnType<typeof calculateAggregates>): LeakPieSlice[] {
-  const g = cur.funnel.greeting;
-  const d = cur.funnel.details;
-  const p = cur.funnel.price;
-  const intr = cur.interactions;
+export interface DealLeadMonthBucket {
+  key: "sameMonth" | "previousMonth" | "older" | "unknown";
+  name: string;
+  count: number;
+  pct: number;
+  fill: string;
+  avgCycleDays: number | null;
+}
 
-  const slices: { name: string; value: number; fill: string }[] = [];
-  if (g > 0) {
-    slices.push({ name: "تسرب بعد التحية", value: g, fill: "#f8b4b4" });
+/** YYYY-MM from a YYYY-MM-DD date key, or null if invalid. */
+function monthKey(ymd: string | null): string | null {
+  if (!ymd) return null;
+  return /^\d{4}-\d{2}-\d{2}$/.test(ymd) ? ymd.slice(0, 7) : null;
+}
+
+/** Diff in whole calendar months between two YYYY-MM keys (older → later returns >= 0). */
+function monthDiff(earlier: string, later: string): number {
+  const [ey, em] = earlier.split("-").map(Number);
+  const [ly, lm] = later.split("-").map(Number);
+  return (ly - ey) * 12 + (lm - em);
+}
+
+/**
+ * Classifies closed deals by how far back their first-contact month is from their close month:
+ *   - sameMonth     → first contact in the same calendar month as the close
+ *   - previousMonth → first contact in the immediately preceding month
+ *   - older         → first contact more than one month before close (long sales cycle)
+ *   - unknown       → no firstContactDate recorded
+ */
+export function buildDealLeadMonthBuckets(deals: any[]): DealLeadMonthBucket[] {
+  const acc = {
+    sameMonth: { count: 0, cycleSum: 0, cycleN: 0 },
+    previousMonth: { count: 0, cycleSum: 0, cycleN: 0 },
+    older: { count: 0, cycleSum: 0, cycleN: 0 },
+    unknown: { count: 0, cycleSum: 0, cycleN: 0 },
+  };
+
+  for (const d of deals || []) {
+    const closeMonth = monthKey(dealDateKey(d));
+    const contactMonth = monthKey(
+      typeof d?.firstContactDate === "string" && d.firstContactDate.trim()
+        ? d.firstContactDate.trim().split("T")[0]
+        : null
+    );
+
+    let bucket: keyof typeof acc;
+    if (!contactMonth || !closeMonth) {
+      bucket = "unknown";
+    } else {
+      const diff = monthDiff(contactMonth, closeMonth);
+      if (diff <= 0) bucket = "sameMonth";
+      else if (diff === 1) bucket = "previousMonth";
+      else bucket = "older";
+    }
+
+    acc[bucket].count += 1;
+    const cycle = Number(d?.closingCycleDays);
+    if (Number.isFinite(cycle) && cycle >= 0) {
+      acc[bucket].cycleSum += cycle;
+      acc[bucket].cycleN += 1;
+    }
   }
-  slices.push({ name: "تسرب بعد التفاصيل", value: d, fill: "#f9d99d" });
-  slices.push({ name: "تسرب بعد السعر", value: p, fill: "#a3daf7" });
-  slices.push({ name: "صفقات مغلقة", value: intr, fill: "#27ae60" });
 
-  const sum = slices.reduce((a, s) => a + s.value, 0);
-  if (sum <= 0) return [];
+  const total = acc.sameMonth.count + acc.previousMonth.count + acc.older.count + acc.unknown.count;
+  const pct = (n: number) =>
+    total > 0 ? parseFloat(((n / total) * 100).toFixed(1)) : 0;
+  const avg = (s: number, n: number) => (n > 0 ? Math.round(s / n) : null);
 
-  return slices.map((s) => ({
-    name: s.name,
-    value: s.value,
-    pct: parseFloat(((s.value / sum) * 100).toFixed(1)),
-    fill: s.fill,
-  }));
+  return [
+    {
+      key: "sameMonth",
+      name: "عملاء الشهر الحالي",
+      count: acc.sameMonth.count,
+      pct: pct(acc.sameMonth.count),
+      fill: "#10B981",
+      avgCycleDays: avg(acc.sameMonth.cycleSum, acc.sameMonth.cycleN),
+    },
+    {
+      key: "previousMonth",
+      name: "عملاء الشهر السابق",
+      count: acc.previousMonth.count,
+      pct: pct(acc.previousMonth.count),
+      fill: "#3B82F6",
+      avgCycleDays: avg(acc.previousMonth.cycleSum, acc.previousMonth.cycleN),
+    },
+    {
+      key: "older",
+      name: "عملاء من أشهر أقدم",
+      count: acc.older.count,
+      pct: pct(acc.older.count),
+      fill: "#F59E0B",
+      avgCycleDays: avg(acc.older.cycleSum, acc.older.cycleN),
+    },
+    {
+      key: "unknown",
+      name: "بلا تاريخ تواصل",
+      count: acc.unknown.count,
+      pct: pct(acc.unknown.count),
+      fill: "#94A3B8",
+      avgCycleDays: avg(acc.unknown.cycleSum, acc.unknown.cycleN),
+    },
+  ];
 }
 
 export interface BestAdInfo {
