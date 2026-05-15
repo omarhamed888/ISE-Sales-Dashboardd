@@ -4,6 +4,7 @@ import { useFilter, DateRange, Platform } from "@/lib/filter-context";
 import { useAuth } from "@/lib/auth-context";
 import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useAvailableMonths } from "@/lib/hooks/useAvailableMonths";
 
 const selectCls = `
   bg-white border border-[#E2E8F0] rounded-xl px-3 py-2
@@ -13,10 +14,18 @@ const selectCls = `
   disabled:opacity-40 disabled:cursor-not-allowed
 `.replace(/\s+/g, ' ').trim();
 
+const dateInputCls = `
+  bg-white border border-[#E2E8F0] rounded-xl px-3 py-2
+  text-[12px] font-bold text-[#1E293B]
+  focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]/50
+  transition-colors
+`.replace(/\s+/g, ' ').trim();
+
 export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean }) {
   const location = useLocation();
   const { user } = useAuth();
   const { filter, updateFilter, resetFilter } = useFilter();
+  const { months: availableMonths, loading: monthsLoading } = useAvailableMonths();
 
   const adminRoutes = ["/dashboard", "/team", "/ads", "/reports", "/metrics"];
   const isAdminRoute = adminRoutes.includes(location.pathname);
@@ -24,7 +33,7 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
 
   if (!isAdminRoute || !isAdmin) return null;
 
-  const ranges: DateRange[] = ["اليوم", "الأسبوع", "الشهر", "الإجمالي", "مخصص"];
+  const ranges: DateRange[] = ["اليوم", "الأسبوع", "الشهر", "شهر محدد", "الإجمالي", "مخصص"];
   const [salesReps, setSalesReps] = useState<{ uid: string; name: string }[]>([]);
   const [uniqueAds, setUniqueAds] = useState<string[]>([]);
   const [isLoadingProps, setIsLoadingProps] = useState(true);
@@ -66,6 +75,17 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
     return () => window.removeEventListener("ise-metadata-adnames-updated", onAdNamesUpdated);
   }, [loadDynamicFilters]);
 
+  // Default the month dropdown to the most recent month with data the first time the user picks "شهر محدد".
+  useEffect(() => {
+    if (
+      filter.dateRange === "شهر محدد" &&
+      !filter.selectedMonth &&
+      availableMonths.length > 0
+    ) {
+      updateFilter({ selectedMonth: availableMonths[0].value });
+    }
+  }, [filter.dateRange, filter.selectedMonth, availableMonths, updateFilter]);
+
   return (
     <div
       dir="rtl"
@@ -94,22 +114,61 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
         ))}
       </div>
 
+      {/* Specific-month dropdown (only months that actually have data) */}
+      {filter.dateRange === "شهر محدد" && (
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider">الشهر</span>
+          {availableMonths.length === 0 ? (
+            <span className="text-[12px] font-bold text-[#94A3B8] bg-[#F8FAFC] border border-dashed border-[#E2E8F0] rounded-xl px-3 py-2">
+              {monthsLoading ? "...جاري التحميل" : "لا توجد بيانات شهور"}
+            </span>
+          ) : (
+            <select
+              value={filter.selectedMonth ?? ""}
+              onChange={(e) => updateFilter({ selectedMonth: e.target.value || null })}
+              className={`${selectCls} min-w-[150px]`}
+            >
+              {availableMonths.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
+
       {/* Custom date range */}
       {filter.dateRange === "مخصص" && (
-        <div className="flex items-center gap-2 shrink-0" dir="ltr">
-          <input
-            type="date"
-            value={filter.customDateFrom ? filter.customDateFrom.toISOString().slice(0, 10) : ""}
-            onChange={(e) => updateFilter({ customDateFrom: e.target.value ? new Date(e.target.value) : null })}
-            className="bg-white border border-[#E2E8F0] rounded-xl px-3 py-2 text-[12px] font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]/50 transition-colors"
-          />
-          <span className="text-[12px] font-bold text-[#94A3B8]">–</span>
-          <input
-            type="date"
-            value={filter.customDateTo ? filter.customDateTo.toISOString().slice(0, 10) : ""}
-            onChange={(e) => updateFilter({ customDateTo: e.target.value ? new Date(e.target.value) : null })}
-            className="bg-white border border-[#E2E8F0] rounded-xl px-3 py-2 text-[12px] font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]/50 transition-colors"
-          />
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider">من</span>
+            <input
+              type="date"
+              value={filter.customDateFrom ? filter.customDateFrom.toISOString().slice(0, 10) : ""}
+              max={filter.customDateTo ? filter.customDateTo.toISOString().slice(0, 10) : undefined}
+              onChange={(e) => updateFilter({ customDateFrom: e.target.value ? new Date(e.target.value) : null })}
+              className={dateInputCls}
+              dir="ltr"
+            />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider">إلى</span>
+            <input
+              type="date"
+              value={filter.customDateTo ? filter.customDateTo.toISOString().slice(0, 10) : ""}
+              min={filter.customDateFrom ? filter.customDateFrom.toISOString().slice(0, 10) : undefined}
+              onChange={(e) => updateFilter({ customDateTo: e.target.value ? new Date(e.target.value) : null })}
+              className={dateInputCls}
+              dir="ltr"
+            />
+          </div>
+          {filter.customDateFrom && filter.customDateTo &&
+            filter.customDateFrom > filter.customDateTo && (
+            <span className="text-[11px] font-black text-[#DC2626] bg-red-50 border border-red-200 rounded-lg px-2 py-1">
+              تاريخ البداية بعد النهاية
+            </span>
+          )}
         </div>
       )}
 

@@ -110,10 +110,25 @@ export function isKeyInClosedRange(key: string | null, from: string, to: string)
   return key >= from && key <= to;
 }
 
-const AR_MONTHS = [
+/** True when YYYY-MM-DD `key` falls within YYYY-MM month and respects the data-quality floor. */
+export function isReportDateInMonth(key: string | null, yyyymm: string | null): boolean {
+  if (!key || !yyyymm || !/^\d{4}-\d{2}$/.test(yyyymm)) return false;
+  if (key < DASHBOARD_DATA_QUALITY_FROM_DATE) return false;
+  return key.slice(0, 7) === yyyymm;
+}
+
+export const AR_MONTHS = [
   "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
   "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
 ];
+
+/** Arabic label for a YYYY-MM month key, e.g. "أبريل 2026". */
+export function formatMonthArabic(yyyymm: string): string {
+  if (!/^\d{4}-\d{2}$/.test(yyyymm)) return yyyymm;
+  const [y, m] = yyyymm.split("-").map(Number);
+  const name = AR_MONTHS[m - 1] ?? String(m);
+  return `${name} ${y}`;
+}
 
 /** e.g. السبت، 4 أبريل 2026 */
 export function formatReportDateArabicLong(ymd: string, locale = "ar-EG"): string {

@@ -1,33 +1,27 @@
 import {
-  BarChart,
+  ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
-  LabelList,
+  Legend,
 } from "recharts";
 import type { DailyBucket } from "@/lib/utils/dashboard-analytics";
 
-function barColor(rate: number): string {
-  if (rate > 5) return "#3498db";
-  if (rate > 0) return "#5dade2";
-  return "#e8f5e9";
-}
-
+/**
+ * Combined daily performance chart:
+ *   • Bar (left axis)  — total messages
+ *   • Bar (left axis)  — closed deals
+ *   • Line (right %)   — conversion rate
+ *
+ * One picture, three signals — so a drop in close rate can be read against
+ * whether it was a low-volume day or a low-quality day.
+ */
 export function DailyConversionChart({ data }: { data: DailyBucket[] }) {
-  const chartData = data.map((d) => ({
-    ...d,
-    fill: barColor(d.conversionRate),
-    rateLabel: `${d.conversionRate}%`,
-  }));
-
-  const maxR = Math.max(1, ...data.map((d) => d.conversionRate));
-  const yMax = Math.ceil(maxR + 1);
-
-  if (chartData.length === 0) {
+  if (data.length === 0) {
     return (
       <div className="flex h-full items-center justify-center text-sm font-semibold text-[#7f8c8d]" dir="rtl">
         لا توجد بيانات يومية
@@ -35,13 +29,51 @@ export function DailyConversionChart({ data }: { data: DailyBucket[] }) {
     );
   }
 
+  const chartData = data.map((d) => ({
+    label: d.labelDayMonth,
+    fullLabel: d.label,
+    messages: d.msgs,
+    deals: d.interactions,
+    rate: d.conversionRate,
+  }));
+
+  // Right axis ceiling: at least 10 %, otherwise rate + 2 rounded up.
+  const maxRate = Math.max(...chartData.map((d) => d.rate), 1);
+  const rateMax = Math.max(10, Math.ceil(maxRate + 2));
+
+  const renderTooltip = ({ active, payload }: any) => {
+    if (!active || !payload?.length) return null;
+    const row = payload[0]?.payload as (typeof chartData)[number] | undefined;
+    if (!row) return null;
+    return (
+      <div
+        className="rounded-lg border border-[#e1e8ed] bg-white px-3 py-2 text-right text-xs font-semibold shadow-md min-w-[160px]"
+        dir="rtl"
+      >
+        <div className="text-[#0F172A] font-black mb-1">{row.fullLabel || row.label}</div>
+        <div className="flex items-center justify-between gap-3 text-[#3498db]">
+          <span>الرسائل</span>
+          <span className="font-black">{row.messages.toLocaleString("en-US")}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3 text-[#10B981]">
+          <span>الصفقات</span>
+          <span className="font-black">{row.deals.toLocaleString("en-US")}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3 text-[#F59E0B] mt-1 pt-1 border-t border-[#E2E8F0]">
+          <span>معدل الإغلاق</span>
+          <span className="font-black">{row.rate}%</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="h-full w-full" dir="ltr">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} margin={{ top: 28, right: 8, left: -8, bottom: 4 }}>
+        <ComposedChart data={chartData} margin={{ top: 24, right: 8, left: -8, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e1e8ed" vertical={false} />
           <XAxis
-            dataKey="labelDayMonth"
+            dataKey="label"
             tick={{ fill: "#7f8c8d", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
@@ -51,38 +83,56 @@ export function DailyConversionChart({ data }: { data: DailyBucket[] }) {
             height={48}
           />
           <YAxis
-            domain={[0, yMax]}
-            tickFormatter={(v) => `${v}%`}
+            yAxisId="left"
             tick={{ fill: "#7f8c8d", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
             width={40}
           />
-          <Tooltip
-            contentStyle={{
-              borderRadius: 10,
-              border: "1px solid #e1e8ed",
-              textAlign: "right",
-              fontWeight: 600,
-            }}
-            formatter={(value) => [`${value ?? 0}%`, "معدل الإغلاق"]}
-            labelFormatter={(_, payload) =>
-              payload?.[0]?.payload?.labelDayMonth
-                ? String(payload[0].payload.labelDayMonth)
-                : ""
-            }
+          <YAxis
+            yAxisId="right"
+            orientation="right"
+            domain={[0, rateMax]}
+            tickFormatter={(v) => `${v}%`}
+            tick={{ fill: "#F59E0B", fontSize: 10 }}
+            axisLine={false}
+            tickLine={false}
+            width={40}
           />
-          <Bar dataKey="conversionRate" radius={[4, 4, 0, 0]} maxBarSize={36}>
-            {chartData.map((e, i) => (
-              <Cell key={i} fill={e.fill} />
-            ))}
-            <LabelList
-              dataKey="rateLabel"
-              position="top"
-              style={{ fill: "#2c3e50", fontSize: 10, fontWeight: 600 }}
-            />
-          </Bar>
-        </BarChart>
+          <Tooltip content={renderTooltip} cursor={{ fill: "rgba(52,152,219,0.06)" }} />
+          <Legend
+            verticalAlign="top"
+            align="center"
+            wrapperStyle={{ paddingBottom: 6, fontSize: 11 }}
+            formatter={(value) => <span style={{ color: "#2c3e50", fontWeight: 700 }}>{value}</span>}
+          />
+          <Bar
+            yAxisId="left"
+            dataKey="messages"
+            name="الرسائل"
+            fill="#3498db"
+            radius={[4, 4, 0, 0]}
+            maxBarSize={22}
+          />
+          <Bar
+            yAxisId="left"
+            dataKey="deals"
+            name="الصفقات"
+            fill="#10B981"
+            radius={[4, 4, 0, 0]}
+            maxBarSize={22}
+          />
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey="rate"
+            name="معدل الإغلاق %"
+            stroke="#F59E0B"
+            strokeWidth={2.5}
+            dot={{ r: 3, strokeWidth: 2, fill: "#fff", stroke: "#F59E0B" }}
+            activeDot={{ r: 5 }}
+          />
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );

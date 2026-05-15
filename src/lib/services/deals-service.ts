@@ -456,3 +456,122 @@ export function computeDaysToCloseDistribution(deals: Deal[]): DaysToCloseBucket
     pct: total > 0 ? parseFloat(((b.count / total) * 100).toFixed(1)) : 0,
   }));
 }
+
+// ── Monthly deal-cycle trend ─────────────────────────────────────────────────
+export interface MonthlyDealCycleBucket {
+  /** YYYY-MM key derived from closeDate. */
+  monthKey: string;
+  /** Arabic label e.g. "أبريل 2026". */
+  label: string;
+  /** Closed deals counted in this month. */
+  deals: number;
+  /** Avg closingCycleDays for deals in this month (0 when none have a valid cycle). */
+  avgCycleDays: number;
+  /** Sum of dealValue for deals in this month. */
+  totalRevenue: number;
+}
+
+/**
+ * Bucket closed deals by their close-month and compute, per month:
+ *   - how many deals closed
+ *   - what was the average cycle length
+ *
+ * Useful as a trendline to see whether the team is getting faster over time.
+ * Deals without a parseable `closeDate` are skipped. Returned list is sorted
+ * ascending by `monthKey` so a line chart reads left-to-right as time moves
+ * forward.
+ */
+export function computeMonthlyDealCycleTrend(deals: Deal[]): MonthlyDealCycleBucket[] {
+  type Acc = { count: number; cycleSum: number; cycleN: number; revenue: number };
+  const map = new Map<string, Acc>();
+
+  for (const deal of deals) {
+    const closeDate = parseDealDate(deal.closeDate) || parseDealDate(deal.date);
+    if (!closeDate) continue;
+    const monthKey = `${closeDate.getFullYear()}-${String(closeDate.getMonth() + 1).padStart(2, '0')}`;
+    let entry = map.get(monthKey);
+    if (!entry) {
+      entry = { count: 0, cycleSum: 0, cycleN: 0, revenue: 0 };
+      map.set(monthKey, entry);
+    }
+    entry.count += 1;
+    entry.revenue += Number(deal.dealValue) || 0;
+    const cycle = deal.closingCycleDays;
+    if (typeof cycle === 'number' && Number.isFinite(cycle) && cycle >= 0) {
+      entry.cycleSum += cycle;
+      entry.cycleN += 1;
+    }
+  }
+
+  const AR_MONTHS = [
+    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+  ];
+
+  return Array.from(map.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([monthKey, e]) => {
+      const [y, m] = monthKey.split('-').map(Number);
+      const label = `${AR_MONTHS[m - 1] ?? m} ${y}`;
+      return {
+        monthKey,
+        label,
+        deals: e.count,
+        avgCycleDays: e.cycleN > 0 ? Math.round(e.cycleSum / e.cycleN) : 0,
+        totalRevenue: e.revenue,
+      };
+    });
+}
+
+// ── Deal cycle by ad source ──────────────────────────────────────────────────
+export interface AdSourceCycleBucket {
+  adSource: string;
+  deals: number;
+  avgCycleDays: number;
+  totalRevenue: number;
+}
+
+/**
+ * Group closed deals by `adSource` and report, per source:
+ *   - how many deals
+ *   - average cycle days
+ *   - total revenue
+ *
+ * Sorted by avg cycle (fastest first). Empty/unknown adSource is bucketed as
+ * "غير محدد". `topN` caps the result; default 8 to keep the chart readable.
+ */
+export function computeCycleByAdSource(deals: Deal[], topN = 8): AdSourceCycleBucket[] {
+  type Acc = { cycleSum: number; cycleN: number; count: number; revenue: number };
+  const map = new Map<string, Acc>();
+
+  for (const deal of deals) {
+    const source = (deal.adSource || '').trim() || 'غير محدد';
+    let entry = map.get(source);
+    if (!entry) {
+      entry = { cycleSum: 0, cycleN: 0, count: 0, revenue: 0 };
+      map.set(source, entry);
+    }
+    entry.count += 1;
+    entry.revenue += Number(deal.dealValue) || 0;
+    const cycle = deal.closingCycleDays;
+    if (typeof cycle === 'number' && Number.isFinite(cycle) && cycle >= 0) {
+      entry.cycleSum += cycle;
+      entry.cycleN += 1;
+    }
+  }
+
+  return Array.from(map.entries())
+    .map(([adSource, e]) => ({
+      adSource,
+      deals: e.count,
+      avgCycleDays: e.cycleN > 0 ? Math.round(e.cycleSum / e.cycleN) : 0,
+      totalRevenue: e.revenue,
+    }))
+    // Sort: fastest avg cycle first, but only among sources that actually have cycle data.
+    .sort((a, b) => {
+      if (a.avgCycleDays === 0 && b.avgCycleDays > 0) return 1;
+      if (b.avgCycleDays === 0 && a.avgCycleDays > 0) return -1;
+      return a.avgCycleDays - b.avgCycleDays;
+    })
+    .slice(0, topN);
+}

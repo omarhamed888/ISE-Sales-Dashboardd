@@ -5,6 +5,7 @@ import {
   isReportDateInDashboardRange,
   getPreviousPeriodYmdRange,
   isKeyInClosedRange,
+  isReportDateInMonth,
 } from "@/lib/utils/report-dates";
 
 function platformMatches(filter: FilterState, r: any): boolean {
@@ -36,12 +37,19 @@ function passesDateAndQuality(r: any, filter: FilterState): boolean {
     return isKeyInClosedRange(key, from, to);
   }
 
+  if (filter.dateRange === "شهر محدد") {
+    return isReportDateInMonth(key, filter.selectedMonth);
+  }
+
   if (filter.dateRange === "الإجمالي") {
     if (!key) return false;
     return key >= DASHBOARD_DATA_QUALITY_FROM_DATE;
   }
 
-  return isReportDateInDashboardRange(key, filter.dateRange);
+  return isReportDateInDashboardRange(
+    key,
+    filter.dateRange as "اليوم" | "الأسبوع" | "الشهر" | "الإجمالي"
+  );
 }
 
 /** Reports matching dashboard filters (by business `date`, not submission time). */
@@ -99,8 +107,11 @@ export function getDashboardPreviousPeriodReports(
   allReports: any[],
   filter: FilterState
 ): any[] {
-  if (filter.dateRange === "مخصص" || !filter.customDateFrom || !filter.customDateTo) return [];
-  const range = getPreviousPeriodYmdRange(filter.dateRange);
+  // Previous-period comparison is only meaningful for fixed buckets.
+  if (filter.dateRange === "مخصص" || filter.dateRange === "شهر محدد") return [];
+  const range = getPreviousPeriodYmdRange(
+    filter.dateRange as "اليوم" | "الأسبوع" | "الشهر" | "الإجمالي"
+  );
   if (!range) return [];
   return filterReportsByYmdRange(allReports, filter, range.from, range.to);
 }
@@ -130,6 +141,12 @@ export function filterDealsByDashboardDate(deals: any[], filter: FilterState): a
       const to = filter.customDateTo.toISOString().slice(0, 10);
       return isKeyInClosedRange(raw, from, to);
     }
-    return isReportDateInDashboardRange(raw, filter.dateRange);
+    if (filter.dateRange === "شهر محدد") {
+      return isReportDateInMonth(raw, filter.selectedMonth);
+    }
+    return isReportDateInDashboardRange(
+      raw,
+      filter.dateRange as "اليوم" | "الأسبوع" | "الشهر" | "الإجمالي"
+    );
   });
 }

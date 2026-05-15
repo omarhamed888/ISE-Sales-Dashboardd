@@ -109,6 +109,22 @@ export default function DashboardPage() {
     day: "numeric",
   });
 
+  const SectionDivider = ({ icon, label, filled = true }: { icon: string; label: string; filled?: boolean }) => (
+    <div className="flex items-center gap-3 mt-2 mb-1">
+      <div className="flex-1 h-px bg-[#E2E8F0]" />
+      <div className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#E2E8F0] rounded-full shadow-sm">
+        <span
+          className="material-symbols-outlined text-[16px] text-[#64748B]"
+          style={filled ? { fontVariationSettings: "'FILL' 1" } : undefined}
+        >
+          {icon}
+        </span>
+        <span className="text-[11px] font-black text-[#64748B] uppercase tracking-widest">{label}</span>
+      </div>
+      <div className="flex-1 h-px bg-[#E2E8F0]" />
+    </div>
+  );
+
   return (
      <div className="max-w-[1500px] w-full mx-auto space-y-6 animate-in fade-in duration-500 pb-20 font-body" dir="rtl">
 
@@ -126,58 +142,38 @@ export default function DashboardPage() {
            <EmptyState />
         ) : (
            <>
-              {/* SECTION 1: KPI Cards */}
+              {/* ───── 1. OVERVIEW: KPIs at a glance ───── */}
+              <SectionDivider icon="analytics" label="نظرة عامة" />
               <KPICards reports={currentReports} allReports={allReports} deals={filteredDeals} />
 
-              {/* SECTION 1b: Marketing KPI (auto-hides when no spend data) */}
-              <MarketingKPICards deals={allDeals} />
+              {/* ───── 2. TEAM TODAY: who submitted, where they stand ───── */}
+              <SectionDivider icon="groups" label="حالة الفريق اليوم" />
+              <TeamStatusSummary allReports={allReports} deals={allDeals} />
 
-              {/* SECTION 2: Charts */}
+              {/* ───── 3. PERFORMANCE: funnel → platforms → daily trends → comparisons ───── */}
+              <SectionDivider icon="insights" label="تحليل الأداء" />
               <Suspense fallback={<SkeletonChart />}>
                 <ChartsGrid reports={currentReports} deals={filteredDeals} />
               </Suspense>
 
-              {/* SECTION 3: Rejection Analytics */}
-              <>
-                <div className="flex items-center gap-3 my-1">
-                  <div className="flex-1 h-px bg-[#E2E8F0]" />
-                  <div className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#E2E8F0] rounded-full shadow-sm">
-                    <span className="material-symbols-outlined text-[16px] text-[#64748B]">bar_chart</span>
-                    <span className="text-[11px] font-black text-[#64748B] uppercase tracking-widest">تحليل أسباب الرفض</span>
-                  </div>
-                  <div className="flex-1 h-px bg-[#E2E8F0]" />
-                </div>
-                <Suspense fallback={<SkeletonChart />}>
-                  <RejectionAnalyticsSection reports={currentReports} />
-                </Suspense>
-              </>
-
-              {/* SECTION 5: Deal Cycle Analytics */}
-              <div className="flex items-center gap-3 my-1">
-                <div className="flex-1 h-px bg-[#E2E8F0]" />
-                <div className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#E2E8F0] rounded-full shadow-sm">
-                  <span className="material-symbols-outlined text-[16px] text-[#64748B]" style={{ fontVariationSettings: "'FILL' 1" }}>timer</span>
-                  <span className="text-[11px] font-black text-[#64748B] uppercase tracking-widest">دورة إغلاق الصفقات</span>
-                </div>
-                <div className="flex-1 h-px bg-[#E2E8F0]" />
-              </div>
+              {/* ───── 4. DEAL CYCLE: how fast we close ───── */}
+              <SectionDivider icon="timer" label="دورة إغلاق الصفقات" />
               <Suspense fallback={<SkeletonChart />}>
                 <DealCycleSection />
               </Suspense>
 
-              {/* SECTION 6: Team Status */}
-              <div className="flex items-center gap-3 my-1">
-                <div className="flex-1 h-px bg-[#E2E8F0]" />
-                <div className="flex items-center gap-2 px-4 py-1.5 bg-white border border-[#E2E8F0] rounded-full shadow-sm">
-                  <span className="material-symbols-outlined text-[16px] text-[#64748B]" style={{ fontVariationSettings: "'FILL' 1" }}>groups</span>
-                  <span className="text-[11px] font-black text-[#64748B] uppercase tracking-widest">حالة الفريق</span>
-                </div>
-                <div className="flex-1 h-px bg-[#E2E8F0]" />
-              </div>
-              <TeamStatusSummary allReports={allReports} deals={allDeals} />
+              {/* ───── 5. REJECTION ANALYTICS: why we lose ───── */}
+              <SectionDivider icon="report" label="تحليل أسباب الرفض" filled={false} />
+              <Suspense fallback={<SkeletonChart />}>
+                <RejectionAnalyticsSection reports={currentReports} />
+              </Suspense>
 
-              {/* SECTION 6: Recent Activity */}
+              {/* ───── 6. RECENT ACTIVITY: drill-down table ───── */}
+              <SectionDivider icon="receipt_long" label="آخر التقارير" />
               <RecentActivity reports={currentReports} deals={filteredDeals} />
+
+              {/* ───── 7. MARKETING SPEND (auto-hides when no spend data): kept at the bottom until real numbers are entered ───── */}
+              <MarketingKPICards deals={allDeals} />
 
            </>
         )}

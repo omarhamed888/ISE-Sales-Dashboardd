@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { getAllAdSpend } from "@/lib/services/ad-spend-service";
 import type { AdSpendEntry } from "@/lib/types";
 import { useFilter } from "@/lib/filter-context";
-import { isReportDateInDashboardRange } from "@/lib/utils/report-dates";
+import { isReportDateInDashboardRange, isReportDateInMonth } from "@/lib/utils/report-dates";
 
 interface Deal {
   salesRepId?: string;
@@ -38,8 +38,14 @@ export function MarketingKPICards({ deals }: { deals: Deal[] }) {
         const to = filter.customDateTo?.toISOString().slice(0, 10) ?? "9999-12-31";
         return s.date >= from && s.date <= to;
       }
+      if (filter.dateRange === "شهر محدد") {
+        return isReportDateInMonth(s.date, filter.selectedMonth);
+      }
       if (filter.dateRange === "الإجمالي") return true;
-      return isReportDateInDashboardRange(s.date, filter.dateRange);
+      return isReportDateInDashboardRange(
+        s.date,
+        filter.dateRange as "اليوم" | "الأسبوع" | "الشهر" | "الإجمالي"
+      );
     });
   }, [spend, filter]);
 
@@ -52,8 +58,14 @@ export function MarketingKPICards({ deals }: { deals: Deal[] }) {
         const to = filter.customDateTo?.toISOString().slice(0, 10) ?? "9999-12-31";
         return date >= from && date <= to;
       }
+      if (filter.dateRange === "شهر محدد") {
+        return isReportDateInMonth(date, filter.selectedMonth);
+      }
       if (filter.dateRange === "الإجمالي") return true;
-      return isReportDateInDashboardRange(date, filter.dateRange);
+      return isReportDateInDashboardRange(
+        date,
+        filter.dateRange as "اليوم" | "الأسبوع" | "الشهر" | "الإجمالي"
+      );
     });
   }, [deals, filter]);
 
