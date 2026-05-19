@@ -10,7 +10,8 @@ import { TeamStatusSummary } from "@/components/dashboard/TeamStatusSummary";
 import { MarketingKPICards } from "@/components/dashboard/MarketingKPICards";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton, SkeletonChart } from "@/components/ui/Skeleton";
-import { getAllDeals } from "@/lib/services/deals-service";
+import { getAllDeals, buildProfitPctMap } from "@/lib/services/deals-service";
+import { useCourses } from "@/lib/hooks/useCourses";
 const ChartsGrid = lazy(() => import("@/components/dashboard/ChartsGrid").then((m) => ({ default: m.ChartsGrid })));
 const RejectionAnalyticsSection = lazy(() => import("@/components/dashboard/RejectionAnalyticsSection").then((m) => ({ default: m.RejectionAnalyticsSection })));
 const DealCycleSection = lazy(() => import("@/components/dashboard/DealCycleSection").then((m) => ({ default: m.DealCycleSection })));
@@ -56,6 +57,9 @@ export default function DashboardPage() {
       .catch(() => { if (!cancelled) setAllDeals([]); });
     return () => { cancelled = true; };
   }, [user?.uid]);
+
+  const courses = useCourses(true);
+  const profitPctById = useMemo(() => buildProfitPctMap(courses), [courses]);
 
   const currentReports = useMemo(() => filterReports(allReports, filter), [allReports, filter]);
   const filteredDeals = useMemo(() => filterDealsByDashboardDate(allDeals, filter), [allDeals, filter]);
@@ -146,8 +150,8 @@ export default function DashboardPage() {
               <SectionDivider icon="analytics" label="نظرة عامة" />
               <KPICards reports={currentReports} allReports={allReports} deals={filteredDeals} />
 
-              {/* ───── 2. TEAM TODAY: who submitted, where they stand ───── */}
-              <SectionDivider icon="groups" label="حالة الفريق اليوم" />
+              {/* ───── 2. TEAM YESTERDAY: who submitted, where they stand ───── */}
+              <SectionDivider icon="groups" label="حالة الفريق أمس" />
               <TeamStatusSummary allReports={allReports} deals={allDeals} />
 
               {/* ───── 3. PERFORMANCE: funnel → platforms → daily trends → comparisons ───── */}
@@ -159,7 +163,7 @@ export default function DashboardPage() {
               {/* ───── 4. DEAL CYCLE: how fast we close ───── */}
               <SectionDivider icon="timer" label="دورة إغلاق الصفقات" />
               <Suspense fallback={<SkeletonChart />}>
-                <DealCycleSection />
+                <DealCycleSection deals={filteredDeals} profitPctById={profitPctById} />
               </Suspense>
 
               {/* ───── 5. REJECTION ANALYTICS: why we lose ───── */}
@@ -173,7 +177,7 @@ export default function DashboardPage() {
               <RecentActivity reports={currentReports} deals={filteredDeals} />
 
               {/* ───── 7. MARKETING SPEND (auto-hides when no spend data): kept at the bottom until real numbers are entered ───── */}
-              <MarketingKPICards deals={allDeals} />
+              <MarketingKPICards deals={allDeals} profitPctById={profitPctById} />
 
            </>
         )}

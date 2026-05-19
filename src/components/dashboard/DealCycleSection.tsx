@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -11,28 +11,16 @@ import {
   ComposedChart,
   Line,
   Legend,
-  LabelList,
 } from 'recharts';
 import {
-  getAllDeals,
   computeDealCycleStats,
   computeWeeklyDealsByCategory,
   computeDaysToCloseDistribution,
   computeMonthlyDealCycleTrend,
-  computeCycleByAdSource,
-  type DealCycleStats,
 } from '@/lib/services/deals-service';
 import type { Deal } from '@/lib/types';
 import { WeeklyClosedDealsChart } from '@/components/dashboard/WeeklyClosedDealsChart';
 import { DaysToCloseChart } from '@/components/dashboard/DaysToCloseChart';
-
-/** Green ≤7d, amber 8–14d, red >14d. Zero = grey (no cycle data). */
-function cycleSpeedColor(days: number): string {
-  if (days <= 0) return '#94A3B8';
-  if (days <= 7) return '#10B981';
-  if (days <= 14) return '#F59E0B';
-  return '#EF4444';
-}
 
 const AR_MONTHS = [
   'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
@@ -54,24 +42,21 @@ function CycleStat({ label, value, sub }: { label: string; value: string | numbe
   );
 }
 
-export function DealCycleSection() {
-  const [loading, setLoading] = useState(true);
-  const [deals, setDeals] = useState<Deal[]>([]);
-  const [company, setCompany] = useState<DealCycleStats | null>(null);
-  const [byTeam, setByTeam] = useState<DealCycleStats[]>([]);
-
+export function DealCycleSection({
+  deals,
+  profitPctById,
+}: {
+  deals: Deal[];
+  profitPctById?: Map<string, number>;
+}) {
   const now = new Date();
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
 
-  useEffect(() => {
-    getAllDeals().then(allDeals => {
-      setDeals(allDeals);
-      const stats = computeDealCycleStats(allDeals);
-      setCompany(stats.company);
-      setByTeam(stats.byTeam);
-    }).catch(console.error).finally(() => setLoading(false));
-  }, []);
+  const { company, byTeam } = useMemo(
+    () => computeDealCycleStats(deals, profitPctById),
+    [deals, profitPctById]
+  );
 
   const weeklyData = useMemo(
     () => computeWeeklyDealsByCategory(deals, selectedYear, selectedMonth),
@@ -84,13 +69,8 @@ export function DealCycleSection() {
   );
 
   const monthlyTrend = useMemo(
-    () => computeMonthlyDealCycleTrend(deals),
-    [deals]
-  );
-
-  const adSourceCycle = useMemo(
-    () => computeCycleByAdSource(deals, 8),
-    [deals]
+    () => computeMonthlyDealCycleTrend(deals, profitPctById),
+    [deals, profitPctById]
   );
 
   const monthOptions = useMemo(() => {
@@ -107,15 +87,7 @@ export function DealCycleSection() {
     return out;
   }, [selectedYear, selectedMonth]);
 
-  if (loading) {
-    return (
-      <div className="bg-white border border-[#E2E8F0] rounded-[24px] p-8 shadow-sm flex items-center justify-center min-h-[160px]">
-        <span className="material-symbols-outlined animate-spin text-[#2563EB]">progress_activity</span>
-      </div>
-    );
-  }
-
-  if (!company || company.totalDeals === 0) {
+  if (company.totalDeals === 0) {
     return (
       <div className="bg-white border border-[#E2E8F0] rounded-[24px] p-8 shadow-sm flex items-center justify-center min-h-[160px]">
         <p className="text-[#64748B] font-bold text-[13px]">لا توجد صفقات مغلقة بعد.</p>
@@ -131,7 +103,7 @@ export function DealCycleSection() {
         <h3 className="text-[15px] font-black text-[#1E293B] mb-6 flex items-center gap-2">
           <span className="material-symbols-outlined text-[#2563EB]">timer</span>
           متوسط دورة الإغلاق — الشركة كلها
-          <span className="text-[11px] font-bold text-[#94A3B8] mr-1">(كل الوقت)</span>
+          <span className="text-[11px] font-bold text-[#94A3B8] mr-1">(حسب الفلتر)</span>
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-6 divide-x divide-x-reverse divide-[#E2E8F0]">
           <CycleStat
@@ -192,14 +164,15 @@ export function DealCycleSection() {
           <h3 className="text-[15px] font-black text-[#1E293B] flex items-center gap-2">
             <span className="material-symbols-outlined text-[#10B981]">timer</span>
             توزيع أيام إغلاق الصفقات
-            <span className="text-[11px] font-bold text-[#94A3B8] mr-1">(كل الوقت)</span>
+            <span className="text-[11px] font-bold text-[#94A3B8] mr-1">(حسب الفلتر)</span>
           </h3>
           <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold text-[#64748B]">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#10B981]" />Fast (0–3)</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#84CC16]" />Short (4–7)</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#F59E0B]" />Medium (8–14)</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#F97316]" />Long (15–30)</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#EF4444]" />Very Long (+30)</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#10B981]" />0–3</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#84CC16]" />4–7</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#F59E0B]" />8–14</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#F97316]" />لحد شهر (15–30)</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#EF4444]" />لحد شهرين (31–60)</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#B91C1C]" />أكثر من شهرين (+60)</span>
           </div>
         </div>
         <div className="h-[280px]">
@@ -284,83 +257,6 @@ export function DealCycleSection() {
                   activeDot={{ r: 6 }}
                 />
               </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
-      {/* Deal cycle by adSource */}
-      {adSourceCycle.length > 0 && (
-        <div className="bg-white border border-[#E2E8F0] rounded-[24px] p-6 shadow-sm lg:col-span-2">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <h3 className="text-[15px] font-black text-[#1E293B] flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#8B5CF6]">campaign</span>
-              دورة الإغلاق حسب مصدر الإعلان
-            </h3>
-            <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold text-[#64748B]">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#10B981]" />≤ 7 يوم</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#F59E0B]" />8–14 يوم</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#EF4444]" />+14 يوم</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-[#94A3B8]" />بدون بيانات</span>
-            </div>
-          </div>
-          <div className="h-[300px]" dir="ltr">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={adSourceCycle.map((b) => ({
-                  ...b,
-                  name: b.adSource.length > 22 ? `${b.adSource.slice(0, 20)}…` : b.adSource,
-                  rightLabel: `${b.avgCycleDays > 0 ? `${b.avgCycleDays}ي` : '—'} · ${b.deals} صفقة`,
-                  fill: cycleSpeedColor(b.avgCycleDays),
-                }))}
-                layout="vertical"
-                margin={{ top: 8, right: 110, left: 0, bottom: 4 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} vertical stroke="#E2E8F0" />
-                <XAxis
-                  type="number"
-                  tick={{ fontSize: 10, fontWeight: 700, fill: '#64748B' }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(v) => `${v} يوم`}
-                />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#475569', fontSize: 11, fontWeight: 700 }}
-                  width={140}
-                />
-                <Tooltip
-                  cursor={{ fill: 'rgba(139,92,246,0.05)' }}
-                  contentStyle={{
-                    borderRadius: 12,
-                    border: '1px solid #E2E8F0',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    fontFamily: 'inherit',
-                    textAlign: 'right',
-                  }}
-                  formatter={(_value, _name, item: any) => {
-                    const row = item?.payload ?? {};
-                    return [
-                      `${row.avgCycleDays > 0 ? `${row.avgCycleDays} يوم` : 'لا توجد دورة محسوبة'} · ${row.deals} صفقة`,
-                      row.adSource,
-                    ];
-                  }}
-                />
-                <Bar dataKey="avgCycleDays" radius={[0, 6, 6, 0]} barSize={22}>
-                  {adSourceCycle.map((b, i) => (
-                    <Cell key={`adsrc-${i}`} fill={cycleSpeedColor(b.avgCycleDays)} />
-                  ))}
-                  <LabelList
-                    dataKey="rightLabel"
-                    position="right"
-                    style={{ fill: '#0F172A', fontSize: 10, fontWeight: 700 }}
-                  />
-                </Bar>
-              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>

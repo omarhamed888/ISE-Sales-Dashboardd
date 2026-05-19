@@ -14,16 +14,53 @@ function getTodayString(): string {
 async function loadCoursesCatalog(): Promise<{
   validIds: Set<string>;
   labelById: Map<string, string>;
+  profitPctById: Map<string, number>;
 }> {
   const snap = await getDocs(collection(db, "courses"));
   const validIds = new Set<string>();
   const labelById = new Map<string, string>();
+  const profitPctById = new Map<string, number>();
   for (const d of snap.docs) {
     validIds.add(d.id);
-    const name = String((d.data() as { name?: unknown }).name || "").trim();
+    const data = d.data() as { name?: unknown; profitPercentage?: unknown };
+    const name = String(data.name || "").trim();
     if (name) labelById.set(d.id, name);
+    profitPctById.set(d.id, normalizeProfitPct(data.profitPercentage));
   }
-  return { validIds, labelById };
+  return { validIds, labelById, profitPctById };
+}
+
+/** Clamp a stored profit percentage to 0–100. Missing/invalid ⇒ 100 (company keeps all). */
+export function normalizeProfitPct(value: unknown): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 100;
+  return Math.min(100, Math.max(0, n));
+}
+
+/** Build the id→profit% map consumed by `netDealValue` from a courses list. */
+export function buildProfitPctMap(
+  courses: { id: string; profitPercentage?: number }[]
+): Map<string, number> {
+  return new Map(courses.map((c) => [c.id, normalizeProfitPct(c.profitPercentage)]));
+}
+
+/**
+ * Net revenue for a deal after each course's own profit share. The deal's value is split
+ * evenly across its courses; each share earns that course's `profitPercentage` independently.
+ * Deals with no products (legacy) fall back to the full value (100%).
+ */
+export function netDealValue(
+  deal: { dealValue?: unknown; products?: unknown },
+  profitPctById?: Map<string, number>
+): number {
+  const gross = Number(deal.dealValue) || 0;
+  if (!profitPctById || gross === 0) return gross;
+  const ids = Array.isArray(deal.products)
+    ? (deal.products as unknown[]).filter((x): x is string => typeof x === "string" && x.trim() !== "")
+    : [];
+  if (ids.length === 0) return gross;
+  const share = gross / ids.length;
+  return ids.reduce((sum, id) => sum + share * ((profitPctById.get(id) ?? 100) / 100), 0);
 }
 
 export async function saveDeals(
@@ -319,7 +356,7 @@ export interface DealCycleStats {
   totalRevenue: number;
 }
 
-export function computeDealCycleStats(deals: Deal[]): {
+export function computeDealCycleStats(deals: Deal[], profitPctById?: Map<string, number>): {
   company: DealCycleStats;
   byTeam: DealCycleStats[];
 } {
@@ -335,7 +372,7 @@ export function computeDealCycleStats(deals: Deal[]): {
     const cycles = group
       .map(d => d.closingCycleDays)
       .filter((v): v is number => typeof v === 'number' && v !== null);
-    const revenue = group.reduce((s, d) => s + (d.dealValue || 0), 0);
+    const revenue = group.reduce((s, d) => s + netDealValue(d, profitPctById), 0);
     const avg = cycles.length > 0 ? Math.round(cycles.reduce((a, b) => a + b, 0) / cycles.length) : 0;
     return {
       label,
@@ -359,6 +396,7 @@ export function computeDealCycleStats(deals: Deal[]): {
 export interface WeeklyDealBucket {
   weekLabel: string;       // "الأسبوع 1"
   weekIndex: number;       // 1..5
+  dayRange: string;        // "1–7" — which days of the month this week covers
   core: number;
   side: number;
   total: number;
@@ -381,16 +419,24 @@ export function computeWeeklyDealsByCategory(
   month: number // 0-indexed (Jan = 0)
 ): WeeklyDealBucket[] {
   const buckets: WeeklyDealBucket[] = [
-    { weekLabel: 'الأسبوع 1', weekIndex: 1, core: 0, side: 0, total: 0 },
-    { weekLabel: 'الأسبوع 2', weekIndex: 2, core: 0, side: 0, total: 0 },
-    { weekLabel: 'الأسبوع 3', weekIndex: 3, core: 0, side: 0, total: 0 },
-    { weekLabel: 'الأسبوع 4', weekIndex: 4, core: 0, side: 0, total: 0 },
+    { weekLabel: 'الأسبوع 1', weekIndex: 1, dayRange: '', core: 0, side: 0, total: 0 },
+    { weekLabel: 'الأسبوع 2', weekIndex: 2, dayRange: '', core: 0, side: 0, total: 0 },
+    { weekLabel: 'الأسبوع 3', weekIndex: 3, dayRange: '', core: 0, side: 0, total: 0 },
+    { weekLabel: 'الأسبوع 4', weekIndex: 4, dayRange: '', core: 0, side: 0, total: 0 },
   ];
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   if (daysInMonth > 28) {
-    buckets.push({ weekLabel: 'الأسبوع 5', weekIndex: 5, core: 0, side: 0, total: 0 });
+    buckets.push({ weekLabel: 'الأسبوع 5', weekIndex: 5, dayRange: '', core: 0, side: 0, total: 0 });
   }
+
+  // Day-of-month span each calendar week covers (last bucket runs to month end).
+  const lastIdx = buckets.length - 1;
+  buckets.forEach((b, i) => {
+    const start = i * 7 + 1;
+    const end = i === lastIdx ? daysInMonth : (i + 1) * 7;
+    b.dayRange = start === end ? `${start}` : `${start}–${end}`;
+  });
 
   for (const deal of deals) {
     const closeDate = parseDealDate(deal.closeDate) || parseDealDate(deal.date);
@@ -421,20 +467,22 @@ export interface DaysToCloseBucket {
 }
 
 /**
- * Group closed deals by their closingCycleDays into 5 named buckets.
- * - 0–3 days   → Fast Close
- * - 4–7 days   → Short Cycle
- * - 8–14 days  → Medium
- * - 15–30 days → Long
- * - 31+ days   → Very Long
+ * Group closed deals by their closingCycleDays into 6 named buckets.
+ * - 0–3 days    → Fast Close
+ * - 4–7 days    → Short Cycle
+ * - 8–14 days   → Medium
+ * - 15–30 days  → Up to 1 month (لحد شهر)
+ * - 31–60 days  → Up to 2 months (لحد شهرين)
+ * - 60+ days    → Over 2 months
  */
 export function computeDaysToCloseDistribution(deals: Deal[]): DaysToCloseBucket[] {
   const buckets: Omit<DaysToCloseBucket, 'pct'>[] = [
     { rangeLabel: '0–3 أيام', segment: 'Fast Close', segmentAr: 'إغلاق سريع', count: 0, fill: '#10B981' },
     { rangeLabel: '4–7 أيام', segment: 'Short Cycle', segmentAr: 'دورة قصيرة', count: 0, fill: '#84CC16' },
     { rangeLabel: '8–14 يوم', segment: 'Medium', segmentAr: 'متوسط', count: 0, fill: '#F59E0B' },
-    { rangeLabel: '15–30 يوم', segment: 'Long', segmentAr: 'طويل', count: 0, fill: '#F97316' },
-    { rangeLabel: '+30 يوم', segment: 'Very Long', segmentAr: 'طويل جداً', count: 0, fill: '#EF4444' },
+    { rangeLabel: '15–30 يوم (لحد شهر)', segment: 'Up to 1 month', segmentAr: 'لحد شهر', count: 0, fill: '#F97316' },
+    { rangeLabel: '31–60 يوم (لحد شهرين)', segment: 'Up to 2 months', segmentAr: 'لحد شهرين', count: 0, fill: '#EF4444' },
+    { rangeLabel: '+60 يوم', segment: 'Over 2 months', segmentAr: 'أكثر من شهرين', count: 0, fill: '#B91C1C' },
   ];
 
   let total = 0;
@@ -446,7 +494,8 @@ export function computeDaysToCloseDistribution(deals: Deal[]): DaysToCloseBucket
     else if (cycle <= 7) idx = 1;
     else if (cycle <= 14) idx = 2;
     else if (cycle <= 30) idx = 3;
-    else idx = 4;
+    else if (cycle <= 60) idx = 4;
+    else idx = 5;
     buckets[idx].count += 1;
     total += 1;
   }
@@ -481,7 +530,7 @@ export interface MonthlyDealCycleBucket {
  * ascending by `monthKey` so a line chart reads left-to-right as time moves
  * forward.
  */
-export function computeMonthlyDealCycleTrend(deals: Deal[]): MonthlyDealCycleBucket[] {
+export function computeMonthlyDealCycleTrend(deals: Deal[], profitPctById?: Map<string, number>): MonthlyDealCycleBucket[] {
   type Acc = { count: number; cycleSum: number; cycleN: number; revenue: number };
   const map = new Map<string, Acc>();
 
@@ -495,7 +544,7 @@ export function computeMonthlyDealCycleTrend(deals: Deal[]): MonthlyDealCycleBuc
       map.set(monthKey, entry);
     }
     entry.count += 1;
-    entry.revenue += Number(deal.dealValue) || 0;
+    entry.revenue += netDealValue(deal, profitPctById);
     const cycle = deal.closingCycleDays;
     if (typeof cycle === 'number' && Number.isFinite(cycle) && cycle >= 0) {
       entry.cycleSum += cycle;
@@ -521,57 +570,4 @@ export function computeMonthlyDealCycleTrend(deals: Deal[]): MonthlyDealCycleBuc
         totalRevenue: e.revenue,
       };
     });
-}
-
-// ── Deal cycle by ad source ──────────────────────────────────────────────────
-export interface AdSourceCycleBucket {
-  adSource: string;
-  deals: number;
-  avgCycleDays: number;
-  totalRevenue: number;
-}
-
-/**
- * Group closed deals by `adSource` and report, per source:
- *   - how many deals
- *   - average cycle days
- *   - total revenue
- *
- * Sorted by avg cycle (fastest first). Empty/unknown adSource is bucketed as
- * "غير محدد". `topN` caps the result; default 8 to keep the chart readable.
- */
-export function computeCycleByAdSource(deals: Deal[], topN = 8): AdSourceCycleBucket[] {
-  type Acc = { cycleSum: number; cycleN: number; count: number; revenue: number };
-  const map = new Map<string, Acc>();
-
-  for (const deal of deals) {
-    const source = (deal.adSource || '').trim() || 'غير محدد';
-    let entry = map.get(source);
-    if (!entry) {
-      entry = { cycleSum: 0, cycleN: 0, count: 0, revenue: 0 };
-      map.set(source, entry);
-    }
-    entry.count += 1;
-    entry.revenue += Number(deal.dealValue) || 0;
-    const cycle = deal.closingCycleDays;
-    if (typeof cycle === 'number' && Number.isFinite(cycle) && cycle >= 0) {
-      entry.cycleSum += cycle;
-      entry.cycleN += 1;
-    }
-  }
-
-  return Array.from(map.entries())
-    .map(([adSource, e]) => ({
-      adSource,
-      deals: e.count,
-      avgCycleDays: e.cycleN > 0 ? Math.round(e.cycleSum / e.cycleN) : 0,
-      totalRevenue: e.revenue,
-    }))
-    // Sort: fastest avg cycle first, but only among sources that actually have cycle data.
-    .sort((a, b) => {
-      if (a.avgCycleDays === 0 && b.avgCycleDays > 0) return 1;
-      if (b.avgCycleDays === 0 && a.avgCycleDays > 0) return -1;
-      return a.avgCycleDays - b.avgCycleDays;
-    })
-    .slice(0, topN);
 }

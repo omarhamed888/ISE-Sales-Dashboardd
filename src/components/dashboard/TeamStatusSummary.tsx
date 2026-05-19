@@ -56,11 +56,13 @@ export function TeamStatusSummary({ allReports, deals }: { allReports: any[]; de
     };
   }, []);
 
-  const todayKey = formatYmdLocal(new Date());
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = formatYmdLocal(yesterday);
 
   if (loading || reps.length === 0) return null;
 
-  const submitted = reps.filter(rep => !!latestReportForRepOnDate(allReports, rep.uid, todayKey)).length;
+  const submitted = reps.filter(rep => !!latestReportForRepOnDate(allReports, rep.uid, yesterdayKey)).length;
   const total = reps.length;
 
   return (
@@ -68,11 +70,11 @@ export function TeamStatusSummary({ allReports, deals }: { allReports: any[]; de
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
           <span className="material-symbols-outlined text-[#2563EB]" style={{ fontVariationSettings: "'FILL' 1" }}>groups</span>
-          حالة الفريق اليوم
+          حالة الفريق أمس
         </h3>
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-bold text-[#64748B]">
-            {todayKey.replace(/-/g, "/")}
+            {yesterdayKey.replace(/-/g, "/")}
           </span>
           <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-[#EFF6FF] text-[#2563EB] border border-[#2563EB]/10">
             {submitted}/{total} رفعوا
@@ -81,7 +83,7 @@ export function TeamStatusSummary({ allReports, deals }: { allReports: any[]; de
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         {reps.map((rep) => {
-          const rpt = latestReportForRepOnDate(allReports, rep.uid, todayKey);
+          const rpt = latestReportForRepOnDate(allReports, rep.uid, yesterdayKey);
           const pd = rpt?.parsedData;
           const msgs = pd?.totalMessages ?? 0;
           const dealCount = rpt && dealsByKey ? getDealCountForReport(rpt, dealsByKey) : undefined;
@@ -107,7 +109,7 @@ export function TeamStatusSummary({ allReports, deals }: { allReports: any[]; de
                 <>
                   <span className="text-[11px] font-bold text-[#10B981] flex items-center gap-1">
                     <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                    رفع اليوم
+                    رفع أمس
                   </span>
                   <div className="flex gap-3">
                     <span className="text-[10px] font-bold text-[#64748B] bg-white border border-[#E2E8F0] px-2 py-0.5 rounded-md">{msgs} رسالة</span>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAllAdSpend } from "@/lib/services/ad-spend-service";
+import { netDealValue } from "@/lib/services/deals-service";
 import type { AdSpendEntry } from "@/lib/types";
 import { useFilter } from "@/lib/filter-context";
 import { isReportDateInDashboardRange, isReportDateInMonth } from "@/lib/utils/report-dates";
@@ -10,13 +11,14 @@ interface Deal {
   date?: string;
   dealValue?: number;
   adSource?: string;
+  products?: string[];
 }
 
 /**
  * Spend / CPL / CPA / ROAS section for the admin dashboard.
  * Hidden if no spend data exists yet.
  */
-export function MarketingKPICards({ deals }: { deals: Deal[] }) {
+export function MarketingKPICards({ deals, profitPctById }: { deals: Deal[]; profitPctById?: Map<string, number> }) {
   const [spend, setSpend] = useState<AdSpendEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const { filter } = useFilter();
@@ -80,7 +82,7 @@ export function MarketingKPICards({ deals }: { deals: Deal[] }) {
     let revenue = 0;
     let dealsCount = 0;
     filteredDeals.forEach((d) => {
-      revenue += Number(d.dealValue) || 0;
+      revenue += netDealValue(d, profitPctById);
       dealsCount += 1;
     });
 
@@ -88,7 +90,7 @@ export function MarketingKPICards({ deals }: { deals: Deal[] }) {
     const cpa = dealsCount > 0 ? totalSpend / dealsCount : 0;
     const roas = totalSpend > 0 ? revenue / totalSpend : 0;
     return { totalSpend, totalLeads, dealsCount, revenue, cpl, cpa, roas };
-  }, [filteredSpend, filteredDeals]);
+  }, [filteredSpend, filteredDeals, profitPctById]);
 
   // Hide entire section if no spend data ever
   if (loading) return null;

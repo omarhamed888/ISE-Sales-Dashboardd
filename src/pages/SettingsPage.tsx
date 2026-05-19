@@ -109,9 +109,11 @@ export default function SettingsPage() {
     const allCourses = useCourses(true);
     const [newCourseName, setNewCourseName] = useState("");
     const [newCourseCode, setNewCourseCode] = useState("");
+    const [newCoursePct, setNewCoursePct] = useState("100");
     const [addingCourse, setAddingCourse] = useState(false);
     const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
     const [editingCourseName, setEditingCourseName] = useState("");
+    const [editingCoursePct, setEditingCoursePct] = useState("100");
     const [savingCourseName, setSavingCourseName] = useState(false);
 
     // Data cleanup
@@ -356,6 +358,15 @@ export default function SettingsPage() {
     };
 
     // Courses management
+    // Blank ⇒ 100% (company keeps all); otherwise clamp 0–100.
+    const parsePct = (raw: string): number => {
+        const t = raw.trim();
+        if (t === "") return 100;
+        const n = Number(t);
+        if (!Number.isFinite(n)) return 100;
+        return Math.min(100, Math.max(0, Math.round(n)));
+    };
+
     const handleAddCourse = async () => {
         if (!newCourseName.trim() || !newCourseCode.trim()) return;
         setAddingCourse(true);
@@ -365,10 +376,12 @@ export default function SettingsPage() {
                 shortCode: newCourseCode.trim(),
                 isActive: true,
                 order: allCourses.length,
+                profitPercentage: parsePct(newCoursePct),
                 createdAt: serverTimestamp()
             });
             setNewCourseName("");
             setNewCourseCode("");
+            setNewCoursePct("100");
         } catch (e) {
             console.error(e);
             alert("تعذّر إضافة البرنامج.");
@@ -395,21 +408,26 @@ export default function SettingsPage() {
         }
     };
 
-    const startEditCourseName = (courseId: string, currentName: string) => {
+    const startEditCourseName = (courseId: string, currentName: string, currentPct: number | undefined) => {
         setEditingCourseId(courseId);
         setEditingCourseName(currentName);
+        setEditingCoursePct(String(currentPct ?? 100));
     };
 
     const cancelEditCourseName = () => {
         setEditingCourseId(null);
         setEditingCourseName("");
+        setEditingCoursePct("100");
     };
 
     const saveCourseName = async () => {
         if (!editingCourseId || !editingCourseName.trim()) return;
         setSavingCourseName(true);
         try {
-            await updateDoc(doc(db, "courses", editingCourseId), { name: editingCourseName.trim() });
+            await updateDoc(doc(db, "courses", editingCourseId), {
+                name: editingCourseName.trim(),
+                profitPercentage: parsePct(editingCoursePct),
+            });
             cancelEditCourseName();
         } catch (e) {
             console.error(e);
@@ -597,15 +615,34 @@ export default function SettingsPage() {
                                     <div className="flex items-center gap-3">
                                         <span className={`w-2 h-2 rounded-full ${course.isActive ? 'bg-emerald-500' : 'bg-gray-300'}`}></span>
                                         {editingCourseId === course.id ? (
-                                            <input
-                                                value={editingCourseName}
-                                                onChange={(e) => setEditingCourseName(e.target.value)}
-                                                className="font-bold text-[13px] text-[#1E293B] bg-white border border-[#E2E8F0] rounded-md px-2 py-1 min-w-[150px] focus:border-[#2563EB] outline-none"
-                                            />
+                                            <>
+                                                <input
+                                                    value={editingCourseName}
+                                                    onChange={(e) => setEditingCourseName(e.target.value)}
+                                                    className="font-bold text-[13px] text-[#1E293B] bg-white border border-[#E2E8F0] rounded-md px-2 py-1 min-w-[150px] focus:border-[#2563EB] outline-none"
+                                                />
+                                                <div className="flex items-center gap-1 bg-white border border-[#E2E8F0] rounded-md px-2 py-1">
+                                                    <input
+                                                        type="number"
+                                                        min={0}
+                                                        max={100}
+                                                        value={editingCoursePct}
+                                                        onChange={(e) => setEditingCoursePct(e.target.value)}
+                                                        className="w-12 font-bold text-[13px] text-[#1E293B] outline-none text-center"
+                                                        dir="ltr"
+                                                    />
+                                                    <span className="text-[11px] font-bold text-[#64748B]">% ربح</span>
+                                                </div>
+                                            </>
                                         ) : (
                                             <span className="font-bold text-[13px] text-[#1E293B]">{course.name}</span>
                                         )}
                                         <span className="text-[11px] font-bold text-[#64748B] bg-white border border-[#E2E8F0] px-2 py-0.5 rounded-md" dir="ltr">{course.shortCode}</span>
+                                        {editingCourseId !== course.id && (
+                                            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                                                ربح {course.profitPercentage ?? 100}%
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {editingCourseId === course.id ? (
@@ -629,10 +666,10 @@ export default function SettingsPage() {
                                         ) : (
                                             <button
                                                 type="button"
-                                                onClick={() => startEditCourseName(course.id, course.name)}
+                                                onClick={() => startEditCourseName(course.id, course.name, course.profitPercentage)}
                                                 className="text-[11px] font-bold px-3 py-1 rounded-lg bg-[#EFF6FF] text-[#2563EB] hover:bg-[#DBEAFE]"
                                             >
-                                                تعديل الاسم
+                                                تعديل
                                             </button>
                                         )}
                                         <button
@@ -670,6 +707,16 @@ export default function SettingsPage() {
                                className="w-32 bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-4 py-2 font-bold text-[13px] text-[#1E293B] focus:border-[#2563EB] outline-none"
                                dir="ltr"
                             />
+                            <div className="flex items-center gap-1 bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-3 py-2">
+                               <input
+                                  type="number" min={0} max={100}
+                                  value={newCoursePct} onChange={e => setNewCoursePct(e.target.value)}
+                                  placeholder="100"
+                                  className="w-12 bg-transparent font-bold text-[13px] text-[#1E293B] outline-none text-center"
+                                  dir="ltr"
+                               />
+                               <span className="text-[12px] font-bold text-[#64748B] whitespace-nowrap">% نسبة الربح</span>
+                            </div>
                             <button
                                type="button"
                                onClick={() => void handleAddCourse()}

@@ -14,6 +14,23 @@ import type { WeeklyDealBucket } from "@/lib/services/deals-service";
 const CORE_COLOR = "#2563EB";
 const SIDE_COLOR = "#8B5CF6";
 
+/** Two-line X tick: week label on top, the day-of-month span beneath it. */
+function WeekAxisTick({ x, y, payload, data }: any) {
+  const row = data?.[payload?.index] as WeeklyDealBucket | undefined;
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text x={0} y={0} dy={12} textAnchor="middle" fill="#1E293B" fontSize={11} fontWeight={700}>
+        {payload?.value}
+      </text>
+      {row?.dayRange && (
+        <text x={0} y={0} dy={26} textAnchor="middle" fill="#94A3B8" fontSize={10} fontWeight={700}>
+          {`يوم ${row.dayRange}`}
+        </text>
+      )}
+    </g>
+  );
+}
+
 function WeekTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   const row = payload[0]?.payload as WeeklyDealBucket | undefined;
@@ -23,7 +40,9 @@ function WeekTooltip({ active, payload, label }: any) {
       className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-right text-xs font-semibold shadow-md"
       dir="rtl"
     >
-      <div className="text-[#0F172A] font-black mb-1">{label}</div>
+      <div className="text-[#0F172A] font-black mb-1">
+        {label}{row.dayRange ? ` · يوم ${row.dayRange}` : ""}
+      </div>
       <div className="flex items-center gap-2 text-[#475569]">
         <span className="w-2.5 h-2.5 rounded-sm" style={{ background: CORE_COLOR }} />
         أساسي: <span className="font-black tabular-nums">{row.core}</span>
@@ -53,11 +72,12 @@ export function WeeklyClosedDealsChart({ data }: { data: WeeklyDealBucket[] }) {
   return (
     <div className="h-full w-full" dir="ltr">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 20, right: 8, left: -8, bottom: 4 }}>
+        <BarChart data={data} margin={{ top: 20, right: 8, left: -8, bottom: 16 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
           <XAxis
             dataKey="weekLabel"
-            tick={{ fontSize: 11, fontWeight: 700, fill: "#1E293B" }}
+            tick={<WeekAxisTick data={data} />}
+            height={40}
             axisLine={false}
             tickLine={false}
           />

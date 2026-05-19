@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
-import { getAllDeals } from '@/lib/services/deals-service';
+import { getAllDeals, netDealValue, buildProfitPctMap } from '@/lib/services/deals-service';
+import { useCourses } from '@/lib/hooks/useCourses';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { inferProductIdsFromProgramName, buildProgramNameFromProducts, classifyDealCategory } from '@/lib/utils/normalize-course-names';
 
@@ -49,6 +50,9 @@ export default function DealsAnalyticsPage() {
   const [attemptsRange, setAttemptsRange] = useState<'all'|'1-3'|'4-7'|'8+'>('all');
   const [visibleDealsCount, setVisibleDealsCount] = useState(50);
 
+  const courses = useCourses(true);
+  const profitPctById = useMemo(() => buildProfitPctMap(courses), [courses]);
+
   useEffect(() => {
     getAllDeals().then(setDeals).catch(console.error).finally(() => setLoading(false));
   }, []);
@@ -79,8 +83,8 @@ export default function DealsAnalyticsPage() {
   // ── Metrics ──────────────────────────────────────────────────────────────
   const coreDeals    = filtered.filter(d => (d.dealCategory || classifyDealCategory(d)) === 'core');
   const sideDeals    = filtered.filter(d => (d.dealCategory || classifyDealCategory(d)) === 'side');
-  const coreRevenue  = coreDeals.reduce((s,d) => s + (d.dealValue||0), 0);
-  const sideRevenue  = sideDeals.reduce((s,d) => s + (d.dealValue||0), 0);
+  const coreRevenue  = coreDeals.reduce((s,d) => s + netDealValue(d, profitPctById), 0);
+  const sideRevenue  = sideDeals.reduce((s,d) => s + netDealValue(d, profitPctById), 0);
   const totalRevenue = coreRevenue + sideRevenue;
   const dealsWithCycle = filtered.filter(d => typeof d.closingCycleDays === 'number');
   const avgCycle = dealsWithCycle.length > 0
@@ -99,7 +103,7 @@ export default function DealsAnalyticsPage() {
       const key = d.salesRepName || 'غير محدد';
       if (!map.has(key)) map.set(key, { name: key, teamName: d.teamName||'—', deals:0, revenue:0, avgCycleDays:0, totalContactAttempts:0, avgContactAttempts:0, revenuePerAttempt:0, programs:{} });
       const s = map.get(key)!;
-      s.deals++; s.revenue += d.dealValue||0; s.avgCycleDays += d.closingCycleDays||0;
+      s.deals++; s.revenue += netDealValue(d, profitPctById); s.avgCycleDays += d.closingCycleDays||0;
       if (Number.isFinite(Number(d.contactAttempts)) && Number(d.contactAttempts)>=1) s.totalContactAttempts += Math.round(Number(d.contactAttempts));
       const prog = d.programName||'غير محدد';
       s.programs[prog] = (s.programs[prog]||0)+1;
@@ -110,7 +114,7 @@ export default function DealsAnalyticsPage() {
       avgContactAttempts: s.deals>0 ? Number((s.totalContactAttempts/s.deals).toFixed(1)) : 0,
       revenuePerAttempt: s.totalContactAttempts>0 ? Math.round(s.revenue/s.totalContactAttempts) : 0,
     })).sort((a,b) => b.revenue - a.revenue);
-  }, [filtered]);
+  }, [filtered, profitPctById]);
 
   const programDist = useMemo(() => {
     const map = new Map<string,number>();

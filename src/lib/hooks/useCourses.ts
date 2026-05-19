@@ -8,6 +8,8 @@ export interface Course {
   shortCode: string;
   isActive: boolean;
   order: number;
+  /** Share of a deal's value this course actually earns the company (0–100). Absent ⇒ 100%. */
+  profitPercentage?: number;
 }
 
 let coursesCache: Course[] | null = null;

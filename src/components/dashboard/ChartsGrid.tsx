@@ -3,12 +3,10 @@ import { calculateAggregates } from "@/lib/utils/dashboard-aggregations";
 import {
   buildConversionFunnelBars,
   buildDailyBuckets,
-  buildDealLeadMonthBuckets,
   buildSalesRepBuckets,
   getPlatformStats,
 } from "@/lib/utils/dashboard-analytics";
 import { DashboardChartCard } from "@/components/dashboard/DashboardChartCard";
-import { DealLeadMonthChart } from "@/components/dashboard/DealLeadMonthChart";
 import { DailyConversionChart } from "@/components/dashboard/DailyConversionChart";
 import { SalesRepComparisonChart } from "@/components/dashboard/SalesRepComparisonChart";
 import {
@@ -26,6 +24,8 @@ import {
   Cell,
   Legend,
   LabelList,
+  ComposedChart,
+  Line,
 } from "recharts";
 
 export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }) {
@@ -33,8 +33,18 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
   const platform = useMemo(() => getPlatformStats(reports, deals), [reports, deals]);
   const funnelData = useMemo(() => buildConversionFunnelBars(cur), [cur]);
   const dailyBuckets = useMemo(() => buildDailyBuckets(reports, deals), [reports, deals]);
-  const leadMonthBuckets = useMemo(() => buildDealLeadMonthBuckets(deals ?? []), [deals]);
   const repBuckets = useMemo(() => buildSalesRepBuckets(reports, deals), [reports, deals]);
+
+  // Actual closed deals registered in deal-closing, grouped by ad source.
+  const actualDealsByAd = useMemo(() => {
+    const m = new Map<string, number>();
+    (deals ?? []).forEach((d) => {
+      const src = String(d?.adSource || "").trim();
+      if (!src) return;
+      m.set(src, (m.get(src) ?? 0) + 1);
+    });
+    return m;
+  }, [deals]);
 
   const dropOffAdData = useMemo(() => {
     return Object.entries(cur.adsData)
@@ -43,12 +53,13 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
         "بعد التحية": data.greeting,
         "بعد التفاصيل": data.details,
         "بعد السعر": data.price,
+        "الصفقات الفعلية": actualDealsByAd.get(name.trim()) ?? 0,
         _total: data.greeting + data.details + data.price + data.success,
       }))
       .sort((a, b) => b._total - a._total)
       .slice(0, 8)
       .map(({ _total, ...rest }) => rest);
-  }, [cur.adsData]);
+  }, [cur.adsData, actualDealsByAd]);
 
   const donutData = useMemo(() => {
     const wa = platform.whatsapp.messages;
@@ -242,15 +253,8 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
       </DashboardChartCard>
 
       <DashboardChartCard
-        title="عمر العميل عند الإغلاق"
-        subtitle="هل الصفقة قُفلت في نفس شهر التواصل، أم رجعت من شهر سابق؟"
-      >
-        <DealLeadMonthChart data={leadMonthBuckets} />
-      </DashboardChartCard>
-
-      <DashboardChartCard
         title="التسرب حسب الإعلان"
-        subtitle="أداء كل إعلان في الفترة المحددة"
+        subtitle="مراحل التسرب من التقارير + الصفقات الفعلية المسجّلة في تقفيل الصفقات"
         fullWidth
       >
         <div className="h-full w-full" dir="ltr">
@@ -260,7 +264,7 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dropOffAdData} margin={{ top: 10, right: 10, left: -12, bottom: 28 }}>
+              <ComposedChart data={dropOffAdData} margin={{ top: 10, right: 10, left: -12, bottom: 28 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e1e8ed" />
                 <XAxis
                   dataKey="name"
@@ -272,7 +276,15 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
                   textAnchor="end"
                   height={64}
                 />
-                <YAxis tick={{ fill: "#7f8c8d", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis yAxisId="left" tick={{ fill: "#7f8c8d", fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  allowDecimals={false}
+                  tick={{ fill: "#16A34A", fontSize: 10 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <Tooltip
                   cursor={{ fill: "rgba(52,152,219,0.06)" }}
                   contentStyle={{
@@ -283,10 +295,19 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
                   }}
                 />
                 <Legend verticalAlign="top" height={32} iconType="circle" />
-                <Bar dataKey="بعد التحية" stackId="a" fill="#f8b4b4" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="بعد التفاصيل" stackId="a" fill="#f9d99d" />
-                <Bar dataKey="بعد السعر" stackId="a" fill="#a3daf7" />
-              </BarChart>
+                <Bar yAxisId="left" dataKey="بعد التحية" stackId="a" fill="#f8b4b4" radius={[0, 0, 0, 0]} />
+                <Bar yAxisId="left" dataKey="بعد التفاصيل" stackId="a" fill="#f9d99d" />
+                <Bar yAxisId="left" dataKey="بعد السعر" stackId="a" fill="#a3daf7" />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="الصفقات الفعلية"
+                  stroke="#16A34A"
+                  strokeWidth={2.5}
+                  dot={{ r: 3, fill: "#16A34A", stroke: "#16A34A" }}
+                  activeDot={{ r: 5 }}
+                />
+              </ComposedChart>
             </ResponsiveContainer>
           )}
         </div>
