@@ -1,5 +1,10 @@
+import { useMemo } from "react";
 import { calculateAggregates } from "@/lib/utils/dashboard-aggregations";
-import { getDashboardPreviousPeriodReports } from "@/lib/utils/dashboard-filters";
+import {
+  buildCourseDealKeys,
+  filterReports,
+  getDashboardPreviousPeriodReports,
+} from "@/lib/utils/dashboard-filters";
 import { useFilter } from "@/lib/filter-context";
 
 interface KPICardProps {
@@ -30,27 +35,46 @@ function KPICard({ label, value, icon, accentColor, bgTint, iconColor, valueColo
 
 export function KPICards({ reports, allReports, deals }: { reports: any[]; allReports: any[]; deals?: any[] }) {
   const { filter } = useFilter();
+
+  const courseDealKeys = useMemo(() => {
+    if (filter.courseId === "all") return undefined;
+    return buildCourseDealKeys(deals ?? []);
+  }, [deals, filter.courseId]);
+
+  const globalFilter = useMemo(() => ({ ...filter, platform: "all" as const }), [filter]);
+
+  const globalReports = useMemo(
+    () => filterReports(allReports, globalFilter, courseDealKeys),
+    [allReports, globalFilter, courseDealKeys]
+  );
+
   const cur = calculateAggregates(reports, deals);
-  const prevReports = getDashboardPreviousPeriodReports(allReports, filter);
-  const prev = calculateAggregates(prevReports);
+  const globalAgg = calculateAggregates(globalReports, deals);
+
+  const prevGlobalReports = getDashboardPreviousPeriodReports(
+    allReports,
+    globalFilter,
+    courseDealKeys
+  );
+  const prevGlobalAgg = calculateAggregates(prevGlobalReports, deals);
+
   const pctDelta = (current: number, previous: number) => {
     if (!previous) return 0;
     return ((current - previous) / previous) * 100;
   };
-  const conversionDelta = pctDelta(cur.conversionRate, prev.conversionRate);
+  const conversionDelta = pctDelta(globalAgg.conversionRate, prevGlobalAgg.conversionRate);
 
-  // معدل الرد = (totalMessages - noReplyAfterGreeting) / totalMessages
   const responded = cur.totalMessages - cur.funnel.greeting;
   const responseRate =
     cur.totalMessages > 0
       ? Math.min(100, parseFloat(((responded / cur.totalMessages) * 100).toFixed(1)))
       : 0;
 
-  // معدل الإغلاق color
+  const closingRate = globalAgg.conversionRate;
   const closeRateColor =
-    cur.conversionRate >= 15
+    closingRate >= 15
       ? "text-[#10B981]"
-      : cur.conversionRate >= 5
+      : closingRate >= 5
         ? "text-[#F59E0B]"
         : "text-[#EF4444]";
 
@@ -89,14 +113,14 @@ export function KPICards({ reports, allReports, deals }: { reports: any[]; allRe
       {/* Card 4: معدل الإغلاق = صفقات مغلقة / إجمالي رسائل */}
       <KPICard
         label="معدل الإغلاق"
-        value={`${cur.conversionRate.toFixed(1)}%`}
+        value={`${closingRate.toFixed(1)}%`}
         icon="percent"
         accentColor="border-r-[#F59E0B]"
         bgTint="bg-[#FFFBEB]"
         iconColor="text-[#F59E0B]"
         valueColor={closeRateColor}
       />
-      {prevReports.length > 0 && (
+      {prevGlobalReports.length > 0 && (
         <div className={`sm:col-span-2 lg:col-span-4 text-[12px] font-black ${conversionDelta >= 0 ? "text-emerald-600" : "text-red-600"}`}>
           {conversionDelta >= 0 ? "↑" : "↓"} {Math.abs(conversionDelta).toFixed(1)}% عن الفترة السابقة
         </div>

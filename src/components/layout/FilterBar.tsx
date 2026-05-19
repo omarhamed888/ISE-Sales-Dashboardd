@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAvailableMonths } from "@/lib/hooks/useAvailableMonths";
+import { useCourses } from "@/lib/hooks/useCourses";
 
 const selectCls = `
   bg-white border border-[#E2E8F0] rounded-xl px-3 py-2
@@ -26,6 +27,7 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
   const { user } = useAuth();
   const { filter, updateFilter, resetFilter } = useFilter();
   const { months: availableMonths, loading: monthsLoading } = useAvailableMonths();
+  const courses = useCourses(true);
 
   const adminRoutes = ["/dashboard", "/team", "/ads", "/reports", "/metrics"];
   const isAdminRoute = adminRoutes.includes(location.pathname);
@@ -201,6 +203,13 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
           <option value="all">كل فئات الصفقات</option>
           <option value="core">Core</option>
           <option value="side">Side</option>
+        </select>
+
+        <select value={filter.courseId} onChange={(e) => updateFilter({ courseId: e.target.value })} className={`${selectCls} max-w-[160px]`} disabled={isLoadingProps}>
+          <option value="all">كل الكورسات</option>
+          {courses.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
         </select>
 
         <div className="hidden md:block h-5 w-px bg-[#E2E8F0] mx-0.5" />

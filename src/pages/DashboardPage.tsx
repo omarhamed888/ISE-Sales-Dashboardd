@@ -3,7 +3,11 @@ import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { useFilter } from "@/lib/filter-context";
-import { filterReports, filterDealsByDashboardDate } from "@/lib/utils/dashboard-filters";
+import {
+  buildCourseDealKeys,
+  filterReports,
+  filterDealsByDashboardDate,
+} from "@/lib/utils/dashboard-filters";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { TeamStatusSummary } from "@/components/dashboard/TeamStatusSummary";
@@ -61,8 +65,15 @@ export default function DashboardPage() {
   const courses = useCourses(true);
   const profitPctById = useMemo(() => buildProfitPctMap(courses), [courses]);
 
-  const currentReports = useMemo(() => filterReports(allReports, filter), [allReports, filter]);
   const filteredDeals = useMemo(() => filterDealsByDashboardDate(allDeals, filter), [allDeals, filter]);
+  const courseDealKeys = useMemo(() => {
+    if (filter.courseId === "all") return undefined;
+    return buildCourseDealKeys(filteredDeals);
+  }, [filteredDeals, filter.courseId]);
+  const currentReports = useMemo(
+    () => filterReports(allReports, filter, courseDealKeys),
+    [allReports, filter, courseDealKeys]
+  );
 
   if (loading) {
     return (

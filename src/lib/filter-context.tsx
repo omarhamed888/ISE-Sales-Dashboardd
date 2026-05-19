@@ -21,6 +21,8 @@ export interface FilterState {
   customDateTo: Date | null;
   /** YYYY-MM, used when dateRange === "شهر محدد". */
   selectedMonth: string | null;
+  /** Firestore course id, or "all". */
+  courseId: string;
 }
 
 const DEFAULT_FILTER_STATE: FilterState = {
@@ -33,6 +35,7 @@ const DEFAULT_FILTER_STATE: FilterState = {
   customDateFrom: null,
   customDateTo: null,
   selectedMonth: null,
+  courseId: "all",
 };
 
 interface FilterContextType {

@@ -53,6 +53,10 @@ export function MarketingKPICards({ deals, profitPctById }: { deals: Deal[]; pro
 
   const filteredDeals = useMemo(() => {
     return deals.filter((d) => {
+      if (filter.courseId && filter.courseId !== "all") {
+        const products = Array.isArray(d.products) ? d.products : [];
+        if (!products.includes(filter.courseId)) return false;
+      }
       const date = (d.date || "").split("T")[0];
       if (!date) return false;
       if (filter.dateRange === "مخصص") {

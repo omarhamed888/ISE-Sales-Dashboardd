@@ -8,6 +8,46 @@ import {
   isReportDateInMonth,
 } from "@/lib/utils/report-dates";
 
+/** `${salesRepId}|${date}` keys for course-filtered deals (links reports to deals). */
+export function buildCourseDealKeys(deals: any[]): Set<string> {
+  const keys = new Set<string>();
+  for (const d of deals || []) {
+    const repId = d?.salesRepId;
+    const rawDate = typeof d?.date === "string" ? d.date : "";
+    const date = rawDate.split("T")[0];
+    if (repId && date) keys.add(`${repId}|${date}`);
+  }
+  return keys;
+}
+
+function reportMatchesCourse(
+  r: any,
+  courseId: string,
+  courseDealKeys?: Set<string>
+): boolean {
+  const repId = r?.salesRepId;
+  const rawDate = typeof r?.date === "string" ? r.date : "";
+  const date = rawDate.split("T")[0];
+  if (repId && date && courseDealKeys?.has(`${repId}|${date}`)) return true;
+
+  const closed = r.parsedData?.closedDeals;
+  if (Array.isArray(closed)) {
+    return closed.some(
+      (d: any) => Array.isArray(d.products) && d.products.includes(courseId)
+    );
+  }
+  return false;
+}
+
+function courseMatches(
+  filter: FilterState,
+  r: any,
+  courseDealKeys?: Set<string>
+): boolean {
+  if (!filter.courseId || filter.courseId === "all") return true;
+  return reportMatchesCourse(r, filter.courseId, courseDealKeys);
+}
+
 function platformMatches(filter: FilterState, r: any): boolean {
   if (filter.platform === "all") return true;
   const pf = (r.platform || "").toLowerCase();
@@ -53,13 +93,19 @@ function passesDateAndQuality(r: any, filter: FilterState): boolean {
 }
 
 /** Reports matching dashboard filters (by business `date`, not submission time). */
-export function filterReports(reports: any[], filter: FilterState) {
+export function filterReports(
+  reports: any[],
+  filter: FilterState,
+  courseDealKeys?: Set<string>
+) {
   return reports.filter((r) => {
     if (!platformMatches(filter, r)) return false;
 
     if (filter.salesRep !== "all" && r.salesRepId !== filter.salesRep) {
       return false;
     }
+
+    if (!courseMatches(filter, r, courseDealKeys)) return false;
 
     if (filter.adName !== "all" && r.parsedData?.funnel) {
       let hasAd = false;
@@ -80,11 +126,13 @@ export function filterReportsByYmdRange(
   reports: any[],
   filter: FilterState,
   from: string,
-  to: string
+  to: string,
+  courseDealKeys?: Set<string>
 ) {
   return reports.filter((r) => {
     if (!platformMatches(filter, r)) return false;
     if (filter.salesRep !== "all" && r.salesRepId !== filter.salesRep) return false;
+    if (!courseMatches(filter, r, courseDealKeys)) return false;
 
     if (filter.adName !== "all" && r.parsedData?.funnel) {
       let hasAd = false;
@@ -105,7 +153,8 @@ export function filterReportsByYmdRange(
 
 export function getDashboardPreviousPeriodReports(
   allReports: any[],
-  filter: FilterState
+  filter: FilterState,
+  courseDealKeys?: Set<string>
 ): any[] {
   // Previous-period comparison is only meaningful for fixed buckets.
   if (filter.dateRange === "مخصص" || filter.dateRange === "شهر محدد") return [];
@@ -113,7 +162,7 @@ export function getDashboardPreviousPeriodReports(
     filter.dateRange as "اليوم" | "الأسبوع" | "الشهر" | "الإجمالي"
   );
   if (!range) return [];
-  return filterReportsByYmdRange(allReports, filter, range.from, range.to);
+  return filterReportsByYmdRange(allReports, filter, range.from, range.to, courseDealKeys);
 }
 
 /** Closed deals whose closeDate falls in the same dashboard window as reports (اليوم / الأسبوع / الشهر / الإجمالي). */
@@ -127,6 +176,10 @@ export function filterDealsByDashboardDate(deals: any[], filter: FilterState): a
     if (filter.dealCategory && filter.dealCategory !== "all") {
       const category = d.dealCategory === "side" ? "side" : "core";
       if (category !== filter.dealCategory) return false;
+    }
+    if (filter.courseId && filter.courseId !== "all") {
+      const products = Array.isArray(d.products) ? d.products : [];
+      if (!products.includes(filter.courseId)) return false;
     }
     const raw =
       typeof d.closeDate === "string" && d.closeDate.trim()
