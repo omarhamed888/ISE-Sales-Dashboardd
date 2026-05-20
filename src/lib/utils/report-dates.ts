@@ -65,8 +65,10 @@ export function isReportDateInDashboardRange(
   }
 
   if (dateRange === "الأسبوع") {
-    const start = addDaysYmd(todayKey, -6);
-    return key >= start && key <= todayKey && key >= DASHBOARD_DATA_QUALITY_FROM_DATE;
+    // 7-day window ending yesterday (today's reports aren't in yet).
+    const end = addDaysYmd(todayKey, -1);
+    const start = addDaysYmd(todayKey, -7);
+    return key >= start && key <= end && key >= DASHBOARD_DATA_QUALITY_FROM_DATE;
   }
 
   if (dateRange === "الشهر") {
@@ -91,7 +93,8 @@ export function getPreviousPeriodYmdRange(
   }
 
   if (dateRange === "الأسبوع") {
-    return { from: addDaysYmd(todayKey, -13), to: addDaysYmd(todayKey, -7) };
+    // Mirror of the yesterday-anchored current week (yesterday-7 .. yesterday-1).
+    return { from: addDaysYmd(todayKey, -14), to: addDaysYmd(todayKey, -8) };
   }
 
   if (dateRange === "الشهر") {

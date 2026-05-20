@@ -44,7 +44,7 @@ export default function DealsAnalyticsPage() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [filterRep, setFilterRep] = useState('الكل');
-  const [filterTeam, setFilterTeam] = useState('الكل');
+  const [filterCourseId, setFilterCourseId] = useState('الكل');
   const [filterBookingType, setFilterBookingType] = useState<'الكل'|'self_booking'|'call_booking'>('الكل');
   const [filterDealCategory, setFilterDealCategory] = useState<'الكل'|'core'|'side'>('الكل');
   const [attemptsRange, setAttemptsRange] = useState<'all'|'1-3'|'4-7'|'8+'>('all');
@@ -52,17 +52,27 @@ export default function DealsAnalyticsPage() {
 
   const courses = useCourses(true);
   const profitPctById = useMemo(() => buildProfitPctMap(courses), [courses]);
+  const courseNameById = useMemo(
+    () => new Map(courses.map((c) => [c.id, c.name])),
+    [courses]
+  );
 
   useEffect(() => {
     getAllDeals().then(setDeals).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   const allReps  = useMemo(() => ['الكل', ...Array.from(new Set(deals.map(d => d.salesRepName).filter(Boolean)))], [deals]);
-  const allTeams = useMemo(() => ['الكل', ...Array.from(new Set(deals.map(d => d.teamName).filter(Boolean)))], [deals]);
+
+  const dealMatchesCourse = (d: { products?: string[]; programName?: string }, courseId: string) => {
+    const products = Array.isArray(d.products) ? d.products.filter(Boolean) : [];
+    if (products.includes(courseId)) return true;
+    const inferred = inferProductIdsFromProgramName(d.programName || '');
+    return inferred.includes(courseId);
+  };
 
   const filtered = useMemo(() => deals.filter(d => {
     if (filterRep  !== 'الكل' && d.salesRepName !== filterRep)  return false;
-    if (filterTeam !== 'الكل' && d.teamName     !== filterTeam) return false;
+    if (filterCourseId !== 'الكل' && !dealMatchesCourse(d, filterCourseId)) return false;
     const bt = d.bookingType || (d.closureType === 'call' ? 'call_booking' : 'self_booking');
     if (filterBookingType !== 'الكل' && bt !== filterBookingType) return false;
     const cat = d.dealCategory || classifyDealCategory(d);
@@ -74,11 +84,19 @@ export default function DealsAnalyticsPage() {
     if (attemptsRange === '4-7' && !(att >= 4 && att <= 7)) return false;
     if (attemptsRange === '8+'  && !(att >= 8))              return false;
     return true;
-  }), [deals, filterRep, filterTeam, filterBookingType, filterDealCategory, dateFrom, dateTo, attemptsRange]);
+  }), [deals, filterRep, filterCourseId, filterBookingType, filterDealCategory, dateFrom, dateTo, attemptsRange]);
 
-  const isFiltered = filterRep !== 'الكل' || filterTeam !== 'الكل' || filterBookingType !== 'الكل'
+  const isFiltered = filterRep !== 'الكل' || filterCourseId !== 'الكل' || filterBookingType !== 'الكل'
     || filterDealCategory !== 'الكل' || dateFrom || dateTo || attemptsRange !== 'all';
-  const resetFilters = () => { setFilterRep('الكل'); setFilterTeam('الكل'); setFilterBookingType('الكل'); setFilterDealCategory('الكل'); setDateFrom(''); setDateTo(''); setAttemptsRange('all'); };
+  const resetFilters = () => {
+    setFilterRep('الكل');
+    setFilterCourseId('الكل');
+    setFilterBookingType('الكل');
+    setFilterDealCategory('الكل');
+    setDateFrom('');
+    setDateTo('');
+    setAttemptsRange('all');
+  };
 
   // ── Metrics ──────────────────────────────────────────────────────────────
   const coreDeals    = filtered.filter(d => (d.dealCategory || classifyDealCategory(d)) === 'core');
@@ -117,15 +135,24 @@ export default function DealsAnalyticsPage() {
   }, [filtered, profitPctById]);
 
   const programDist = useMemo(() => {
+    // Resolve a product id to a readable name: live courses catalog first (covers
+    // custom courses), then the legacy canonical labels. Orphaned ids that match
+    // neither (bad DB rows) collapse into "غير محدد" instead of leaking raw ids.
+    const resolveLabel = (id: string): string => {
+      const fromCatalog = courseNameById.get(id);
+      if (fromCatalog && fromCatalog.trim()) return fromCatalog.trim();
+      const canon = buildProgramNameFromProducts([id]);
+      return canon && canon !== id ? canon : 'غير محدد';
+    };
     const map = new Map<string,number>();
     for (const d of filtered) {
       const ids = Array.isArray(d.products) ? d.products.filter(Boolean) : [];
       const normIds = ids.length > 0 ? ids : inferProductIdsFromProgramName(d.programName||'');
-      if (normIds.length > 0) { for (const id of normIds) { const lbl = buildProgramNameFromProducts([id])||id; map.set(lbl,(map.get(lbl)||0)+1); } }
+      if (normIds.length > 0) { for (const id of normIds) { const lbl = resolveLabel(id); map.set(lbl,(map.get(lbl)||0)+1); } }
       else { const p=(d.programName||'غير محدد').trim()||'غير محدد'; map.set(p,(map.get(p)||0)+1); }
     }
     return Array.from(map.entries()).map(([name,value])=>({name,value})).sort((a,b)=>b.value-a.value);
-  }, [filtered]);
+  }, [filtered, courseNameById]);
 
   const adDist = useMemo(() => {
     const map = new Map<string,number>();
@@ -185,10 +212,13 @@ export default function DealsAnalyticsPage() {
             className={`text-[12px] font-bold rounded-xl px-3 py-2 outline-none border transition-colors ${filterRep!=='الكل'?'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]':'bg-[#F7F9FC] border-[#E2E8F0] text-[#475569]'}`}>
             {allReps.map(r=><option key={r}>{r}</option>)}
           </select>
-          {/* Team */}
-          <select value={filterTeam} onChange={e => setFilterTeam(e.target.value)}
-            className={`text-[12px] font-bold rounded-xl px-3 py-2 outline-none border transition-colors ${filterTeam!=='الكل'?'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]':'bg-[#F7F9FC] border-[#E2E8F0] text-[#475569]'}`}>
-            {allTeams.map(t=><option key={t}>{t}</option>)}
+          {/* Course / product */}
+          <select value={filterCourseId} onChange={e => setFilterCourseId(e.target.value)}
+            className={`text-[12px] font-bold rounded-xl px-3 py-2 outline-none border transition-colors max-w-[200px] ${filterCourseId!=='الكل'?'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]':'bg-[#F7F9FC] border-[#E2E8F0] text-[#475569]'}`}>
+            <option value="الكل">كل الكورسات والمنتجات</option>
+            {courses.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
           </select>
           {/* Booking */}
           <select value={filterBookingType} onChange={e => setFilterBookingType(e.target.value as any)}
