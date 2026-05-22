@@ -241,8 +241,54 @@ export async function getMyDeals(
   });
 }
 
+/**
+ * Loads every deal in the collection. Use sparingly — this becomes prohibitively
+ * expensive past a few thousand documents. Prefer `getDealsByDateRange` for any
+ * dashboard/analytics flow that already has a date window.
+ *
+ * Kept for: exports, the legacy DealsAnalyticsPage initial load, and admin
+ * inspection. A dev-only warning fires when the result set is suspiciously
+ * large so we notice if a hot path starts using it.
+ */
 export async function getAllDeals(): Promise<Deal[]> {
   const q = query(collection(db, 'deals'), orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  const deals = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Deal));
+  if (import.meta.env?.DEV && deals.length > 1000) {
+    console.warn(
+      `[deals-service] getAllDeals returned ${deals.length} docs. ` +
+      `Consider switching to getDealsByDateRange.`,
+    );
+  }
+  return deals;
+}
+
+/**
+ * Date-windowed deal loader for the dashboard. Queries on `closeDate` directly
+ * so Firestore can use a date index rather than scanning the whole collection.
+ *
+ * Both bounds are inclusive YYYY-MM-DD strings — string comparison works because
+ * ISO dates sort lexicographically. Deals without a `closeDate` are excluded
+ * (they're already filtered out client-side by `filterDealsByDashboardDate`'s
+ * date-format regex).
+ *
+ * The `maxRows` cap defends against catastrophic queries (e.g. "الإجمالي"
+ * spanning all-time on a multi-year dataset). 5000 deals per window is well
+ * beyond any realistic dashboard scope and stays under Firestore's 10K limit
+ * with room to spare.
+ */
+export async function getDealsByDateRange(
+  from: string,
+  to: string,
+  maxRows = 5000,
+): Promise<Deal[]> {
+  const q = query(
+    collection(db, 'deals'),
+    where('closeDate', '>=', from),
+    where('closeDate', '<=', to),
+    orderBy('closeDate', 'desc'),
+    limit(maxRows),
+  );
   const snapshot = await getDocs(q);
   return snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Deal));
 }

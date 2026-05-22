@@ -16,6 +16,7 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: { is
     { href: "/ads-management",     icon: "manage_search",   label: "إدارة الإعلانات" },
     { href: "/marketing-insights", icon: "campaign",        label: "تحليل التسويق" },
     { href: "/meta-insights",      icon: "insights",        label: "تحليلات Meta" },
+    { href: "/integrations/meta",  icon: "hub",             label: "ربط Meta API" },
     { href: "/reports",            icon: "assessment",      label: "التقارير" },
     { href: "/insights",           icon: "auto_awesome",    label: "الرؤى" },
     { href: "/deals-analytics",    icon: "handshake",       label: "تحليل الصفقات" },

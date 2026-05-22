@@ -6,6 +6,8 @@ import { db } from "@/lib/firebase";
 import type { AdSpendEntry } from "@/lib/types";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton, SkeletonChart } from "@/components/ui/Skeleton";
+import { useFilter } from "@/lib/filter-context";
+import { getDashboardDateWindow, normalizeReportDateKey } from "@/lib/utils/report-dates";
 
 interface PerAd {
   adName: string;
@@ -41,6 +43,17 @@ export default function MarketingInsightsPage() {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Date/period comes from the shared global FilterBar at the top of the page.
+  const { filter } = useFilter();
+  const dateWindow = useMemo(
+    () => getDashboardDateWindow(filter.dateRange, {
+      customDateFrom: filter.customDateFrom,
+      customDateTo: filter.customDateTo,
+      selectedMonth: filter.selectedMonth,
+    }),
+    [filter.dateRange, filter.customDateFrom, filter.customDateTo, filter.selectedMonth]
+  );
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -62,10 +75,24 @@ export default function MarketingInsightsPage() {
     return () => { cancelled = true; };
   }, []);
 
+  // Scope all three sources to the selected period before aggregating. When the
+  // window is unresolved (e.g. مخصص without dates) we fall back to everything.
+  const inWindow = (ymd: string | null | undefined) =>
+    !dateWindow || (!!ymd && ymd >= dateWindow.from && ymd <= dateWindow.to);
+  const filteredSpend = useMemo(() => spend.filter((s) => inWindow(s.date)), [spend, dateWindow]);
+  const filteredDeals = useMemo(
+    () => deals.filter((d) => inWindow((d.closeDate || d.date || "").slice(0, 10))),
+    [deals, dateWindow]
+  );
+  const filteredReports = useMemo(
+    () => reports.filter((r) => inWindow(normalizeReportDateKey(r))),
+    [reports, dateWindow]
+  );
+
   // Aggregate per ad
   const perAdRows: PerAd[] = useMemo(() => {
     const map = new Map<string, PerAd>();
-    spend.forEach((s) => {
+    filteredSpend.forEach((s) => {
       const key = s.adName.trim() || "غير محدد";
       const existing = map.get(key) ?? {
         adName: key,
@@ -84,7 +111,7 @@ export default function MarketingInsightsPage() {
     });
 
     // Match deals by adSource (ad name)
-    deals.forEach((d) => {
+    filteredDeals.forEach((d) => {
       const key = (d.adSource || "").trim();
       if (!key) return;
       const row = map.get(key);
@@ -94,7 +121,7 @@ export default function MarketingInsightsPage() {
     });
 
     // Match actual leads from reports.parsedData.leadsByAd
-    reports.forEach((r) => {
+    filteredReports.forEach((r) => {
       const lba = r?.parsedData?.leadsByAd;
       if (!Array.isArray(lba)) return;
       lba.forEach((entry: any) => {
@@ -113,7 +140,7 @@ export default function MarketingInsightsPage() {
       const roas = r.spend > 0 ? r.revenue / r.spend : 0;
       return { ...r, cpl, cpa, roas, status: statusFor(roas, cpa) };
     }).sort((a, b) => b.spend - a.spend);
-  }, [spend, deals, reports]);
+  }, [filteredSpend, filteredDeals, filteredReports]);
 
   const totals = useMemo(() => {
     const t = perAdRows.reduce(
@@ -156,13 +183,18 @@ export default function MarketingInsightsPage() {
   }
 
   if (perAdRows.length === 0) {
+    // Distinguish "no data ever" from "no data in the selected period" so the
+    // global date filter doesn't make a populated account look empty.
+    const hasAnySpend = spend.length > 0;
     return (
       <div className="max-w-[1400px] mx-auto py-16">
         <EmptyState
           variant="getting-started"
           icon="campaign"
-          title="لا توجد بيانات تسويق بعد"
-          description="بمجرد إدخال الميديا باير لمصاريف الإعلانات، ستظهر هنا تحليلات شاملة عن الـ ROI لكل إعلان."
+          title={hasAnySpend ? "لا توجد بيانات في هذه الفترة" : "لا توجد بيانات تسويق بعد"}
+          description={hasAnySpend
+            ? "غيّر الفترة الزمنية من الشريط العام بالأعلى لعرض النتائج."
+            : "بمجرد إدخال الميديا باير لمصاريف الإعلانات، ستظهر هنا تحليلات شاملة عن الـ ROI لكل إعلان."}
         />
       </div>
     );

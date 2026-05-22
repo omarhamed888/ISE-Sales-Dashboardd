@@ -7,6 +7,7 @@ import { ProductPicker } from "@/components/ProductPicker";
 import { useCourses } from "@/lib/hooks/useCourses";
 import { classifyDealCategory } from "@/lib/utils/normalize-course-names";
 import { AdSelectDropdown } from "@/components/ads/AdSelectDropdown";
+import { useToast } from "@/components/ui/Toast";
 
 const emptyDeal = (): DealInput => ({
   customerName: "",
@@ -29,6 +30,7 @@ function formatNumber(n: number) {
 export default function DealsPage() {
   const { user } = useAuth();
   const courses = useCourses();
+  const { showToast } = useToast();
   const [deals, setDeals] = useState<DealInput[]>([emptyDeal()]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -99,7 +101,7 @@ export default function DealsPage() {
       (d) => !Number.isFinite(Number(d.contactAttempts)) || Number(d.contactAttempts) < 1
     );
     if (hasInvalidAttempts) {
-      alert("فضلاً أدخل عدد مرات التواصل لكل صفقة (رقم صحيح يبدأ من 1).");
+      showToast("warning", "فضلاً أدخل عدد مرات التواصل لكل صفقة (رقم صحيح يبدأ من 1).");
       return;
     }
     setSaving(true);
@@ -108,7 +110,7 @@ export default function DealsPage() {
       setSavedDeals(deals);
       setSaved(true);
     } catch (e: any) {
-      alert("فشل الحفظ: " + e.message);
+      showToast("error", `فشل الحفظ: ${e.message ?? "خطأ غير معروف"}`);
     } finally {
       setSaving(false);
     }

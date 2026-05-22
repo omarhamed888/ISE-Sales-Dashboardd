@@ -151,9 +151,7 @@ service cloud.firestore {
 
     match /courses/{courseId} {
       allow read: if isAuth();
-      // Keep management available even for legacy user docs where docId != auth.uid.
-      // UI still limits these actions to admin/superadmin.
-      allow create, update: if isAuth();
+      allow create, update: if isAdmin();
       allow delete: if isSuperAdmin();
     }
 

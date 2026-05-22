@@ -34,12 +34,6 @@ function ensureSuperAdmin(role: string | null) {
   }
 }
 
-function ensureAdminOrBuyer(role: string | null) {
-  if (role !== "admin" && role !== "superadmin" && role !== "media_buyer") {
-    throw new HttpsError("permission-denied", "Admin or media buyer access required.");
-  }
-}
-
 function normalizeAdAccountId(raw: string): string {
   const trimmed = raw.trim();
   if (trimmed.startsWith("act_")) return trimmed;
@@ -137,13 +131,17 @@ async function runMetaSync(daysBack: number) {
 
   const db = admin.firestore();
   let written = 0;
+  let batch = db.batch();
+  let batchCount = 0;
+
   for (const r of rows) {
     const date = r.date_start;
     const adId = r.ad_id;
     if (!date || !adId) continue;
     const docId = `${date}_${adId}_${META_SYSTEM_BUYER_ID}`;
     const ref = db.collection(AD_SPEND_COLLECTION).doc(docId);
-    await ref.set(
+    batch.set(
+      ref,
       {
         date,
         adId,
@@ -164,6 +162,17 @@ async function runMetaSync(daysBack: number) {
       { merge: true }
     );
     written += 1;
+    batchCount += 1;
+
+    if (batchCount === 500) {
+      await batch.commit();
+      batch = db.batch();
+      batchCount = 0;
+    }
+  }
+
+  if (batchCount > 0) {
+    await batch.commit();
   }
 
   await admin.firestore().doc(META_CONFIG_DOC).set(
@@ -214,13 +223,35 @@ export const testMetaConnection = onCall({ region: "us-central1" }, async (req) 
   }
 });
 
+// Minimum seconds between manual `syncMetaAds` invocations. The cron path
+// (`scheduledMetaSync`) bypasses this gate. Tunable here without redeploying.
+const MANUAL_SYNC_COOLDOWN_SECONDS = 60;
+
 export const syncMetaAds = onCall({ region: "us-central1", timeoutSeconds: 540 }, async (req) => {
   if (!req.auth) throw new HttpsError("unauthenticated", "Must be signed in.");
   const role = await getUserRole(req.auth.uid);
-  ensureAdminOrBuyer(role);
+  ensureAdmin(role);
 
   const daysBackRaw = Number((req.data as { daysBack?: unknown })?.daysBack);
   const daysBack = Number.isFinite(daysBackRaw) && daysBackRaw > 0 && daysBackRaw <= 90 ? Math.floor(daysBackRaw) : 7;
+
+  // Cooldown guard: each Meta API sync hits the Graph API and writes many
+  // Firestore docs. Without this, an admin could trigger expensive runs in a
+  // tight loop. We read `lastSyncAt` from config and reject if too recent.
+  const configSnap = await admin.firestore().doc(META_CONFIG_DOC).get();
+  const lastSyncAt = configSnap.data()?.lastSyncAt;
+  if (lastSyncAt && typeof lastSyncAt.toMillis === "function") {
+    const elapsedSec = (Date.now() - lastSyncAt.toMillis()) / 1000;
+    if (elapsedSec < MANUAL_SYNC_COOLDOWN_SECONDS) {
+      const wait = Math.ceil(MANUAL_SYNC_COOLDOWN_SECONDS - elapsedSec);
+      return {
+        success: false,
+        rateLimited: true,
+        retryAfterSeconds: wait,
+        error: `يرجى الانتظار ${wait} ثانية قبل إعادة المزامنة.`,
+      };
+    }
+  }
 
   try {
     const result = await runMetaSync(daysBack);
@@ -271,5 +302,3 @@ export const scheduledMetaSync = onSchedule(
   }
 );
 
-// Silence unused-import warning for ensureAdmin (kept for future endpoints).
-void ensureAdmin;

@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { useFilter, DateRange, Platform } from "@/lib/filter-context";
+import { useFilter, DateRange, Platform, FilterState } from "@/lib/filter-context";
 import { useAuth } from "@/lib/auth-context";
 import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAvailableMonths } from "@/lib/hooks/useAvailableMonths";
 import { useCourses } from "@/lib/hooks/useCourses";
+import { FILTERED_ROUTES, DATE_ONLY_FILTER_ROUTES } from "@/lib/config/filtered-routes";
+import { FilterSheet, SheetField } from "./FilterSheet";
 
 const selectCls = `
   bg-white border border-[#E2E8F0] rounded-xl px-3 py-2
@@ -15,12 +17,18 @@ const selectCls = `
   disabled:opacity-40 disabled:cursor-not-allowed
 `.replace(/\s+/g, ' ').trim();
 
+// Applied on top of selectCls when a selector holds a non-default value, so an
+// active filter reads at a glance on desktop (mirrors DealsAnalyticsPage style).
+const selectActiveCls = "bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]";
+
 const dateInputCls = `
   bg-white border border-[#E2E8F0] rounded-xl px-3 py-2
   text-[12px] font-bold text-[#1E293B]
   focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]/50
   transition-colors
 `.replace(/\s+/g, ' ').trim();
+
+type Option = { value: string; label: string };
 
 export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean }) {
   const location = useLocation();
@@ -29,16 +37,15 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
   const { months: availableMonths, loading: monthsLoading } = useAvailableMonths();
   const courses = useCourses(true);
 
-  const adminRoutes = ["/dashboard", "/team", "/ads", "/reports", "/metrics"];
-  const isAdminRoute = adminRoutes.includes(location.pathname);
+  const isAdminRoute = FILTERED_ROUTES.includes(location.pathname);
+  const isDateOnly = DATE_ONLY_FILTER_ROUTES.includes(location.pathname);
   const isAdmin = user?.role === "admin" || user?.role === "superadmin";
-
-  if (!isAdminRoute || !isAdmin) return null;
 
   const ranges: DateRange[] = ["اليوم", "الأسبوع", "الشهر", "شهر محدد", "الإجمالي", "مخصص"];
   const [salesReps, setSalesReps] = useState<{ uid: string; name: string }[]>([]);
   const [uniqueAds, setUniqueAds] = useState<string[]>([]);
   const [isLoadingProps, setIsLoadingProps] = useState(true);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const loadDynamicFilters = useCallback(async () => {
     setIsLoadingProps(true);
@@ -88,140 +95,248 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
     }
   }, [filter.dateRange, filter.selectedMonth, availableMonths, updateFilter]);
 
-  return (
-    <div
-      dir="rtl"
-      className={`
-        fixed top-[64px] left-0 z-30 transition-all duration-300
-        w-full ${isSidebarCollapsed ? "md:w-[calc(100%-72px)]" : "md:w-[calc(100%-240px)]"}
-        bg-white border-b border-[#E2E8F0] shadow-sm
-        px-4 md:px-6 py-3 md:py-0 md:h-[58px]
-        flex flex-col md:flex-row-reverse items-start md:items-center gap-3
-      `}
-    >
-      {/* Date range pills */}
-      <div className="flex items-center bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-1 gap-0.5 shrink-0 overflow-x-auto no-scrollbar">
-        {ranges.map((range) => (
-          <button
-            key={range}
-            onClick={() => updateFilter({ dateRange: range })}
-            className={`px-3.5 py-1.5 text-[12px] font-bold rounded-lg whitespace-nowrap transition-all duration-200 cursor-pointer
-              ${filter.dateRange === range
-                ? "bg-[#1E40AF] text-white shadow-sm"
-                : "text-[#64748B] hover:text-[#1E293B] hover:bg-white"
-              }`}
-          >
-            {range}
-          </button>
-        ))}
-      </div>
+  // ── Selector definitions (shared by desktop bar + mobile sheet) ──────────
+  const selectors = useMemo(() => {
+    const platformOptions: Option[] = [
+      { value: "all", label: "جميع المنصات" },
+      { value: "whatsapp", label: "واتساب" },
+      { value: "messenger", label: "ماسنجر" },
+      { value: "tiktok", label: "تيك توك" },
+    ];
+    const repOptions: Option[] = [
+      { value: "all", label: "جميع المندوبين" },
+      ...salesReps.map((r) => ({ value: r.uid, label: r.name })),
+    ];
+    const adOptions: Option[] = [
+      { value: "all", label: "جميع الإعلانات" },
+      ...uniqueAds.map((a) => ({ value: a, label: a })),
+    ];
+    const bookingOptions: Option[] = [
+      { value: "all", label: "كل أنواع الحجز" },
+      { value: "self_booking", label: "حجز ذاتي" },
+      { value: "call_booking", label: "حجز بمكالمة" },
+    ];
+    const categoryOptions: Option[] = [
+      { value: "all", label: "كل فئات الصفقات" },
+      { value: "core", label: "Core" },
+      { value: "side", label: "Side" },
+    ];
+    const courseOptions: Option[] = [
+      { value: "all", label: "كل الكورسات" },
+      ...courses.map((c) => ({ value: c.id, label: c.name })),
+    ];
 
-      {/* Specific-month dropdown (only months that actually have data) */}
-      {filter.dateRange === "شهر محدد" && (
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider">الشهر</span>
-          {availableMonths.length === 0 ? (
-            <span className="text-[12px] font-bold text-[#94A3B8] bg-[#F8FAFC] border border-dashed border-[#E2E8F0] rounded-xl px-3 py-2">
-              {monthsLoading ? "...جاري التحميل" : "لا توجد بيانات شهور"}
-            </span>
-          ) : (
-            <select
-              value={filter.selectedMonth ?? ""}
-              onChange={(e) => updateFilter({ selectedMonth: e.target.value || null })}
-              className={`${selectCls} min-w-[150px]`}
-            >
-              {availableMonths.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-      )}
+    return [
+      { key: "platform", label: "المنصة", value: filter.platform as string, options: platformOptions,
+        apply: (v: string) => updateFilter({ platform: v as Platform }) },
+      { key: "salesRep", label: "المندوب", value: filter.salesRep, options: repOptions,
+        apply: (v: string) => updateFilter({ salesRep: v }) },
+      { key: "adName", label: "الإعلان", value: filter.adName, options: adOptions,
+        apply: (v: string) => updateFilter({ adName: v }) },
+      { key: "bookingType", label: "نوع الحجز", value: filter.bookingType as string, options: bookingOptions,
+        apply: (v: string) => updateFilter({ bookingType: v as FilterState["bookingType"] }) },
+      { key: "dealCategory", label: "فئة الصفقة", value: filter.dealCategory as string, options: categoryOptions,
+        apply: (v: string) => updateFilter({ dealCategory: v as FilterState["dealCategory"] }) },
+      { key: "courseId", label: "الكورس", value: filter.courseId, options: courseOptions,
+        apply: (v: string) => updateFilter({ courseId: v }) },
+    ];
+  }, [filter.platform, filter.salesRep, filter.adName, filter.bookingType, filter.dealCategory, filter.courseId, salesReps, uniqueAds, courses, updateFilter]);
 
-      {/* Custom date range */}
-      {filter.dateRange === "مخصص" && (
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider">من</span>
-            <input
-              type="date"
-              value={filter.customDateFrom ? filter.customDateFrom.toISOString().slice(0, 10) : ""}
-              max={filter.customDateTo ? filter.customDateTo.toISOString().slice(0, 10) : undefined}
-              onChange={(e) => updateFilter({ customDateFrom: e.target.value ? new Date(e.target.value) : null })}
-              className={dateInputCls}
-              dir="ltr"
-            />
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider">إلى</span>
-            <input
-              type="date"
-              value={filter.customDateTo ? filter.customDateTo.toISOString().slice(0, 10) : ""}
-              min={filter.customDateFrom ? filter.customDateFrom.toISOString().slice(0, 10) : undefined}
-              onChange={(e) => updateFilter({ customDateTo: e.target.value ? new Date(e.target.value) : null })}
-              className={dateInputCls}
-              dir="ltr"
-            />
-          </div>
-          {filter.customDateFrom && filter.customDateTo &&
-            filter.customDateFrom > filter.customDateTo && (
-            <span className="text-[11px] font-black text-[#DC2626] bg-red-50 border border-red-200 rounded-lg px-2 py-1">
-              تاريخ البداية بعد النهاية
-            </span>
-          )}
-        </div>
-      )}
+  // Count of active (non-default) dimension filters → drives the mobile badge
+  // and the reset-button enabled state. Date range is shown separately as pills,
+  // so it isn't counted here.
+  const activeCount = useMemo(
+    () => selectors.filter((s) => s.value && s.value !== "all").length,
+    [selectors]
+  );
 
-      {/* Selectors + reset */}
-      <div className="flex flex-wrap items-center gap-2 flex-1 justify-start md:justify-end">
-        <select value={filter.platform} onChange={(e) => updateFilter({ platform: e.target.value as Platform })} className={selectCls} disabled={isLoadingProps}>
-          <option value="all">جميع المنصات</option>
-          <option value="whatsapp">واتساب</option>
-          <option value="messenger">ماسنجر</option>
-          <option value="tiktok">تيك توك</option>
-        </select>
+  // Hooks must run unconditionally; gate rendering only after they're declared.
+  if (!isAdminRoute || !isAdmin) return null;
 
-        <select value={filter.salesRep} onChange={(e) => updateFilter({ salesRep: e.target.value })} className={`${selectCls} max-w-[150px]`} disabled={isLoadingProps}>
-          <option value="all">جميع المندوبين</option>
-          {salesReps.map(rep => <option key={rep.uid} value={rep.uid}>{rep.name}</option>)}
-        </select>
-
-        <select value={filter.adName} onChange={(e) => updateFilter({ adName: e.target.value })} className={`${selectCls} max-w-[160px]`} disabled={isLoadingProps}>
-          <option value="all">جميع الإعلانات</option>
-          {uniqueAds.map(ad => <option key={ad} value={ad}>{ad}</option>)}
-        </select>
-
-        <select value={filter.bookingType} onChange={(e) => updateFilter({ bookingType: e.target.value as "all" | "self_booking" | "call_booking" })} className={selectCls} disabled={isLoadingProps}>
-          <option value="all">كل أنواع الحجز</option>
-          <option value="self_booking">حجز ذاتي</option>
-          <option value="call_booking">حجز بمكالمة</option>
-        </select>
-
-        <select value={filter.dealCategory} onChange={(e) => updateFilter({ dealCategory: e.target.value as "all" | "core" | "side" })} className={selectCls} disabled={isLoadingProps}>
-          <option value="all">كل فئات الصفقات</option>
-          <option value="core">Core</option>
-          <option value="side">Side</option>
-        </select>
-
-        <select value={filter.courseId} onChange={(e) => updateFilter({ courseId: e.target.value })} className={`${selectCls} max-w-[160px]`} disabled={isLoadingProps}>
-          <option value="all">كل الكورسات</option>
-          {courses.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-
-        <div className="hidden md:block h-5 w-px bg-[#E2E8F0] mx-0.5" />
-
+  const renderDatePills = (size: "bar" | "sheet") => (
+    <div className={`flex items-center bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-1 gap-0.5 ${size === "bar" ? "shrink-0 overflow-x-auto no-scrollbar" : "flex-wrap"}`}>
+      {ranges.map((range) => (
         <button
-          onClick={resetFilter}
-          title="إعادة تعيين الفلاتر"
-          className="h-9 w-9 rounded-xl border border-[#E2E8F0] text-[#94A3B8] hover:text-[#DC2626] hover:bg-red-50 hover:border-red-200 flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0"
+          key={range}
+          onClick={() => updateFilter({ dateRange: range })}
+          className={`px-3.5 py-1.5 text-[12px] font-bold rounded-lg whitespace-nowrap transition-all duration-200 cursor-pointer
+            ${filter.dateRange === range
+              ? "bg-[#1E40AF] text-white shadow-sm"
+              : "text-[#64748B] hover:text-[#1E293B] hover:bg-white"
+            }`}
         >
-          <span className="material-symbols-outlined text-[17px]">filter_alt_off</span>
+          {range}
+        </button>
+      ))}
+    </div>
+  );
+
+  const renderMonthPicker = () =>
+    filter.dateRange === "شهر محدد" && (
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider">الشهر</span>
+        {availableMonths.length === 0 ? (
+          <span className="text-[12px] font-bold text-[#94A3B8] bg-[#F8FAFC] border border-dashed border-[#E2E8F0] rounded-xl px-3 py-2">
+            {monthsLoading ? "...جاري التحميل" : "لا توجد بيانات شهور"}
+          </span>
+        ) : (
+          <select
+            value={filter.selectedMonth ?? ""}
+            onChange={(e) => updateFilter({ selectedMonth: e.target.value || null })}
+            className={`${selectCls} min-w-[150px]`}
+          >
+            {availableMonths.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+    );
+
+  const renderCustomRange = () =>
+    filter.dateRange === "مخصص" && (
+      <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider">من</span>
+          <input
+            type="date"
+            value={filter.customDateFrom ? filter.customDateFrom.toISOString().slice(0, 10) : ""}
+            max={filter.customDateTo ? filter.customDateTo.toISOString().slice(0, 10) : undefined}
+            onChange={(e) => updateFilter({ customDateFrom: e.target.value ? new Date(e.target.value) : null })}
+            className={dateInputCls}
+            dir="ltr"
+          />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider">إلى</span>
+          <input
+            type="date"
+            value={filter.customDateTo ? filter.customDateTo.toISOString().slice(0, 10) : ""}
+            min={filter.customDateFrom ? filter.customDateFrom.toISOString().slice(0, 10) : undefined}
+            onChange={(e) => updateFilter({ customDateTo: e.target.value ? new Date(e.target.value) : null })}
+            className={dateInputCls}
+            dir="ltr"
+          />
+        </div>
+        {filter.customDateFrom && filter.customDateTo &&
+          filter.customDateFrom > filter.customDateTo && (
+          <span className="text-[11px] font-black text-[#DC2626] bg-red-50 border border-red-200 rounded-lg px-2 py-1">
+            تاريخ البداية بعد النهاية
+          </span>
+        )}
+      </div>
+    );
+
+  const currentRangeLabel = filter.dateRange === "شهر محدد" && filter.selectedMonth
+    ? availableMonths.find((m) => m.value === filter.selectedMonth)?.label ?? "شهر محدد"
+    : filter.dateRange;
+
+  return (
+    <>
+      <div
+        dir="rtl"
+        className={`
+          fixed top-[64px] left-0 z-30 transition-all duration-300
+          w-full ${isSidebarCollapsed ? "md:w-[calc(100%-72px)]" : "md:w-[calc(100%-240px)]"}
+          bg-white border-b border-[#E2E8F0] shadow-sm
+        `}
+      >
+        {/* ── Desktop / tablet: full inline row ──────────────────────────── */}
+        <div className="hidden md:flex flex-row-reverse items-center gap-3 px-6 h-[58px]">
+          {renderDatePills("bar")}
+          {renderMonthPicker()}
+          {renderCustomRange()}
+
+          <div className="flex flex-wrap items-center gap-2 flex-1 justify-end">
+            {!isDateOnly && selectors.map((s) => {
+              const active = s.value && s.value !== "all";
+              const widthCap = s.key === "salesRep" || s.key === "courseId" ? "max-w-[150px]"
+                : s.key === "adName" ? "max-w-[160px]" : "";
+              return (
+                <select
+                  key={s.key}
+                  value={s.value}
+                  onChange={(e) => s.apply(e.target.value)}
+                  className={`${selectCls} ${widthCap} ${active ? selectActiveCls : ""}`}
+                  disabled={isLoadingProps}
+                >
+                  {s.options.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              );
+            })}
+
+            {!isDateOnly && <div className="h-5 w-px bg-[#E2E8F0] mx-0.5" />}
+
+            <button
+              onClick={resetFilter}
+              title="إعادة تعيين الفلاتر"
+              disabled={activeCount === 0 && filter.dateRange === "اليوم"}
+              className="h-9 w-9 rounded-xl border border-[#E2E8F0] text-[#94A3B8] hover:text-[#DC2626] hover:bg-red-50 hover:border-red-200 flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-[#94A3B8] disabled:hover:border-[#E2E8F0]"
+            >
+              <span className="material-symbols-outlined text-[17px]">filter_alt_off</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ── Mobile: single trigger row that opens the filter sheet ─────── */}
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          className="md:hidden w-full flex items-center justify-between gap-2 px-4 h-[56px] text-right"
+        >
+          <span className="flex items-center gap-2 text-[13px] font-black text-[#1E293B]">
+            <span className="material-symbols-outlined text-[20px] text-[#1E40AF]">tune</span>
+            تصفية النتائج
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="text-[12px] font-bold px-2.5 py-1 rounded-lg bg-[#EFF6FF] text-[#2563EB] border border-[#2563EB]/15 whitespace-nowrap max-w-[120px] truncate">
+              {currentRangeLabel}
+            </span>
+            {!isDateOnly && activeCount > 0 && (
+              <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-[#1E40AF] text-white min-w-[20px] text-center">
+                {activeCount}
+              </span>
+            )}
+            <span className="material-symbols-outlined text-[20px] text-[#94A3B8]">expand_more</span>
+          </span>
         </button>
       </div>
-    </div>
+
+      {/* ── Mobile filter sheet ──────────────────────────────────────────── */}
+      <FilterSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        onReset={() => { resetFilter(); }}
+        activeCount={activeCount}
+      >
+        <SheetField label="الفترة الزمنية">
+          {renderDatePills("sheet")}
+        </SheetField>
+        {filter.dateRange === "شهر محدد" && (
+          <SheetField label="الشهر">{renderMonthPicker()}</SheetField>
+        )}
+        {filter.dateRange === "مخصص" && (
+          <SheetField label="نطاق مخصص">{renderCustomRange()}</SheetField>
+        )}
+        {!isDateOnly && selectors.map((s) => (
+          <SheetField key={s.key} label={s.label}>
+            <select
+              value={s.value}
+              onChange={(e) => s.apply(e.target.value)}
+              className={`${selectCls} w-full ${s.value && s.value !== "all" ? selectActiveCls : ""}`}
+              disabled={isLoadingProps}
+            >
+              {s.options.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </SheetField>
+        ))}
+      </FilterSheet>
+    </>
   );
 }

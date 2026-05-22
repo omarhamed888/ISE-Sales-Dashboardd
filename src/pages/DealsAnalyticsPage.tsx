@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { getAllDeals, netDealValue, buildProfitPctMap } from '@/lib/services/deals-service';
 import { useCourses } from '@/lib/hooks/useCourses';
+import { useFilter } from '@/lib/filter-context';
+import { filterDealsByDashboardDate } from '@/lib/utils/dashboard-filters';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { inferProductIdsFromProgramName, buildProgramNameFromProducts, classifyDealCategory } from '@/lib/utils/normalize-course-names';
 
@@ -41,14 +43,14 @@ function KpiCard({ label, value, sub, icon, accent }: { label: string; value: st
 export default function DealsAnalyticsPage() {
   const [deals, setDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [filterRep, setFilterRep] = useState('الكل');
-  const [filterCourseId, setFilterCourseId] = useState('الكل');
-  const [filterBookingType, setFilterBookingType] = useState<'الكل'|'self_booking'|'call_booking'>('الكل');
-  const [filterDealCategory, setFilterDealCategory] = useState<'الكل'|'core'|'side'>('الكل');
+  // Page-specific filter (not part of the global FilterContext — only this page
+  // analyzes contact-attempt buckets).
   const [attemptsRange, setAttemptsRange] = useState<'all'|'1-3'|'4-7'|'8+'>('all');
   const [visibleDealsCount, setVisibleDealsCount] = useState(50);
+
+  // Global filters (rep / course / booking / category / date range) come from the
+  // shared FilterBar at the top of the page — same source as the dashboard.
+  const { filter } = useFilter();
 
   const courses = useCourses(true);
   const profitPctById = useMemo(() => buildProfitPctMap(courses), [courses]);
@@ -61,42 +63,19 @@ export default function DealsAnalyticsPage() {
     getAllDeals().then(setDeals).catch(console.error).finally(() => setLoading(false));
   }, []);
 
-  const allReps  = useMemo(() => ['الكل', ...Array.from(new Set(deals.map(d => d.salesRepName).filter(Boolean)))], [deals]);
-
-  const dealMatchesCourse = (d: { products?: string[]; programName?: string }, courseId: string) => {
-    const products = Array.isArray(d.products) ? d.products.filter(Boolean) : [];
-    if (products.includes(courseId)) return true;
-    const inferred = inferProductIdsFromProgramName(d.programName || '');
-    return inferred.includes(courseId);
-  };
-
-  const filtered = useMemo(() => deals.filter(d => {
-    if (filterRep  !== 'الكل' && d.salesRepName !== filterRep)  return false;
-    if (filterCourseId !== 'الكل' && !dealMatchesCourse(d, filterCourseId)) return false;
-    const bt = d.bookingType || (d.closureType === 'call' ? 'call_booking' : 'self_booking');
-    if (filterBookingType !== 'الكل' && bt !== filterBookingType) return false;
-    const cat = d.dealCategory || classifyDealCategory(d);
-    if (filterDealCategory !== 'الكل' && cat !== filterDealCategory) return false;
-    if (dateFrom && d.closeDate < dateFrom) return false;
-    if (dateTo   && d.closeDate > dateTo)   return false;
+  // Apply the shared dashboard filters first (rep, course, booking, category,
+  // date window), then layer this page's contact-attempts bucket on top.
+  const globalFiltered = useMemo(
+    () => filterDealsByDashboardDate(deals, filter),
+    [deals, filter]
+  );
+  const filtered = useMemo(() => globalFiltered.filter(d => {
     const att = Number(d.contactAttempts);
     if (attemptsRange === '1-3' && !(att >= 1 && att <= 3)) return false;
     if (attemptsRange === '4-7' && !(att >= 4 && att <= 7)) return false;
     if (attemptsRange === '8+'  && !(att >= 8))              return false;
     return true;
-  }), [deals, filterRep, filterCourseId, filterBookingType, filterDealCategory, dateFrom, dateTo, attemptsRange]);
-
-  const isFiltered = filterRep !== 'الكل' || filterCourseId !== 'الكل' || filterBookingType !== 'الكل'
-    || filterDealCategory !== 'الكل' || dateFrom || dateTo || attemptsRange !== 'all';
-  const resetFilters = () => {
-    setFilterRep('الكل');
-    setFilterCourseId('الكل');
-    setFilterBookingType('الكل');
-    setFilterDealCategory('الكل');
-    setDateFrom('');
-    setDateTo('');
-    setAttemptsRange('all');
-  };
+  }), [globalFiltered, attemptsRange]);
 
   // ── Metrics ──────────────────────────────────────────────────────────────
   const coreDeals    = filtered.filter(d => (d.dealCategory || classifyDealCategory(d)) === 'core');
@@ -191,66 +170,26 @@ export default function DealsAnalyticsPage() {
             <span className="material-symbols-outlined text-[14px]">receipt_long</span>
             {filtered.length} صفقة
           </span>
-          {isFiltered && (
-            <button onClick={resetFilters} className="inline-flex items-center gap-1 text-[12px] font-bold text-[#EF4444] bg-red-50 border border-red-200 px-3 py-1.5 rounded-full hover:bg-red-100 transition-colors">
-              <span className="material-symbols-outlined text-[14px]">close</span>
-              مسح الفلاتر
-            </button>
-          )}
         </div>
       </div>
 
-      {/* ── Filter bar ─────────────────────────────────────────────────────── */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-4 shadow-sm" dir="rtl">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="material-symbols-outlined text-[16px] text-[#64748B]">tune</span>
-          <span className="text-[12px] font-black text-[#64748B]">تصفية النتائج</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {/* Rep */}
-          <select value={filterRep} onChange={e => setFilterRep(e.target.value)}
-            className={`text-[12px] font-bold rounded-xl px-3 py-2 outline-none border transition-colors ${filterRep!=='الكل'?'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]':'bg-[#F7F9FC] border-[#E2E8F0] text-[#475569]'}`}>
-            {allReps.map(r=><option key={r}>{r}</option>)}
-          </select>
-          {/* Course / product */}
-          <select value={filterCourseId} onChange={e => setFilterCourseId(e.target.value)}
-            className={`text-[12px] font-bold rounded-xl px-3 py-2 outline-none border transition-colors max-w-[200px] ${filterCourseId!=='الكل'?'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]':'bg-[#F7F9FC] border-[#E2E8F0] text-[#475569]'}`}>
-            <option value="الكل">كل الكورسات والمنتجات</option>
-            {courses.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          {/* Booking */}
-          <select value={filterBookingType} onChange={e => setFilterBookingType(e.target.value as any)}
-            className={`text-[12px] font-bold rounded-xl px-3 py-2 outline-none border transition-colors ${filterBookingType!=='الكل'?'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]':'bg-[#F7F9FC] border-[#E2E8F0] text-[#475569]'}`}>
-            <option value="الكل">كل أنواع الحجز</option>
-            <option value="self_booking">حجز ذاتي</option>
-            <option value="call_booking">حجز بمكالمة</option>
-          </select>
-          {/* Category */}
-          <select value={filterDealCategory} onChange={e => setFilterDealCategory(e.target.value as any)}
-            className={`text-[12px] font-bold rounded-xl px-3 py-2 outline-none border transition-colors ${filterDealCategory!=='الكل'?'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]':'bg-[#F7F9FC] border-[#E2E8F0] text-[#475569]'}`}>
-            <option value="الكل">Core + Side</option>
-            <option value="core">Core فقط</option>
-            <option value="side">Side فقط</option>
-          </select>
-          {/* Attempts */}
-          <select value={attemptsRange} onChange={e => setAttemptsRange(e.target.value as any)}
-            className={`text-[12px] font-bold rounded-xl px-3 py-2 outline-none border transition-colors ${attemptsRange!=='all'?'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]':'bg-[#F7F9FC] border-[#E2E8F0] text-[#475569]'}`}>
-            <option value="all">كل المحاولات</option>
-            <option value="1-3">١-٣ محاولات</option>
-            <option value="4-7">٤-٧ محاولات</option>
-            <option value="8+">٨+ محاولات</option>
-          </select>
-          {/* Date range */}
-          <div className="flex items-center gap-1.5 bg-[#F7F9FC] border border-[#E2E8F0] rounded-xl px-3 py-2" dir="ltr">
-            <input type="date" value={dateFrom} onChange={e=>setDateFrom(e.target.value)}
-              className={`text-[12px] font-bold bg-transparent outline-none w-[130px] ${dateFrom?'text-[#2563EB]':'text-[#94A3B8]'}`} placeholder="من" />
-            <span className="text-[#CBD5E1] font-bold text-[12px]">–</span>
-            <input type="date" value={dateTo} onChange={e=>setDateTo(e.target.value)}
-              className={`text-[12px] font-bold bg-transparent outline-none w-[130px] ${dateTo?'text-[#2563EB]':'text-[#94A3B8]'}`} placeholder="إلى" />
-          </div>
-        </div>
+      {/* ── Page-specific filter (المندوب/الكورس/التاريخ من شريط الفلتر العام بالأعلى) ── */}
+      <div className="bg-white border border-[#E2E8F0] rounded-2xl px-4 py-3 shadow-sm flex flex-wrap items-center gap-3" dir="rtl">
+        <span className="text-[12px] font-black text-[#64748B] flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-[16px]">contact_phone</span>
+          عدد محاولات التواصل
+        </span>
+        <select value={attemptsRange} onChange={e => setAttemptsRange(e.target.value as any)}
+          className={`text-[12px] font-bold rounded-xl px-3 py-2 outline-none border transition-colors ${attemptsRange!=='all'?'bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]':'bg-[#F7F9FC] border-[#E2E8F0] text-[#475569]'}`}>
+          <option value="all">كل المحاولات</option>
+          <option value="1-3">١-٣ محاولات</option>
+          <option value="4-7">٤-٧ محاولات</option>
+          <option value="8+">٨+ محاولات</option>
+        </select>
+        <span className="text-[11px] font-bold text-[#94A3B8] mr-auto hidden sm:flex items-center gap-1">
+          <span className="material-symbols-outlined text-[14px]">arrow_upward</span>
+          باقي الفلاتر (المندوب، الكورس، الفترة) من الشريط العام بالأعلى
+        </span>
       </div>
 
       {/* ── KPI rows ───────────────────────────────────────────────────────── */}

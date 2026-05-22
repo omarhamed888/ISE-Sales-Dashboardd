@@ -6,9 +6,10 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useCourses } from "@/lib/hooks/useCourses";
-import type { AppConfig } from "@/lib/hooks/useAppConfig";
+import { useAppConfig, type AppConfig } from "@/lib/hooks/useAppConfig";
 import { ObjectionCategoriesManager } from "@/components/settings/ObjectionCategoriesManager";
 import { uploadCompanyLogo } from "@/lib/services/logo-upload";
+import { useToast } from "@/components/ui/Toast";
 
 const AR_DAY_TO_NUM: Record<string, number> = {
   السبت: 6,
@@ -79,6 +80,7 @@ function formatDocDate(v: unknown): string {
 
 export default function SettingsPage() {
     const { user } = useAuth();
+    const { showToast } = useToast();
     const canManageCourses = user?.role === "admin" || user?.role === "superadmin";
     const isSuperAdmin = user?.role === "superadmin";
 
@@ -162,35 +164,30 @@ export default function SettingsPage() {
 
     }, [user, isSuperAdmin]);
 
+    // Real-time subscription to app_config/settings (replaces the previous
+    // one-shot fetch). After a logo upload, the cache-busted URL written by
+    // uploadCompanyLogo propagates here via onSnapshot, so the preview always
+    // reflects what's actually in Firestore.
+    const { config: appConfig } = useAppConfig();
     useEffect(() => {
         if (!isSuperAdmin) return;
-        (async () => {
-            try {
-                const settingsSnap = await getDoc(doc(db, "app_config", "settings"));
-                if (settingsSnap.exists()) {
-                    const d = settingsSnap.data() as Partial<AppConfig>;
-                    if (typeof d.companyLogo === "string" && d.companyLogo.trim()) {
-                        setLogoPreview(d.companyLogo.trim());
-                    }
-                    setSettings((prev) => ({
-                        companyName:
-                            typeof d.companyName === "string" && d.companyName.trim()
-                                ? d.companyName.trim()
-                                : prev.companyName,
-                        workingDays: Array.isArray(d.workingDays) && d.workingDays.length
-                            ? numbersToArabicDays(d.workingDays)
-                            : prev.workingDays,
-                        reminderTime:
-                            typeof d.reportDeadlineHour === "number" && !Number.isNaN(d.reportDeadlineHour)
-                                ? `${String(d.reportDeadlineHour).padStart(2, "0")}:00`
-                                : prev.reminderTime,
-                    }));
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        })();
-    }, [isSuperAdmin]);
+        if (typeof appConfig.companyLogo === "string" && appConfig.companyLogo.trim()) {
+            setLogoPreview(appConfig.companyLogo.trim());
+        }
+        setSettings((prev) => ({
+            companyName:
+                typeof appConfig.companyName === "string" && appConfig.companyName.trim()
+                    ? appConfig.companyName.trim()
+                    : prev.companyName,
+            workingDays: Array.isArray(appConfig.workingDays) && appConfig.workingDays.length
+                ? numbersToArabicDays(appConfig.workingDays)
+                : prev.workingDays,
+            reminderTime:
+                typeof appConfig.reportDeadlineHour === "number" && !Number.isNaN(appConfig.reportDeadlineHour)
+                    ? `${String(appConfig.reportDeadlineHour).padStart(2, "0")}:00`
+                    : prev.reminderTime,
+        }));
+    }, [isSuperAdmin, appConfig.companyLogo, appConfig.companyName, appConfig.workingDays, appConfig.reportDeadlineHour]);
 
     useEffect(() => {
         if (!canManageCourses) return;
@@ -268,7 +265,7 @@ export default function SettingsPage() {
         } catch (e) {
             console.error(e);
             setSettingsFeedback(null);
-            alert("تعذّر حفظ الإعدادات. تحقق من الاتصال أو الصلاحيات.");
+            showToast("error", "تعذّر حفظ الإعدادات. تحقق من الاتصال أو الصلاحيات.");
         } finally {
             setSavingSettings(false);
         }
@@ -331,7 +328,7 @@ export default function SettingsPage() {
             downloadUtf8Csv(`reports_export_${stamp}.csv`, header, rows);
         } catch (e) {
             console.error(e);
-            alert("تعذّر تصدير التقارير.");
+            showToast("error", "تعذّر تصدير التقارير.");
         } finally {
             setExportingCsv(false);
         }
@@ -343,7 +340,7 @@ export default function SettingsPage() {
             setUsers(users.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
         } catch (e) {
             console.error(e);
-            alert("تعذّر تحديث صلاحية المستخدم.");
+            showToast("error", "تعذّر تحديث صلاحية المستخدم.");
         }
     };
 
@@ -353,7 +350,7 @@ export default function SettingsPage() {
             setUsers(users.map((u) => (u.id === userId ? { ...u, isActive: !currentStatus } : u)));
         } catch (e) {
             console.error(e);
-            alert("تعذّر تحديث حالة المستخدم.");
+            showToast("error", "تعذّر تحديث حالة المستخدم.");
         }
     };
 
@@ -384,7 +381,7 @@ export default function SettingsPage() {
             setNewCoursePct("100");
         } catch (e) {
             console.error(e);
-            alert("تعذّر إضافة البرنامج.");
+            showToast("error", "تعذّر إضافة البرنامج.");
         } finally {
             setAddingCourse(false);
         }
@@ -395,7 +392,7 @@ export default function SettingsPage() {
             await updateDoc(doc(db, "courses", courseId), { isActive: !currentActive });
         } catch (e) {
             console.error(e);
-            alert("تعذّر تحديث حالة البرنامج.");
+            showToast("error", "تعذّر تحديث حالة البرنامج.");
         }
     };
 
@@ -404,7 +401,7 @@ export default function SettingsPage() {
             await deleteDoc(doc(db, "courses", courseId));
         } catch (e) {
             console.error(e);
-            alert("تعذّر حذف البرنامج. يتطلب ذلك صلاحية مدير النظام.");
+            showToast("error", "تعذّر حذف البرنامج. يتطلب ذلك صلاحية مدير النظام.");
         }
     };
 
@@ -431,7 +428,7 @@ export default function SettingsPage() {
             cancelEditCourseName();
         } catch (e) {
             console.error(e);
-            alert("تعذّر حفظ اسم البرنامج.");
+            showToast("error", "تعذّر حفظ اسم البرنامج.");
         } finally {
             setSavingCourseName(false);
         }
@@ -514,6 +511,7 @@ export default function SettingsPage() {
                             <div className="flex items-center gap-4">
                                 <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#E2E8F0] flex items-center justify-center overflow-hidden shrink-0">
                                     <img
+                                        key={logoPreview || "default"}
                                         src={logoPreview || "/logo.png"}
                                         alt="logo"
                                         className="h-12 w-12 object-contain"

@@ -8,13 +8,14 @@ import {
   filterReports,
   filterDealsByDashboardDate,
 } from "@/lib/utils/dashboard-filters";
+import { getDashboardDateWindow, formatYmdLocal } from "@/lib/utils/report-dates";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { TeamStatusSummary } from "@/components/dashboard/TeamStatusSummary";
 import { MarketingKPICards } from "@/components/dashboard/MarketingKPICards";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton, SkeletonChart } from "@/components/ui/Skeleton";
-import { getAllDeals, buildProfitPctMap } from "@/lib/services/deals-service";
+import { getDealsByDateRange, buildProfitPctMap } from "@/lib/services/deals-service";
 import { useCourses } from "@/lib/hooks/useCourses";
 const ChartsGrid = lazy(() => import("@/components/dashboard/ChartsGrid").then((m) => ({ default: m.ChartsGrid })));
 const RejectionAnalyticsSection = lazy(() => import("@/components/dashboard/RejectionAnalyticsSection").then((m) => ({ default: m.RejectionAnalyticsSection })));
@@ -22,7 +23,8 @@ const DealCycleSection = lazy(() => import("@/components/dashboard/DealCycleSect
 
 export default function DashboardPage() {
   const [allReports, setAllReports] = useState<any[]>([]);
-  const [allDeals, setAllDeals] = useState<any[]>([]);
+  const [windowedDeals, setWindowedDeals] = useState<any[]>([]);
+  const [yesterdayDeals, setYesterdayDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { filter } = useFilter();
@@ -50,22 +52,53 @@ export default function DashboardPage() {
     return () => unsubscribe();
   }, [user?.uid]);
 
+  // Date window for the deals query, derived from the active filter. Loading only
+  // the relevant window (instead of the whole `deals` collection) is the main
+  // perf fix — `date` and `closeDate` are always written together, so a
+  // closeDate-indexed query returns exactly what filterDealsByDashboardDate needs.
+  const dealWindow = useMemo(
+    () => getDashboardDateWindow(filter.dateRange, {
+      customDateFrom: filter.customDateFrom,
+      customDateTo: filter.customDateTo,
+      selectedMonth: filter.selectedMonth,
+    }),
+    [filter.dateRange, filter.customDateFrom, filter.customDateTo, filter.selectedMonth]
+  );
+
   useEffect(() => {
-    if (!user?.uid) {
-      setAllDeals([]);
+    if (!user?.uid || !dealWindow) {
+      setWindowedDeals([]);
       return;
     }
     let cancelled = false;
-    getAllDeals()
-      .then((d) => { if (!cancelled) setAllDeals(d as any[]); })
-      .catch(() => { if (!cancelled) setAllDeals([]); });
+    getDealsByDateRange(dealWindow.from, dealWindow.to)
+      .then((d) => { if (!cancelled) setWindowedDeals(d as any[]); })
+      .catch(() => { if (!cancelled) setWindowedDeals([]); });
+    return () => { cancelled = true; };
+  }, [user?.uid, dealWindow]);
+
+  // TeamStatusSummary is always about *yesterday*, independent of the filter, so
+  // it gets its own single-day query (cheap) rather than relying on the window
+  // — which may not include yesterday for past "شهر محدد"/"مخصص" selections.
+  useEffect(() => {
+    if (!user?.uid) {
+      setYesterdayDeals([]);
+      return;
+    }
+    const y = new Date();
+    y.setDate(y.getDate() - 1);
+    const yKey = formatYmdLocal(y);
+    let cancelled = false;
+    getDealsByDateRange(yKey, yKey)
+      .then((d) => { if (!cancelled) setYesterdayDeals(d as any[]); })
+      .catch(() => { if (!cancelled) setYesterdayDeals([]); });
     return () => { cancelled = true; };
   }, [user?.uid]);
 
   const courses = useCourses(true);
   const profitPctById = useMemo(() => buildProfitPctMap(courses), [courses]);
 
-  const filteredDeals = useMemo(() => filterDealsByDashboardDate(allDeals, filter), [allDeals, filter]);
+  const filteredDeals = useMemo(() => filterDealsByDashboardDate(windowedDeals, filter), [windowedDeals, filter]);
   const courseDealKeys = useMemo(() => {
     if (filter.courseId === "all") return undefined;
     return buildCourseDealKeys(filteredDeals);
@@ -163,7 +196,7 @@ export default function DashboardPage() {
 
               {/* ───── 2. TEAM YESTERDAY: who submitted, where they stand ───── */}
               <SectionDivider icon="groups" label="حالة الفريق أمس" />
-              <TeamStatusSummary allReports={allReports} deals={allDeals} />
+              <TeamStatusSummary allReports={allReports} deals={yesterdayDeals} />
 
               {/* ───── 3. PERFORMANCE: funnel → platforms → daily trends → comparisons ───── */}
               <SectionDivider icon="insights" label="تحليل الأداء" />
@@ -188,7 +221,7 @@ export default function DashboardPage() {
               <RecentActivity reports={currentReports} deals={filteredDeals} />
 
               {/* ───── 7. MARKETING SPEND (auto-hides when no spend data): kept at the bottom until real numbers are entered ───── */}
-              <MarketingKPICards deals={allDeals} profitPctById={profitPctById} />
+              <MarketingKPICards deals={windowedDeals} profitPctById={profitPctById} />
 
            </>
         )}

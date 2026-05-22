@@ -113,6 +113,66 @@ export function isKeyInClosedRange(key: string | null, from: string, to: string)
   return key >= from && key <= to;
 }
 
+/**
+ * Translate the active dashboard FilterContext date selection into a single
+ * YYYY-MM-DD `[from, to]` window for use with date-indexed Firestore queries
+ * (`getDealsByDateRange`).
+ *
+ * "الإجمالي" returns the data-quality floor → today. Returns `null` only when
+ * the inputs are inconsistent (e.g. مخصص with missing dates, شهر محدد without
+ * a selected month) — callers should skip the query in that case.
+ */
+export function getDashboardDateWindow(
+  dateRange: "اليوم" | "الأسبوع" | "الشهر" | "الإجمالي" | "مخصص" | "شهر محدد",
+  options: {
+    customDateFrom?: Date | null;
+    customDateTo?: Date | null;
+    selectedMonth?: string | null;
+  } = {},
+  today: Date = new Date(),
+): { from: string; to: string } | null {
+  const todayKey = formatYmdLocal(today);
+
+  if (dateRange === "مخصص") {
+    const { customDateFrom, customDateTo } = options;
+    if (!customDateFrom || !customDateTo) return null;
+    return {
+      from: formatYmdLocal(customDateFrom),
+      to: formatYmdLocal(customDateTo),
+    };
+  }
+
+  if (dateRange === "شهر محدد") {
+    const m = options.selectedMonth;
+    if (!m || !/^\d{4}-\d{2}$/.test(m)) return null;
+    const [y, mo] = m.split("-").map(Number);
+    const lastDay = new Date(y, mo, 0).getDate();
+    return {
+      from: `${m}-01`,
+      to: `${m}-${String(lastDay).padStart(2, "0")}`,
+    };
+  }
+
+  if (dateRange === "الإجمالي") {
+    return { from: DASHBOARD_DATA_QUALITY_FROM_DATE, to: todayKey };
+  }
+
+  if (dateRange === "اليوم") {
+    const yesterday = addDaysYmd(todayKey, -1);
+    return { from: yesterday, to: yesterday };
+  }
+
+  if (dateRange === "الأسبوع") {
+    return { from: addDaysYmd(todayKey, -7), to: addDaysYmd(todayKey, -1) };
+  }
+
+  if (dateRange === "الشهر") {
+    return { from: startOfMonthYmd(todayKey), to: todayKey };
+  }
+
+  return null;
+}
+
 /** True when YYYY-MM-DD `key` falls within YYYY-MM month and respects the data-quality floor. */
 export function isReportDateInMonth(key: string | null, yyyymm: string | null): boolean {
   if (!key || !yyyymm || !/^\d{4}-\d{2}$/.test(yyyymm)) return false;

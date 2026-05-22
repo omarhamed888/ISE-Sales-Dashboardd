@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import { Sidebar } from "./Sidebar";
@@ -8,23 +8,42 @@ import { FilterProvider } from "@/lib/filter-context";
 import { ToastProvider } from "@/components/ui/Toast";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useScheduledNotifications } from "@/lib/hooks/useScheduledNotifications";
+import { useAppConfig } from "@/lib/hooks/useAppConfig";
+import { FILTERED_ROUTES } from "@/lib/config/filtered-routes";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { user } = useAuth();
+  const { config } = useAppConfig();
   useScheduledNotifications();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  const adminRoutes = ["/dashboard", "/team", "/ads", "/reports", "/metrics"];
-  const isAdminRoute = adminRoutes.includes(location.pathname);
+  // Dynamic page title — follows the admin-configured company name. Falls back
+  // to a sensible default before the config subscription resolves.
+  useEffect(() => {
+    const name = config.companyName?.trim() || "ISE Sales Dashboard";
+    document.title = `${name} — لوحة المبيعات`;
+  }, [config.companyName]);
+
+  // Dynamic favicon — swap the <link id="app-icon"> href whenever the admin
+  // uploads a new company logo. Browsers cache aggressively, so the URL is
+  // already cache-busted by uploadCompanyLogo (`?v=<timestamp>`).
+  useEffect(() => {
+    const url = config.companyLogo?.trim();
+    if (!url) return;
+    const link = document.getElementById("app-icon") as HTMLLinkElement | null;
+    if (link) link.href = url;
+  }, [config.companyLogo]);
+
+  const isAdminRoute = FILTERED_ROUTES.includes(location.pathname);
   const isAdmin = user?.role === "admin" || user?.role === "superadmin";
   const showFilterBar = isAdminRoute && isAdmin;
 
-  // Sidebar: 240px expanded, 72px collapsed
-  // TopNav: 64px, FilterBar: 58px
+  // Sidebar: 240px expanded, 72px collapsed.
+  // TopNav: 64px. FilterBar: 56px (mobile single-row trigger) / 58px (desktop row).
   const sideOffset = isSidebarCollapsed ? "md:mr-[72px]" : "md:mr-[240px]";
-  const topOffset   = showFilterBar ? "mt-[188px] md:mt-[122px]" : "mt-[64px]";
+  const topOffset   = showFilterBar ? "mt-[120px] md:mt-[122px]" : "mt-[64px]";
 
   return (
     <FilterProvider>

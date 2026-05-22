@@ -9,6 +9,8 @@ import { subscribeToMetaConfig, type MetaConnectionConfig } from "@/lib/services
 import type { AdSpendEntry } from "@/lib/types";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton, SkeletonChart } from "@/components/ui/Skeleton";
+import { useFilter } from "@/lib/filter-context";
+import { getDashboardDateWindow } from "@/lib/utils/report-dates";
 
 type SourceFilter = "all" | "meta_api" | "manual";
 
@@ -61,9 +63,23 @@ export default function MetaInsightsPage() {
   const [config, setConfig] = useState<MetaConnectionConfig | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [fromDate, setFromDate] = useState<string>(ymdDaysAgo(30));
-  const [toDate, setToDate] = useState<string>(ymdToday());
+  // Date/period comes from the shared global FilterBar; source (API vs manual)
+  // is Meta-specific and stays page-local.
+  const { filter } = useFilter();
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("meta_api");
+
+  // Resolve the global date selection into a YYYY-MM-DD window. Falls back to
+  // last-30-days only if the selection is somehow incomplete.
+  const { fromDate, toDate } = useMemo(() => {
+    const win = getDashboardDateWindow(filter.dateRange, {
+      customDateFrom: filter.customDateFrom,
+      customDateTo: filter.customDateTo,
+      selectedMonth: filter.selectedMonth,
+    });
+    return win
+      ? { fromDate: win.from, toDate: win.to }
+      : { fromDate: ymdDaysAgo(30), toDate: ymdToday() };
+  }, [filter.dateRange, filter.customDateFrom, filter.customDateTo, filter.selectedMonth]);
 
   useEffect(() => {
     let cancelled = false;
@@ -216,31 +232,8 @@ export default function MetaInsightsPage() {
         </div>
       )}
 
-      {/* Filters */}
+      {/* Page-specific filter — date/period is controlled from the global bar above */}
       <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-4 mb-6 flex flex-wrap items-center gap-4">
-        <div className="flex items-center gap-2">
-          <label className="text-[11px] font-bold text-[#64748B]">من:</label>
-          <input
-            type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-            max={toDate}
-            className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-3 py-1.5 text-[12px] font-bold text-[#1E293B]"
-            dir="ltr"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-[11px] font-bold text-[#64748B]">إلى:</label>
-          <input
-            type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-            min={fromDate}
-            max={ymdToday()}
-            className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-3 py-1.5 text-[12px] font-bold text-[#1E293B]"
-            dir="ltr"
-          />
-        </div>
         <div className="flex items-center gap-2">
           <label className="text-[11px] font-bold text-[#64748B]">المصدر:</label>
           <select
@@ -253,6 +246,10 @@ export default function MetaInsightsPage() {
             <option value="all">الكل</option>
           </select>
         </div>
+        <span className="text-[11px] font-bold text-[#94A3B8] mr-auto hidden sm:flex items-center gap-1">
+          <span className="material-symbols-outlined text-[14px]">arrow_upward</span>
+          الفترة الزمنية من الشريط العام بالأعلى
+        </span>
       </div>
 
       {filteredSpend.length === 0 ? (

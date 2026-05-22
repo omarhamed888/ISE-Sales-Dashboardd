@@ -24,6 +24,9 @@ yarn-error.log*
 .vscode
 .idea
 
+# build artifacts
+*.tsbuildinfo
+
 # firebase
 .firebase
 firebase-debug.log

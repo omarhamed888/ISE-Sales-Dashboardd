@@ -121,6 +121,12 @@ export function MarketingKPICards({ deals, profitPctById }: { deals: Deal[]; pro
         </Link>
       </div>
 
+      {filter.courseId && filter.courseId !== "all" && (
+        <div className="mb-3 flex items-center gap-1.5 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] font-semibold text-amber-700" dir="rtl">
+          <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>info</span>
+          الإنفاق الإعلاني لا يمكن تصفيته بالكورس — ROAS و CPA يعكسان إجمالي الإنفاق
+        </div>
+      )}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiTile
           label="إجمالي المصروف"
