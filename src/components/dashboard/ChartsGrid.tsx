@@ -62,12 +62,18 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
   }, [cur.adsData, actualDealsByAd]);
 
   const donutData = useMemo(() => {
+    // Donut is sized by messages (reports own the messages signal). Each slice's
+    // label shows the platform's deal count (deals joined to a same-day report).
+    // Deals without a matching report land in the "غير محدد" slice so the totals
+    // still add up to deals.length and match the KPI.
+    const totalDeals = (deals ?? []).length;
     const wa = platform.whatsapp.messages;
     const ms = platform.messenger.messages;
     const tk = platform.tiktok?.messages || 0;
     const waI = platform.whatsapp.interactions;
     const msI = platform.messenger.interactions;
     const tkI = platform.tiktok?.interactions || 0;
+    const unkI = platform.unknown?.interactions || 0;
     const slices: { name: string; value: number; fill: string }[] = [];
     if (wa > 0) {
       slices.push({
@@ -90,8 +96,21 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
         fill: tkI === 0 ? "#f2f2f2" : "#333333",
       });
     }
+    // Only show the "unknown" slice if there are unattributed deals. Size it so
+    // it stays visible in the donut (we don't have a messages count for it) by
+    // borrowing the average messages-per-deal from the attributed slices.
+    if (unkI > 0) {
+      const attributedDeals = Math.max(1, totalDeals - unkI);
+      const attributedMsgs = wa + ms + tk;
+      const sliceValue = Math.max(1, Math.round((attributedMsgs / attributedDeals) * unkI));
+      slices.push({
+        name: `غير محدد (${unkI} صفقة)`,
+        value: sliceValue,
+        fill: "#cbd5e1",
+      });
+    }
     return slices;
-  }, [platform]);
+  }, [platform, deals]);
 
   const FunnelTooltip = ({ active, payload }: any) => {
     if (!active || !payload?.length) return null;

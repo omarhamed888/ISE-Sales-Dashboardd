@@ -13,14 +13,12 @@ import {
   parseYmdToDate,
 } from "@/lib/utils/report-dates";
 
-/** Extract YYYY-MM-DD key from a deal's closeDate (preferred) or fallback date. */
+/** Extract YYYY-MM-DD key from a deal's closeDate. Keep this aligned with
+ *  `filterDealsByDashboardDate` and the `getDealsByDateRange` server query —
+ *  all three only consider closeDate so the dashboard and /deals-analytics
+ *  bucket the same rows on the same days. */
 function dealDateKey(d: any): string | null {
-  const raw =
-    typeof d?.closeDate === "string" && d.closeDate.trim()
-      ? d.closeDate.trim()
-      : typeof d?.date === "string"
-        ? d.date.trim()
-        : "";
+  const raw = typeof d?.closeDate === "string" && d.closeDate.trim() ? d.closeDate.trim() : "";
   if (!raw) return null;
   const key = raw.split("T")[0];
   return /^\d{4}-\d{2}-\d{2}$/.test(key) ? key : null;
@@ -49,10 +47,11 @@ export function classifyPlatform(platformRaw: string | undefined): PlatformKey {
 }
 
 /**
- * Per-platform totals. Messages come from reports (authoritative per platform). Interactions
- * here are the *report-matched* deal counts — `Deal` does not carry a platform field, so deals
- * with no matching report on the same `salesRepId|date` are not attributed to any platform.
- * The KPI/chart totals use the unified deal-based path, so a small mismatch here is expected.
+ * Per-platform totals. Messages come from reports (authoritative per platform).
+ * Interactions per platform = deals with a matching report on the same `salesRepId|date`
+ * (since `Deal` doesn't carry a platform field). Deals that have no matching report fall
+ * into the `unknown` bucket so the sum across platforms still equals `deals.length` and
+ * matches the KPI.
  */
 export function getPlatformStats(reports: any[], deals?: any[]): PlatformStats {
   const dealsByKey = deals ? buildDealsCountByReportKey(deals) : undefined;
@@ -60,7 +59,9 @@ export function getPlatformStats(reports: any[], deals?: any[]): PlatformStats {
     whatsapp: { messages: 0, interactions: 0 },
     messenger: { messages: 0, interactions: 0 },
     tiktok: { messages: 0, interactions: 0 },
+    unknown: { messages: 0, interactions: 0 },
   };
+  let attributedDeals = 0;
   reports.forEach((r) => {
     const pd = r.parsedData;
     if (!pd) return;
@@ -69,13 +70,20 @@ export function getPlatformStats(reports: any[], deals?: any[]): PlatformStats {
       (typeof pd.totalMessages === "number" ? pd.totalMessages : null) ??
       pd.summary?.totalMessages ??
       0;
-    const dealCount = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
-    const intr = calcInteractionsFromParsedData(pd, dealCount);
     if (msgs === 0) return;
     const key = classifyPlatform(r.platform);
     out[key].messages += msgs;
-    out[key].interactions += intr;
+    if (dealsByKey) {
+      const dealCount = getDealCountForReport(r, dealsByKey);
+      out[key].interactions += dealCount;
+      attributedDeals += dealCount;
+    } else {
+      out[key].interactions += calcInteractionsFromParsedData(pd);
+    }
   });
+  if (deals) {
+    out.unknown.interactions = Math.max(0, deals.length - attributedDeals);
+  }
   return out;
 }
 

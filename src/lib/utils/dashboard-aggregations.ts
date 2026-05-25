@@ -63,7 +63,11 @@ function shouldIncludeAdRow(adName: string | undefined): boolean {
 }
 
 export function calculateAggregates(reports: any[], deals?: any[]) {
-  const dealsByKey = deals ? buildDealsCountByReportKey(deals) : undefined;
+  // When deals are provided we trust them as the single source of truth for
+  // "interactions" — every uploaded deal counts, even if there is no report
+  // on the same salesRepId|date. The old per-report join undercounted because
+  // deals without a matching report leaked out.
+  const useDealsForInteractions = Array.isArray(deals);
   let totalMessages = 0;
   let interactions = 0;
   const funnel = { greeting: 0, details: 0, price: 0, success: 0 };
@@ -78,13 +82,14 @@ export function calculateAggregates(reports: any[], deals?: any[]) {
       (typeof pd.totalMessages === "number" ? pd.totalMessages : null) ??
       pd.summary?.totalMessages ??
       0;
-    const dealCount = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
-    const intr = calcInteractionsFromParsedData(pd, dealCount);
 
     if (tm === 0) return;
 
     totalMessages += tm;
-    interactions += intr;
+    if (!useDealsForInteractions) {
+      // Legacy path — no deals available, fall back to report-derived counts.
+      interactions += calcInteractionsFromParsedData(pd);
+    }
     jobConfusionCount += pd.jobConfusionCount || 0;
 
     const f = pd.funnel || pd.funnels;
@@ -118,6 +123,10 @@ export function calculateAggregates(reports: any[], deals?: any[]) {
     funnel.price += processStage(f.noReplyAfterPrice || f.noReplyPrice, "price");
     funnel.success += processStage(f.repliedAfterPrice, "success");
   });
+
+  if (useDealsForInteractions) {
+    interactions = deals!.length;
+  }
 
   const conversionRate = calcConversionRate(interactions, totalMessages);
 

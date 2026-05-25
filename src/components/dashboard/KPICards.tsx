@@ -33,7 +33,7 @@ function KPICard({ label, value, icon, accentColor, bgTint, iconColor, valueColo
   );
 }
 
-export function KPICards({ reports, allReports, deals }: { reports: any[]; allReports: any[]; deals?: any[] }) {
+export function KPICards({ reports, allReports, deals, prevDeals }: { reports: any[]; allReports: any[]; deals?: any[]; prevDeals?: any[] }) {
   const { filter } = useFilter();
 
   const courseDealKeys = useMemo(() => {
@@ -56,7 +56,9 @@ export function KPICards({ reports, allReports, deals }: { reports: any[]; allRe
     globalFilter,
     courseDealKeys
   );
-  const prevGlobalAgg = calculateAggregates(prevGlobalReports, deals);
+  // Previous-period interactions must come from the previous-period deals, not
+  // the current ones — otherwise the conversion delta compares apples to oranges.
+  const prevGlobalAgg = calculateAggregates(prevGlobalReports, prevDeals);
 
   const pctDelta = (current: number, previous: number) => {
     if (!previous) return 0;
@@ -90,10 +92,12 @@ export function KPICards({ reports, allReports, deals }: { reports: any[]; allRe
         iconColor="text-[#2563EB]"
       />
 
-      {/* Card 2: الصفقات المغلقة */}
+      {/* Card 2: الصفقات المغلقة — count the actual filtered deals (matches
+          DealCycleSection and DealsAnalyticsPage). cur.interactions also equals
+          deals.length now, but using `deals` directly keeps the intent obvious. */}
       <KPICard
         label="الصفقات المغلقة"
-        value={cur.interactions.toLocaleString('en-US')}
+        value={(deals?.length ?? 0).toLocaleString('en-US')}
         icon="handshake"
         accentColor="border-r-[#10B981]"
         bgTint="bg-[#ECFDF5]"

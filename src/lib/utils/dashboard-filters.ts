@@ -165,28 +165,34 @@ export function getDashboardPreviousPeriodReports(
   return filterReportsByYmdRange(allReports, filter, range.from, range.to, courseDealKeys);
 }
 
+/** Non-date filters shared by current- and previous-period deal filtering. */
+export function dealMatchesNonDateFilters(d: any, filter: FilterState): boolean {
+  if (filter.salesRep !== "all" && d.salesRepId !== filter.salesRep) return false;
+  if (filter.bookingType && filter.bookingType !== "all") {
+    const bt = d.bookingType || (d.closureType === "call" ? "call_booking" : "self_booking");
+    if (bt !== filter.bookingType) return false;
+  }
+  if (filter.dealCategory && filter.dealCategory !== "all") {
+    const category = d.dealCategory === "side" ? "side" : "core";
+    if (category !== filter.dealCategory) return false;
+  }
+  if (filter.courseId && filter.courseId !== "all") {
+    const products = Array.isArray(d.products) ? d.products : [];
+    if (!products.includes(filter.courseId)) return false;
+  }
+  return true;
+}
+
 /** Closed deals whose closeDate falls in the same dashboard window as reports (اليوم / الأسبوع / الشهر / الإجمالي). */
 export function filterDealsByDashboardDate(deals: any[], filter: FilterState): any[] {
   return deals.filter((d) => {
-    if (filter.salesRep !== "all" && d.salesRepId !== filter.salesRep) return false;
-    if (filter.bookingType && filter.bookingType !== "all") {
-      const bt = d.bookingType || (d.closureType === "call" ? "call_booking" : "self_booking");
-      if (bt !== filter.bookingType) return false;
-    }
-    if (filter.dealCategory && filter.dealCategory !== "all") {
-      const category = d.dealCategory === "side" ? "side" : "core";
-      if (category !== filter.dealCategory) return false;
-    }
-    if (filter.courseId && filter.courseId !== "all") {
-      const products = Array.isArray(d.products) ? d.products : [];
-      if (!products.includes(filter.courseId)) return false;
-    }
+    if (!dealMatchesNonDateFilters(d, filter)) return false;
+    // Source `closeDate` only — matches `getDealsByDateRange`'s server query
+    // (which only indexes closeDate). Falling back to `d.date` would let
+    // legacy rows leak into client-side counts on /deals-analytics that the
+    // dashboard's Firestore query can never see, breaking parity.
     const raw =
-      typeof d.closeDate === "string" && d.closeDate.trim()
-        ? d.closeDate.trim()
-        : typeof d.date === "string"
-          ? d.date.trim()
-          : "";
+      typeof d.closeDate === "string" && d.closeDate.trim() ? d.closeDate.trim() : "";
     if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return false;
     if (filter.dateRange === "مخصص") {
       if (!filter.customDateFrom || !filter.customDateTo) return false;

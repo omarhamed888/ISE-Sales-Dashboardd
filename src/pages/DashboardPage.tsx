@@ -7,8 +7,9 @@ import {
   buildCourseDealKeys,
   filterReports,
   filterDealsByDashboardDate,
+  dealMatchesNonDateFilters,
 } from "@/lib/utils/dashboard-filters";
-import { getDashboardDateWindow, formatYmdLocal } from "@/lib/utils/report-dates";
+import { getDashboardDateWindow, formatYmdLocal, getPreviousPeriodYmdRange } from "@/lib/utils/report-dates";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { TeamStatusSummary } from "@/components/dashboard/TeamStatusSummary";
@@ -24,6 +25,7 @@ const DealCycleSection = lazy(() => import("@/components/dashboard/DealCycleSect
 export default function DashboardPage() {
   const [allReports, setAllReports] = useState<any[]>([]);
   const [windowedDeals, setWindowedDeals] = useState<any[]>([]);
+  const [prevWindowedDeals, setPrevWindowedDeals] = useState<any[]>([]);
   const [yesterdayDeals, setYesterdayDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -77,6 +79,28 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, [user?.uid, dealWindow]);
 
+  // Previous-period deals, needed so KPICards can compute a meaningful
+  // conversion delta. Skipped for "مخصص" / "شهر محدد" since the comparison
+  // helper returns null for those (no fixed previous window).
+  const prevDealWindow = useMemo(() => {
+    if (filter.dateRange === "مخصص" || filter.dateRange === "شهر محدد") return null;
+    return getPreviousPeriodYmdRange(
+      filter.dateRange as "اليوم" | "الأسبوع" | "الشهر" | "الإجمالي"
+    );
+  }, [filter.dateRange]);
+
+  useEffect(() => {
+    if (!user?.uid || !prevDealWindow) {
+      setPrevWindowedDeals([]);
+      return;
+    }
+    let cancelled = false;
+    getDealsByDateRange(prevDealWindow.from, prevDealWindow.to)
+      .then((d) => { if (!cancelled) setPrevWindowedDeals(d as any[]); })
+      .catch(() => { if (!cancelled) setPrevWindowedDeals([]); });
+    return () => { cancelled = true; };
+  }, [user?.uid, prevDealWindow]);
+
   // TeamStatusSummary is always about *yesterday*, independent of the filter, so
   // it gets its own single-day query (cheap) rather than relying on the window
   // — which may not include yesterday for past "شهر محدد"/"مخصص" selections.
@@ -99,6 +123,12 @@ export default function DashboardPage() {
   const profitPctById = useMemo(() => buildProfitPctMap(courses), [courses]);
 
   const filteredDeals = useMemo(() => filterDealsByDashboardDate(windowedDeals, filter), [windowedDeals, filter]);
+  // Previous-period deals already come from a query scoped to the prev window —
+  // here we only re-apply the non-date filters (rep / course / category / booking).
+  const filteredPrevDeals = useMemo(
+    () => prevWindowedDeals.filter((d) => dealMatchesNonDateFilters(d, filter)),
+    [prevWindowedDeals, filter]
+  );
   const courseDealKeys = useMemo(() => {
     if (filter.courseId === "all") return undefined;
     return buildCourseDealKeys(filteredDeals);
@@ -192,7 +222,7 @@ export default function DashboardPage() {
            <>
               {/* ───── 1. OVERVIEW: KPIs at a glance ───── */}
               <SectionDivider icon="analytics" label="نظرة عامة" />
-              <KPICards reports={currentReports} allReports={allReports} deals={filteredDeals} />
+              <KPICards reports={currentReports} allReports={allReports} deals={filteredDeals} prevDeals={filteredPrevDeals} />
 
               {/* ───── 2. TEAM YESTERDAY: who submitted, where they stand ───── */}
               <SectionDivider icon="groups" label="حالة الفريق أمس" />
