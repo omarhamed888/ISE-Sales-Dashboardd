@@ -144,23 +144,24 @@ export function DateRangePicker({ from, to, onChange }: DateRangePickerProps) {
 
   return (
     <div ref={rootRef} className="relative flex items-center gap-1 shrink-0" dir="rtl">
-      {/* Prev arrow */}
-      <button
-        type="button"
-        onClick={() => shiftDays(-1)}
-        disabled={!canNavigate}
-        title="الفترة السابقة"
-        aria-label="الفترة السابقة"
-        className="h-10 w-10 sm:h-9 sm:w-9 rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] hover:text-[#1E40AF] hover:border-[#1E40AF]/40 hover:bg-[#EFF6FF] flex items-center justify-center transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#64748B] disabled:hover:border-[#E2E8F0] shrink-0"
-      >
-        <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-      </button>
+      {/* Prev arrow — only shown when a range is active (otherwise nothing to shift) */}
+      {canNavigate && (
+        <button
+          type="button"
+          onClick={() => shiftDays(-1)}
+          title="الفترة السابقة"
+          aria-label="الفترة السابقة"
+          className="h-10 w-10 sm:h-8 sm:w-8 rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] hover:text-[#1E40AF] hover:border-[#1E40AF]/40 hover:bg-[#EFF6FF] flex items-center justify-center transition-all duration-150 shrink-0"
+        >
+          <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+        </button>
+      )}
 
-      {/* Chip — opens picker */}
+      {/* Chip — opens picker. Compact when empty (placeholder), wider when a range is set. */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`h-10 sm:h-9 inline-flex items-center gap-2 px-3.5 rounded-xl border text-[12px] font-bold transition-all duration-150 min-w-0 ${
+        className={`h-10 sm:h-8 inline-flex items-center gap-1.5 px-3 rounded-xl border text-[12px] font-bold transition-all duration-150 min-w-0 ${
           from && to
             ? "bg-[#EFF6FF] border-[#1E40AF]/40 text-[#1E40AF] hover:border-[#1E40AF]"
             : "bg-white border-[#E2E8F0] text-[#64748B] hover:border-[#CBD5E1] hover:bg-[#F8FAFC]"
@@ -173,17 +174,18 @@ export function DateRangePicker({ from, to, onChange }: DateRangePickerProps) {
         <span className="material-symbols-outlined text-[14px] opacity-60 shrink-0">expand_more</span>
       </button>
 
-      {/* Next arrow */}
-      <button
-        type="button"
-        onClick={() => shiftDays(1)}
-        disabled={!canNavigate}
-        title="الفترة التالية"
-        aria-label="الفترة التالية"
-        className="h-10 w-10 sm:h-9 sm:w-9 rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] hover:text-[#1E40AF] hover:border-[#1E40AF]/40 hover:bg-[#EFF6FF] flex items-center justify-center transition-all duration-150 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#64748B] disabled:hover:border-[#E2E8F0] shrink-0"
-      >
-        <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-      </button>
+      {/* Next arrow — only shown when a range is active */}
+      {canNavigate && (
+        <button
+          type="button"
+          onClick={() => shiftDays(1)}
+          title="الفترة التالية"
+          aria-label="الفترة التالية"
+          className="h-10 w-10 sm:h-8 sm:w-8 rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] hover:text-[#1E40AF] hover:border-[#1E40AF]/40 hover:bg-[#EFF6FF] flex items-center justify-center transition-all duration-150 shrink-0"
+        >
+          <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+        </button>
+      )}
 
       {/* Picker overlay — bottom sheet on mobile, popover on sm+ */}
       {open && (

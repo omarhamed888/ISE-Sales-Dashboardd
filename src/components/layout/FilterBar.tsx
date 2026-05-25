@@ -268,43 +268,53 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
           bg-white border-b border-[#E2E8F0] shadow-sm
         `}
       >
-        {/* ── Desktop / tablet: full inline row ──────────────────────────── */}
-        <div className="hidden md:flex flex-row-reverse items-center gap-3 px-6 h-[58px]">
-          {renderDatePills("bar")}
-          {renderMonthPicker()}
-          {renderDateRangePicker()}
-
-          <div className="flex flex-wrap items-center gap-2 flex-1 justify-end">
-            {!isDateOnly && selectors.map((s) => {
-              const active = s.value && s.value !== "all";
-              const widthCap = s.key === "salesRep" || s.key === "courseId" ? "max-w-[150px]"
-                : s.key === "adName" ? "max-w-[160px]" : "";
-              return (
-                <select
-                  key={s.key}
-                  value={s.value}
-                  onChange={(e) => s.apply(e.target.value)}
-                  className={`${selectCls} ${widthCap} ${active ? selectActiveCls : ""}`}
-                  disabled={isLoadingProps}
-                >
-                  {s.options.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-              );
-            })}
-
-            {!isDateOnly && <div className="h-5 w-px bg-[#E2E8F0] mx-0.5" />}
-
-            <button
-              onClick={resetFilter}
-              title="إعادة تعيين الفلاتر"
-              disabled={activeCount === 0 && filter.dateRange === "اليوم"}
-              className="h-9 w-9 rounded-xl border border-[#E2E8F0] text-[#94A3B8] hover:text-[#DC2626] hover:bg-red-50 hover:border-red-200 flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-[#94A3B8] disabled:hover:border-[#E2E8F0]"
-            >
-              <span className="material-symbols-outlined text-[17px]">filter_alt_off</span>
-            </button>
+        {/* ── Desktop / tablet: single-row inline bar (selects scroll if overflow) ── */}
+        <div className="hidden md:flex items-center gap-2 px-4 h-[58px]">
+          {/* Date controls group (pills + custom range chip + nav arrows) */}
+          <div className="flex items-center gap-2 shrink-0">
+            {renderDatePills("bar")}
+            {renderMonthPicker()}
+            {renderDateRangePicker()}
           </div>
+
+          {!isDateOnly && (
+            <>
+              {/* Visual divider between date controls and dimension filters */}
+              <div className="h-6 w-px bg-[#E2E8F0] shrink-0" />
+
+              {/* Scrollable selects row — never wraps, scrolls horizontally on narrow widths */}
+              <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto no-scrollbar">
+                {selectors.map((s) => {
+                  const active = s.value && s.value !== "all";
+                  const widthCap = s.key === "salesRep" || s.key === "courseId" ? "max-w-[140px]"
+                    : s.key === "adName" ? "max-w-[150px]" : "";
+                  return (
+                    <select
+                      key={s.key}
+                      value={s.value}
+                      onChange={(e) => s.apply(e.target.value)}
+                      className={`${selectCls} ${widthCap} shrink-0 ${active ? selectActiveCls : ""}`}
+                      disabled={isLoadingProps}
+                    >
+                      {s.options.map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </select>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* Reset — always pinned at the end */}
+          <button
+            onClick={resetFilter}
+            title="إعادة تعيين الفلاتر"
+            disabled={activeCount === 0 && filter.dateRange === "اليوم"}
+            className="h-9 w-9 rounded-xl border border-[#E2E8F0] text-[#94A3B8] hover:text-[#DC2626] hover:bg-red-50 hover:border-red-200 flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0 disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-[#94A3B8] disabled:hover:border-[#E2E8F0]"
+          >
+            <span className="material-symbols-outlined text-[17px]">filter_alt_off</span>
+          </button>
         </div>
 
         {/* ── Mobile: trigger row + active chips strip ───────────────────── */}
