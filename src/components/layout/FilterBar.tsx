@@ -8,6 +8,7 @@ import { useAvailableMonths } from "@/lib/hooks/useAvailableMonths";
 import { useCourses } from "@/lib/hooks/useCourses";
 import { FILTERED_ROUTES, DATE_ONLY_FILTER_ROUTES } from "@/lib/config/filtered-routes";
 import { FilterSheet, SheetField } from "./FilterSheet";
+import { DateRangePicker } from "@/components/filters/DateRangePicker";
 
 const selectCls = `
   bg-white border border-[#E2E8F0] rounded-xl px-3 py-2
@@ -20,13 +21,6 @@ const selectCls = `
 // Applied on top of selectCls when a selector holds a non-default value, so an
 // active filter reads at a glance on desktop (mirrors DealsAnalyticsPage style).
 const selectActiveCls = "bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]";
-
-const dateInputCls = `
-  bg-white border border-[#E2E8F0] rounded-xl px-3 py-2
-  text-[12px] font-bold text-[#1E293B]
-  focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 focus:border-[#1E40AF]/50
-  transition-colors
-`.replace(/\s+/g, ' ').trim();
 
 type Option = { value: string; label: string };
 
@@ -41,7 +35,8 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
   const isDateOnly = DATE_ONLY_FILTER_ROUTES.includes(location.pathname);
   const isAdmin = user?.role === "admin" || user?.role === "superadmin";
 
-  const ranges: DateRange[] = ["اليوم", "الأسبوع", "الشهر", "شهر محدد", "الإجمالي", "مخصص"];
+  // "مخصص" is reached via the DateRangePicker chip, not as a pill.
+  const ranges: DateRange[] = ["اليوم", "الأسبوع", "الشهر", "شهر محدد", "الإجمالي"];
   const [salesReps, setSalesReps] = useState<{ uid: string; name: string }[]>([]);
   const [uniqueAds, setUniqueAds] = useState<string[]>([]);
   const [isLoadingProps, setIsLoadingProps] = useState(true);
@@ -195,39 +190,21 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
       </div>
     );
 
-  const renderCustomRange = () =>
-    filter.dateRange === "مخصص" && (
-      <div className="flex flex-wrap items-center gap-2 shrink-0">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider">من</span>
-          <input
-            type="date"
-            value={filter.customDateFrom ? filter.customDateFrom.toISOString().slice(0, 10) : ""}
-            max={filter.customDateTo ? filter.customDateTo.toISOString().slice(0, 10) : undefined}
-            onChange={(e) => updateFilter({ customDateFrom: e.target.value ? new Date(e.target.value) : null })}
-            className={dateInputCls}
-            dir="ltr"
-          />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider">إلى</span>
-          <input
-            type="date"
-            value={filter.customDateTo ? filter.customDateTo.toISOString().slice(0, 10) : ""}
-            min={filter.customDateFrom ? filter.customDateFrom.toISOString().slice(0, 10) : undefined}
-            onChange={(e) => updateFilter({ customDateTo: e.target.value ? new Date(e.target.value) : null })}
-            className={dateInputCls}
-            dir="ltr"
-          />
-        </div>
-        {filter.customDateFrom && filter.customDateTo &&
-          filter.customDateFrom > filter.customDateTo && (
-          <span className="text-[11px] font-black text-[#DC2626] bg-red-50 border border-red-200 rounded-lg px-2 py-1">
-            تاريخ البداية بعد النهاية
-          </span>
-        )}
-      </div>
-    );
+  // Custom range chip + popover + prev/next arrows. Picking a range switches
+  // the active dateRange to "مخصص" automatically.
+  const renderDateRangePicker = () => (
+    <DateRangePicker
+      from={filter.dateRange === "مخصص" ? filter.customDateFrom : null}
+      to={filter.dateRange === "مخصص" ? filter.customDateTo : null}
+      onChange={({ from, to }) =>
+        updateFilter({
+          dateRange: from && to ? "مخصص" : filter.dateRange,
+          customDateFrom: from,
+          customDateTo: to,
+        })
+      }
+    />
+  );
 
   const currentRangeLabel = filter.dateRange === "شهر محدد" && filter.selectedMonth
     ? availableMonths.find((m) => m.value === filter.selectedMonth)?.label ?? "شهر محدد"
@@ -247,7 +224,7 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
         <div className="hidden md:flex flex-row-reverse items-center gap-3 px-6 h-[58px]">
           {renderDatePills("bar")}
           {renderMonthPicker()}
-          {renderCustomRange()}
+          {renderDateRangePicker()}
 
           <div className="flex flex-wrap items-center gap-2 flex-1 justify-end">
             {!isDateOnly && selectors.map((s) => {
@@ -319,9 +296,7 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
         {filter.dateRange === "شهر محدد" && (
           <SheetField label="الشهر">{renderMonthPicker()}</SheetField>
         )}
-        {filter.dateRange === "مخصص" && (
-          <SheetField label="نطاق مخصص">{renderCustomRange()}</SheetField>
-        )}
+        <SheetField label="نطاق مخصص">{renderDateRangePicker()}</SheetField>
         {!isDateOnly && selectors.map((s) => (
           <SheetField key={s.key} label={s.label}>
             <select

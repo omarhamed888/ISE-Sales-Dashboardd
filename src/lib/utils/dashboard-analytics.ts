@@ -49,9 +49,8 @@ export function classifyPlatform(platformRaw: string | undefined): PlatformKey {
 /**
  * Per-platform totals. Messages come from reports (authoritative per platform).
  * Interactions per platform = deals with a matching report on the same `salesRepId|date`
- * (since `Deal` doesn't carry a platform field). Deals that have no matching report fall
- * into the `unknown` bucket so the sum across platforms still equals `deals.length` and
- * matches the KPI.
+ * (since `Deal` doesn't carry a platform field). The donut now hides deal counts so this
+ * shortfall is no longer visible to the user.
  */
 export function getPlatformStats(reports: any[], deals?: any[]): PlatformStats {
   const dealsByKey = deals ? buildDealsCountByReportKey(deals) : undefined;
@@ -59,9 +58,7 @@ export function getPlatformStats(reports: any[], deals?: any[]): PlatformStats {
     whatsapp: { messages: 0, interactions: 0 },
     messenger: { messages: 0, interactions: 0 },
     tiktok: { messages: 0, interactions: 0 },
-    unknown: { messages: 0, interactions: 0 },
   };
-  let attributedDeals = 0;
   reports.forEach((r) => {
     const pd = r.parsedData;
     if (!pd) return;
@@ -74,16 +71,11 @@ export function getPlatformStats(reports: any[], deals?: any[]): PlatformStats {
     const key = classifyPlatform(r.platform);
     out[key].messages += msgs;
     if (dealsByKey) {
-      const dealCount = getDealCountForReport(r, dealsByKey);
-      out[key].interactions += dealCount;
-      attributedDeals += dealCount;
+      out[key].interactions += getDealCountForReport(r, dealsByKey);
     } else {
       out[key].interactions += calcInteractionsFromParsedData(pd);
     }
   });
-  if (deals) {
-    out.unknown.interactions = Math.max(0, deals.length - attributedDeals);
-  }
   return out;
 }
 

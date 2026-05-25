@@ -209,6 +209,4 @@ export interface PlatformStats {
   whatsapp: { messages: number; interactions: number };
   messenger: { messages: number; interactions: number };
   tiktok: { messages: number; interactions: number };
-  /** Deals with no report on the same salesRepId|date — can't be attributed to a platform. */
-  unknown: { messages: number; interactions: number };
 }

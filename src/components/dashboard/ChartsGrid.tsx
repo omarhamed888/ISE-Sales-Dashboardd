@@ -62,55 +62,17 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
   }, [cur.adsData, actualDealsByAd]);
 
   const donutData = useMemo(() => {
-    // Donut is sized by messages (reports own the messages signal). Each slice's
-    // label shows the platform's deal count (deals joined to a same-day report).
-    // Deals without a matching report land in the "غير محدد" slice so the totals
-    // still add up to deals.length and match the KPI.
-    const totalDeals = (deals ?? []).length;
+    // Donut is sized by messages (reports own the messages signal). Deal counts
+    // intentionally omitted — they live in the KPI card and other deal-driven charts.
     const wa = platform.whatsapp.messages;
     const ms = platform.messenger.messages;
     const tk = platform.tiktok?.messages || 0;
-    const waI = platform.whatsapp.interactions;
-    const msI = platform.messenger.interactions;
-    const tkI = platform.tiktok?.interactions || 0;
-    const unkI = platform.unknown?.interactions || 0;
     const slices: { name: string; value: number; fill: string }[] = [];
-    if (wa > 0) {
-      slices.push({
-        name: `واتساب (${waI} صفقة)`,
-        value: wa,
-        fill: "#3498db",
-      });
-    }
-    if (ms > 0) {
-      slices.push({
-        name: `ماسنجر (${msI} صفقة)`,
-        value: ms,
-        fill: msI === 0 ? "#e8f5e9" : "#85c1e9",
-      });
-    }
-    if (tk > 0) {
-      slices.push({
-        name: `تيك توك (${tkI} صفقة)`,
-        value: tk,
-        fill: tkI === 0 ? "#f2f2f2" : "#333333",
-      });
-    }
-    // Only show the "unknown" slice if there are unattributed deals. Size it so
-    // it stays visible in the donut (we don't have a messages count for it) by
-    // borrowing the average messages-per-deal from the attributed slices.
-    if (unkI > 0) {
-      const attributedDeals = Math.max(1, totalDeals - unkI);
-      const attributedMsgs = wa + ms + tk;
-      const sliceValue = Math.max(1, Math.round((attributedMsgs / attributedDeals) * unkI));
-      slices.push({
-        name: `غير محدد (${unkI} صفقة)`,
-        value: sliceValue,
-        fill: "#cbd5e1",
-      });
-    }
+    if (wa > 0) slices.push({ name: "واتساب", value: wa, fill: "#3498db" });
+    if (ms > 0) slices.push({ name: "ماسنجر", value: ms, fill: "#85c1e9" });
+    if (tk > 0) slices.push({ name: "تيك توك", value: tk, fill: "#333333" });
     return slices;
-  }, [platform, deals]);
+  }, [platform]);
 
   const FunnelTooltip = ({ active, payload }: any) => {
     if (!active || !payload?.length) return null;
@@ -172,7 +134,7 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
         </div>
       </DashboardChartCard>
 
-      <DashboardChartCard title="أداء المنصات" subtitle="إجمالي الرسائل والصفقات حسب المنصة">
+      <DashboardChartCard title="أداء المنصات" subtitle="إجمالي الرسائل حسب المنصة">
         <div className="h-full w-full" dir="ltr">
           {donutData.length === 0 ? (
             <div className="flex h-full items-center justify-center text-sm font-semibold text-[#7f8c8d]" dir="rtl">
