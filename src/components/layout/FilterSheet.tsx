@@ -105,12 +105,31 @@ export function FilterSheet({
 
 /**
  * A labeled field wrapper used inside the sheet to give each control a clear
- * Arabic label and consistent vertical rhythm.
+ * Arabic label and consistent vertical rhythm. Optional icon renders to the
+ * right of the label (RTL) — helps the eye land on the right control fast.
  */
-export function SheetField({ label, children }: { label: string; children: ReactNode }) {
+export function SheetField({
+  label,
+  icon,
+  children,
+}: {
+  label: string;
+  icon?: string;
+  children: ReactNode;
+}) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider">{label}</span>
+    <div className="flex flex-col gap-2">
+      <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wider flex items-center gap-1.5">
+        {icon && (
+          <span
+            className="material-symbols-outlined text-[15px] text-[#1E40AF]"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+          >
+            {icon}
+          </span>
+        )}
+        {label}
+      </span>
       {children}
     </div>
   );
