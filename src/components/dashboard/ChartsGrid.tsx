@@ -9,6 +9,7 @@ import {
 import { DashboardChartCard } from "@/components/dashboard/DashboardChartCard";
 import { DailyConversionChart } from "@/components/dashboard/DailyConversionChart";
 import { SalesRepComparisonChart } from "@/components/dashboard/SalesRepComparisonChart";
+import { useFilter } from "@/lib/filter-context";
 import {
   BarChart,
   Bar,
@@ -29,6 +30,7 @@ import {
 } from "recharts";
 
 export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }) {
+  const { updateFilter } = useFilter();
   const cur = useMemo(() => calculateAggregates(reports, deals), [reports, deals]);
   const platform = useMemo(() => getPlatformStats(reports, deals), [reports, deals]);
   const funnelData = useMemo(() => buildConversionFunnelBars(cur), [cur]);
@@ -230,7 +232,10 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
       </DashboardChartCard>
 
       <DashboardChartCard title="مقارنة أداء المندوبين" subtitle="الرسائل والصفقات المغلقة لكل مندوب">
-        <SalesRepComparisonChart data={repBuckets} />
+        <SalesRepComparisonChart
+          data={repBuckets}
+          onRepSelect={(salesRepId) => updateFilter({ salesRep: salesRepId })}
+        />
       </DashboardChartCard>
 
       <DashboardChartCard

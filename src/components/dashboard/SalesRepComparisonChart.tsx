@@ -20,7 +20,13 @@ import type { SalesRepBucket } from "@/lib/utils/dashboard-analytics";
  * Two reps with the same close count can look very different here — the line
  * separates "high volume / low quality" from "low volume / high quality".
  */
-export function SalesRepComparisonChart({ data }: { data: SalesRepBucket[] }) {
+export function SalesRepComparisonChart({
+  data,
+  onRepSelect,
+}: {
+  data: SalesRepBucket[];
+  onRepSelect?: (salesRepId: string) => void;
+}) {
   if (data.length === 0) {
     return (
       <div className="flex h-full items-center justify-center text-sm font-semibold text-[#7f8c8d]" dir="rtl">
@@ -30,6 +36,7 @@ export function SalesRepComparisonChart({ data }: { data: SalesRepBucket[] }) {
   }
 
   const chartData = data.map((r) => ({
+    salesRepId: r.salesRepId,
     name: r.displayName,
     fullName: r.name,
     messages: r.messages,
@@ -65,6 +72,13 @@ export function SalesRepComparisonChart({ data }: { data: SalesRepBucket[] }) {
         </div>
       </div>
     );
+  };
+
+  const handleSeriesClick = (point: any) => {
+    const row = point?.payload ?? point;
+    const salesRepId = typeof row?.salesRepId === "string" ? row.salesRepId : "";
+    if (!salesRepId || !onRepSelect) return;
+    onRepSelect(salesRepId);
   };
 
   return (
@@ -114,6 +128,8 @@ export function SalesRepComparisonChart({ data }: { data: SalesRepBucket[] }) {
               fill="#3498db"
               radius={[4, 4, 0, 0]}
               maxBarSize={26}
+              cursor={onRepSelect ? "pointer" : "default"}
+              onClick={handleSeriesClick}
             />
             <Bar
               yAxisId="left"
@@ -122,6 +138,8 @@ export function SalesRepComparisonChart({ data }: { data: SalesRepBucket[] }) {
               fill="#27ae60"
               radius={[4, 4, 0, 0]}
               maxBarSize={26}
+              cursor={onRepSelect ? "pointer" : "default"}
+              onClick={handleSeriesClick}
             />
             <Line
               yAxisId="right"
@@ -132,6 +150,8 @@ export function SalesRepComparisonChart({ data }: { data: SalesRepBucket[] }) {
               strokeWidth={2.5}
               dot={{ r: 3, strokeWidth: 2, fill: "#fff", stroke: "#F59E0B" }}
               activeDot={{ r: 5 }}
+              cursor={onRepSelect ? "pointer" : "default"}
+              onClick={handleSeriesClick}
             />
           </ComposedChart>
         </ResponsiveContainer>

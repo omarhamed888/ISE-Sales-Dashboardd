@@ -1,8 +1,11 @@
 import { useEffect, useState, useMemo } from 'react';
-import { getAllDeals, netDealValue, buildProfitPctMap } from '@/lib/services/deals-service';
+import { getDealsByDateRange, netDealValue, buildProfitPctMap } from '@/lib/services/deals-service';
 import { useCourses } from '@/lib/hooks/useCourses';
 import { useFilter } from '@/lib/filter-context';
 import { filterDealsByDashboardDate } from '@/lib/utils/dashboard-filters';
+import { getDashboardDateWindow } from '@/lib/utils/report-dates';
+import { exportRowsToExcel } from '@/lib/utils/excel-export';
+import { useToast } from '@/components/ui/Toast';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { inferProductIdsFromProgramName, buildProgramNameFromProducts, classifyDealCategory } from '@/lib/utils/normalize-course-names';
 
@@ -41,6 +44,7 @@ function KpiCard({ label, value, sub, icon, accent }: { label: string; value: st
 }
 
 export default function DealsAnalyticsPage() {
+  const { showToast } = useToast();
   const [deals, setDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   // Page-specific filter (not part of the global FilterContext — only this page
@@ -59,9 +63,32 @@ export default function DealsAnalyticsPage() {
     [courses]
   );
 
+  // Mirrors DashboardPage: window the Firestore query on closeDate so both pages
+  // load exactly the same set of deals for the same filter. Without this they
+  // could disagree on edge cases (deals past the 5000 cap, or with closeDate
+  // missing on the dashboard's server query).
+  const dealWindow = useMemo(
+    () => getDashboardDateWindow(filter.dateRange, {
+      customDateFrom: filter.customDateFrom,
+      customDateTo: filter.customDateTo,
+      selectedMonth: filter.selectedMonth,
+    }),
+    [filter.dateRange, filter.customDateFrom, filter.customDateTo, filter.selectedMonth]
+  );
+
   useEffect(() => {
-    getAllDeals().then(setDeals).catch(console.error).finally(() => setLoading(false));
-  }, []);
+    if (!dealWindow) {
+      setDeals([]);
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    getDealsByDateRange(dealWindow.from, dealWindow.to)
+      .then((d) => { if (!cancelled) setDeals(d as any[]); })
+      .catch((err) => { console.error(err); if (!cancelled) setDeals([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [dealWindow]);
 
   // Apply the shared dashboard filters first (rep, course, booking, category,
   // date window), then layer this page's contact-attempts bucket on top.
@@ -152,6 +179,72 @@ export default function DealsAnalyticsPage() {
   );
 
   const fmt = (n: number) => n.toLocaleString('en-US');
+  const todayKey = new Date().toISOString().split('T')[0];
+
+  const exportRepStats = async () => {
+    if (repStats.length === 0) {
+      showToast('info', 'لا توجد بيانات لتصدير أداء الموظفين.');
+      return;
+    }
+    const rows = repStats.map((rep, i) => {
+      const topProgram = Object.entries(rep.programs).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
+      return {
+        '#': i + 1,
+        'الموظف': rep.name,
+        'الفريق': rep.teamName,
+        'الصفقات': rep.deals,
+        'الإيرادات': rep.revenue,
+        'متوسط دورة الإغلاق (يوم)': rep.avgCycleDays,
+        'إجمالي محاولات التواصل': rep.totalContactAttempts,
+        'متوسط محاولات التواصل': rep.avgContactAttempts,
+        'إيراد لكل محاولة': rep.revenuePerAttempt,
+        'البرنامج الأكثر': topProgram,
+      };
+    });
+    try {
+      await exportRowsToExcel({
+        rows,
+        sheetName: 'Rep Performance',
+        fileName: `deals-rep-performance-${todayKey}.xlsx`,
+      });
+      showToast('success', 'تم تصدير أداء الموظفين بنجاح.');
+    } catch (err) {
+      console.error(err);
+      showToast('error', 'فشل تصدير أداء الموظفين.');
+    }
+  };
+
+  const exportDeals = async () => {
+    if (filtered.length === 0) {
+      showToast('info', 'لا توجد صفقات لتصديرها.');
+      return;
+    }
+    const rows = filtered.map((deal) => ({
+      'العميل': deal.customerName || '—',
+      'الموظف': deal.salesRepName || '—',
+      'البرنامج': deal.programName || '—',
+      'المصدر': deal.adSource || '—',
+      'نوع الحجز': (deal.bookingType || (deal.closureType === 'call' ? 'call_booking' : 'self_booking')) === 'call_booking' ? 'مكالمة' : 'ذاتي',
+      'الفئة': (deal.dealCategory || classifyDealCategory(deal)) === 'side' ? 'Side' : 'Core',
+      'قيمة الصفقة': Number(deal.dealValue) || 0,
+      'صافي الإيراد': Math.round(netDealValue(deal, profitPctById)),
+      'دورة الإغلاق (يوم)': typeof deal.closingCycleDays === 'number' ? deal.closingCycleDays : null,
+      'محاولات التواصل': Number.isFinite(Number(deal.contactAttempts)) ? Number(deal.contactAttempts) : null,
+      'أول تواصل': deal.firstContactDate || '',
+      'تاريخ الإغلاق': deal.closeDate || '',
+    }));
+    try {
+      await exportRowsToExcel({
+        rows,
+        sheetName: 'Deals',
+        fileName: `deals-analytics-${todayKey}.xlsx`,
+      });
+      showToast('success', 'تم تصدير الصفقات بنجاح.');
+    } catch (err) {
+      console.error(err);
+      showToast('error', 'فشل تصدير الصفقات.');
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6 font-body" dir="rtl">
@@ -166,6 +259,20 @@ export default function DealsAnalyticsPage() {
           <p className="text-[12px] font-bold text-[#64748B] mt-0.5">نظرة شاملة على أداء الفريق في إغلاق الصفقات</p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={exportRepStats}
+            className="inline-flex items-center gap-1.5 bg-white border border-[#E2E8F0] text-[#334155] text-[12px] font-black px-3 py-1.5 rounded-full hover:bg-[#F8FAFC] transition-colors"
+          >
+            <span className="material-symbols-outlined text-[15px]">download</span>
+            تصدير أداء الموظفين
+          </button>
+          <button
+            onClick={exportDeals}
+            className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[12px] font-black px-3 py-1.5 rounded-full hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors"
+          >
+            <span className="material-symbols-outlined text-[15px]">download</span>
+            تصدير الصفقات
+          </button>
           <span className="inline-flex items-center gap-1.5 bg-[#EFF6FF] border border-[#BFDBFE] text-[#2563EB] text-[12px] font-black px-3 py-1.5 rounded-full">
             <span className="material-symbols-outlined text-[14px]">receipt_long</span>
             {filtered.length} صفقة

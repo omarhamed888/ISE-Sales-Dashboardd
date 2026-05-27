@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, Suspense, lazy } from "react";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { useFilter } from "@/lib/filter-context";
@@ -38,20 +38,27 @@ export default function DashboardPage() {
       return;
     }
 
+    let cancelled = false;
     const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    const fetchReports = async () => {
+      try {
+        const snapshot = await getDocs(q);
+        if (cancelled) return;
+        const docs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
         setAllReports(docs);
-        setLoading(false);
-      },
-      (err) => {
-        console.error("dashboard reports listener:", err);
-        setLoading(false);
+      } catch (err) {
+        if (!cancelled) console.error("dashboard reports refresh:", err);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-    );
-    return () => unsubscribe();
+    };
+
+    fetchReports();
+    const timer = setInterval(fetchReports, 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
   }, [user?.uid]);
 
   // Date window for the deals query, derived from the active filter. Loading only

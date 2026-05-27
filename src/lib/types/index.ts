@@ -198,6 +198,7 @@ export interface DailyBucket {
 }
 
 export interface SalesRepBucket {
+  salesRepId?: string;
   name: string;
   displayName: string;
   messages: number;

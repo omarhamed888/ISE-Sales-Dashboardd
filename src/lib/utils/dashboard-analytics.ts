@@ -204,12 +204,15 @@ function shortRepName(name: string): string {
  * directly so the per-rep numbers match the dashboard KPI and /deals-analytics.
  */
 export function buildSalesRepBuckets(reports: any[], deals?: any[]): SalesRepBucket[] {
-  const map = new Map<string, { messages: number; interactions: number }>();
-  const ensure = (key: string) => {
+  const map = new Map<string, { salesRepId?: string; name: string; messages: number; interactions: number }>();
+  const ensure = (key: string, salesRepId: string | undefined, name: string) => {
     let e = map.get(key);
     if (!e) {
-      e = { messages: 0, interactions: 0 };
+      e = { salesRepId, name, messages: 0, interactions: 0 };
       map.set(key, e);
+    } else {
+      if (!e.salesRepId && salesRepId) e.salesRepId = salesRepId;
+      if (!e.name || e.name === "غير مسجل") e.name = name;
     }
     return e;
   };
@@ -219,19 +222,24 @@ export function buildSalesRepBuckets(reports: any[], deals?: any[]): SalesRepBuc
     if (!pd) return;
     const msgs = pd.totalMessages ?? pd.summary?.totalMessages ?? 0;
     if (msgs === 0) return;
-    const key = (r.salesRepName as string)?.trim() || "غير مسجل";
-    ensure(key).messages += msgs;
+    const salesRepId = typeof r?.salesRepId === "string" && r.salesRepId.trim() ? r.salesRepId.trim() : undefined;
+    const name = (r?.salesRepName as string)?.trim() || "غير مسجل";
+    const key = salesRepId ? `id:${salesRepId}` : `name:${name}`;
+    ensure(key, salesRepId, name).messages += msgs;
   });
 
   (deals ?? []).forEach((d) => {
-    const key = (d.salesRepName as string)?.trim() || "غير مسجل";
-    ensure(key).interactions += 1;
+    const salesRepId = typeof d?.salesRepId === "string" && d.salesRepId.trim() ? d.salesRepId.trim() : undefined;
+    const name = (d?.salesRepName as string)?.trim() || "غير مسجل";
+    const key = salesRepId ? `id:${salesRepId}` : `name:${name}`;
+    ensure(key, salesRepId, name).interactions += 1;
   });
 
   return Array.from(map.entries())
-    .map(([name, v]) => ({
-      name,
-      displayName: shortRepName(name),
+    .map(([, v]) => ({
+      salesRepId: v.salesRepId,
+      name: v.name,
+      displayName: shortRepName(v.name),
       messages: v.messages,
       interactions: v.interactions,
       conversionRate: calcConversionRate(v.interactions, v.messages),
