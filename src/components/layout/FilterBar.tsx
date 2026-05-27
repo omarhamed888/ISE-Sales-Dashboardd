@@ -9,7 +9,7 @@ import { useCourses } from "@/lib/hooks/useCourses";
 import { FILTERED_ROUTES, DATE_ONLY_FILTER_ROUTES } from "@/lib/config/filtered-routes";
 import { FilterSheet, SheetField } from "./FilterSheet";
 import { DateRangePicker } from "@/components/filters/DateRangePicker";
-import { useToast } from "@/components/ui/Toast";
+import { useFilterPresets } from "@/components/filters/useFilterPresets";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
@@ -26,22 +26,14 @@ const selectCls = `
 const selectActiveCls = "bg-[#EFF6FF] border-[#2563EB] text-[#2563EB]";
 
 type Option = { value: string; label: string };
-type StoredPreset = {
-  id: string;
-  name: string;
-  filter: Omit<FilterState, "customDateFrom" | "customDateTo"> & {
-    customDateFrom: string | null;
-    customDateTo: string | null;
-  };
-};
 
 export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean }) {
   const location = useLocation();
   const { user } = useAuth();
   const { filter, updateFilter, resetFilter } = useFilter();
-  const { showToast } = useToast();
   const { months: availableMonths, loading: monthsLoading } = useAvailableMonths();
   const courses = useCourses(true);
+  const { presets, selectedPresetId, applyPreset, savePreset, deletePreset } = useFilterPresets();
 
   const isAdminRoute = FILTERED_ROUTES.includes(location.pathname);
   const isDateOnly = DATE_ONLY_FILTER_ROUTES.includes(location.pathname);
@@ -53,31 +45,6 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
   const [uniqueAds, setUniqueAds] = useState<string[]>([]);
   const [isLoadingProps, setIsLoadingProps] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [presets, setPresets] = useState<StoredPreset[]>([]);
-  const [selectedPresetId, setSelectedPresetId] = useState("");
-
-  const presetStorageKey = useMemo(
-    () => `ise-filter-presets:${user?.uid ?? "guest"}`,
-    [user?.uid]
-  );
-
-  const serializeFilter = useCallback(
-    (value: FilterState): StoredPreset["filter"] => ({
-      ...value,
-      customDateFrom: value.customDateFrom ? value.customDateFrom.toISOString() : null,
-      customDateTo: value.customDateTo ? value.customDateTo.toISOString() : null,
-    }),
-    []
-  );
-
-  const deserializeFilter = useCallback(
-    (value: StoredPreset["filter"]): FilterState => ({
-      ...value,
-      customDateFrom: value.customDateFrom ? new Date(value.customDateFrom) : null,
-      customDateTo: value.customDateTo ? new Date(value.customDateTo) : null,
-    }),
-    []
-  );
 
   const loadDynamicFilters = useCallback(async () => {
     setIsLoadingProps(true);
@@ -115,87 +82,6 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
     window.addEventListener("ise-metadata-adnames-updated", onAdNamesUpdated);
     return () => window.removeEventListener("ise-metadata-adnames-updated", onAdNamesUpdated);
   }, [loadDynamicFilters]);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(presetStorageKey);
-      if (!raw) {
-        setPresets([]);
-        setSelectedPresetId("");
-        return;
-      }
-      const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) {
-        setPresets([]);
-        setSelectedPresetId("");
-        return;
-      }
-      const valid = parsed.filter(
-        (p: unknown): p is StoredPreset =>
-          !!p &&
-          typeof p === "object" &&
-          typeof (p as StoredPreset).id === "string" &&
-          typeof (p as StoredPreset).name === "string" &&
-          !!(p as StoredPreset).filter
-      );
-      setPresets(valid);
-      setSelectedPresetId("");
-    } catch {
-      setPresets([]);
-      setSelectedPresetId("");
-    }
-  }, [presetStorageKey]);
-
-  const persistPresets = useCallback(
-    (next: StoredPreset[]) => {
-      setPresets(next);
-      try {
-        localStorage.setItem(presetStorageKey, JSON.stringify(next));
-      } catch {
-        showToast("error", "تعذّر حفظ الفلاتر المفضلة على هذا الجهاز.");
-      }
-    },
-    [presetStorageKey, showToast]
-  );
-
-  const handleApplyPreset = useCallback(
-    (presetId: string) => {
-      setSelectedPresetId(presetId);
-      if (!presetId) return;
-      const preset = presets.find((p) => p.id === presetId);
-      if (!preset) return;
-      updateFilter(deserializeFilter(preset.filter));
-      showToast("success", `تم تطبيق فلتر "${preset.name}".`);
-    },
-    [deserializeFilter, presets, showToast, updateFilter]
-  );
-
-  const handleSavePreset = useCallback(() => {
-    const name = (window.prompt("اسم الفلتر المفضل؟") || "").trim();
-    if (!name) return;
-    const nextPreset: StoredPreset = {
-      id: `preset-${Date.now()}`,
-      name,
-      filter: serializeFilter(filter),
-    };
-    const deduped = presets.filter((p) => p.name !== name);
-    const next = [nextPreset, ...deduped].slice(0, 10);
-    persistPresets(next);
-    setSelectedPresetId(nextPreset.id);
-    showToast("success", `تم حفظ الفلتر "${name}".`);
-  }, [filter, persistPresets, presets, serializeFilter, showToast]);
-
-  const handleDeletePreset = useCallback(() => {
-    if (!selectedPresetId) return;
-    const current = presets.find((p) => p.id === selectedPresetId);
-    if (!current) return;
-    const ok = window.confirm(`حذف الفلتر "${current.name}"؟`);
-    if (!ok) return;
-    const next = presets.filter((p) => p.id !== selectedPresetId);
-    persistPresets(next);
-    setSelectedPresetId("");
-    showToast("success", "تم حذف الفلتر المفضل.");
-  }, [persistPresets, presets, selectedPresetId, showToast]);
 
   // Default the month dropdown to the most recent month with data the first time the user picks "شهر محدد".
   useEffect(() => {
@@ -425,7 +311,7 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
               <div className="flex items-center gap-1.5 shrink-0">
                 <select
                   value={selectedPresetId}
-                  onChange={(e) => handleApplyPreset(e.target.value)}
+                  onChange={(e) => applyPreset(e.target.value)}
                   className={`${selectCls} min-w-[150px] max-w-[180px]`}
                 >
                   <option value="">الفلاتر المفضلة</option>
@@ -435,7 +321,7 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
                 </select>
                 <button
                   type="button"
-                  onClick={handleSavePreset}
+                  onClick={savePreset}
                   className="h-9 px-2.5 rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8] hover:bg-[#DBEAFE] text-[11px] font-black transition-colors"
                   title="حفظ الفلاتر الحالية"
                 >
@@ -443,7 +329,7 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
                 </button>
                 <button
                   type="button"
-                  onClick={handleDeletePreset}
+                  onClick={deletePreset}
                   disabled={!selectedPresetId}
                   className="h-9 px-2.5 rounded-xl border border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C] hover:bg-[#FEE2E2] text-[11px] font-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   title="حذف الفلتر المختار"
@@ -568,7 +454,7 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
             <div className="space-y-2">
               <select
                 value={selectedPresetId}
-                onChange={(e) => handleApplyPreset(e.target.value)}
+                onChange={(e) => applyPreset(e.target.value)}
                 className={`${selectCls} w-full h-12 text-[13px]`}
               >
                 <option value="">اختَر فلترًا محفوظًا</option>
@@ -579,14 +465,14 @@ export function FilterBar({ isSidebarCollapsed }: { isSidebarCollapsed?: boolean
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={handleSavePreset}
+                  onClick={savePreset}
                   className="h-11 rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8] text-[12px] font-black"
                 >
                   حفظ الحالي
                 </button>
                 <button
                   type="button"
-                  onClick={handleDeletePreset}
+                  onClick={deletePreset}
                   disabled={!selectedPresetId}
                   className="h-11 rounded-xl border border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C] text-[12px] font-black disabled:opacity-40 disabled:cursor-not-allowed"
                 >

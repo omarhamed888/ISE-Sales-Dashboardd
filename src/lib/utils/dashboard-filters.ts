@@ -1,5 +1,7 @@
 import { FilterState } from "@/lib/filter-context";
 import { DASHBOARD_DATA_QUALITY_FROM_DATE } from "@/lib/config";
+import type { Deal } from "@/lib/types";
+import type { ReportLike } from "@/lib/utils/dashboard-aggregations";
 import {
   normalizeReportDateKey,
   isReportDateInDashboardRange,
@@ -9,7 +11,7 @@ import {
 } from "@/lib/utils/report-dates";
 
 /** `${salesRepId}|${date}` keys for course-filtered deals (links reports to deals). */
-export function buildCourseDealKeys(deals: any[]): Set<string> {
+export function buildCourseDealKeys(deals: Deal[]): Set<string> {
   const keys = new Set<string>();
   for (const d of deals || []) {
     const repId = d?.salesRepId;
@@ -21,7 +23,7 @@ export function buildCourseDealKeys(deals: any[]): Set<string> {
 }
 
 function reportMatchesCourse(
-  r: any,
+  r: ReportLike,
   courseId: string,
   courseDealKeys?: Set<string>
 ): boolean {
@@ -33,7 +35,7 @@ function reportMatchesCourse(
   const closed = r.parsedData?.closedDeals;
   if (Array.isArray(closed)) {
     return closed.some(
-      (d: any) => Array.isArray(d.products) && d.products.includes(courseId)
+      (d) => Array.isArray(d.products) && d.products.includes(courseId)
     );
   }
   return false;
@@ -41,14 +43,14 @@ function reportMatchesCourse(
 
 function courseMatches(
   filter: FilterState,
-  r: any,
+  r: ReportLike,
   courseDealKeys?: Set<string>
 ): boolean {
   if (!filter.courseId || filter.courseId === "all") return true;
   return reportMatchesCourse(r, filter.courseId, courseDealKeys);
 }
 
-function platformMatches(filter: FilterState, r: any): boolean {
+function platformMatches(filter: FilterState, r: ReportLike): boolean {
   if (filter.platform === "all") return true;
   const pf = (r.platform || "").toLowerCase();
   if (filter.platform === "whatsapp") {
@@ -68,7 +70,7 @@ function platformMatches(filter: FilterState, r: any): boolean {
   return true;
 }
 
-function passesDateAndQuality(r: any, filter: FilterState): boolean {
+function passesDateAndQuality(r: ReportLike, filter: FilterState): boolean {
   const key = normalizeReportDateKey(r);
   if (filter.dateRange === "مخصص") {
     if (!key || !filter.customDateFrom || !filter.customDateTo) return false;
@@ -92,57 +94,42 @@ function passesDateAndQuality(r: any, filter: FilterState): boolean {
   );
 }
 
+function adNameMatches(filter: FilterState, r: ReportLike): boolean {
+  if (filter.adName === "all" || !r.parsedData?.funnel) return true;
+  return Object.values(r.parsedData.funnel).some(
+    (stages) =>
+      Array.isArray(stages) && stages.some((s) => s.adName === filter.adName)
+  );
+}
+
 /** Reports matching dashboard filters (by business `date`, not submission time). */
 export function filterReports(
-  reports: any[],
+  reports: ReportLike[],
   filter: FilterState,
   courseDealKeys?: Set<string>
-) {
+): ReportLike[] {
   return reports.filter((r) => {
     if (!platformMatches(filter, r)) return false;
-
-    if (filter.salesRep !== "all" && r.salesRepId !== filter.salesRep) {
-      return false;
-    }
-
+    if (filter.salesRep !== "all" && r.salesRepId !== filter.salesRep) return false;
     if (!courseMatches(filter, r, courseDealKeys)) return false;
-
-    if (filter.adName !== "all" && r.parsedData?.funnel) {
-      let hasAd = false;
-      Object.values(r.parsedData.funnel).forEach((stages: any) => {
-        if (Array.isArray(stages)) {
-          if (stages.some((s: any) => s.adName === filter.adName)) hasAd = true;
-        }
-      });
-      if (!hasAd) return false;
-    }
-
+    if (!adNameMatches(filter, r)) return false;
     return passesDateAndQuality(r, filter);
   });
 }
 
 /** Same non-date filters as `filterReports`, but restricted to a YYYY-MM-DD inclusive range (for previous-period KPIs). */
 export function filterReportsByYmdRange(
-  reports: any[],
+  reports: ReportLike[],
   filter: FilterState,
   from: string,
   to: string,
   courseDealKeys?: Set<string>
-) {
+): ReportLike[] {
   return reports.filter((r) => {
     if (!platformMatches(filter, r)) return false;
     if (filter.salesRep !== "all" && r.salesRepId !== filter.salesRep) return false;
     if (!courseMatches(filter, r, courseDealKeys)) return false;
-
-    if (filter.adName !== "all" && r.parsedData?.funnel) {
-      let hasAd = false;
-      Object.values(r.parsedData.funnel).forEach((stages: any) => {
-        if (Array.isArray(stages)) {
-          if (stages.some((s: any) => s.adName === filter.adName)) hasAd = true;
-        }
-      });
-      if (!hasAd) return false;
-    }
+    if (!adNameMatches(filter, r)) return false;
 
     const key = normalizeReportDateKey(r);
     if (!key) return false;
@@ -152,10 +139,10 @@ export function filterReportsByYmdRange(
 }
 
 export function getDashboardPreviousPeriodReports(
-  allReports: any[],
+  allReports: ReportLike[],
   filter: FilterState,
   courseDealKeys?: Set<string>
-): any[] {
+): ReportLike[] {
   // Previous-period comparison is only meaningful for fixed buckets.
   if (filter.dateRange === "مخصص" || filter.dateRange === "شهر محدد") return [];
   const range = getPreviousPeriodYmdRange(
@@ -166,7 +153,7 @@ export function getDashboardPreviousPeriodReports(
 }
 
 /** Non-date filters shared by current- and previous-period deal filtering. */
-export function dealMatchesNonDateFilters(d: any, filter: FilterState): boolean {
+export function dealMatchesNonDateFilters(d: Deal, filter: FilterState): boolean {
   if (filter.salesRep !== "all" && d.salesRepId !== filter.salesRep) return false;
   if (filter.bookingType && filter.bookingType !== "all") {
     const bt = d.bookingType || (d.closureType === "call" ? "call_booking" : "self_booking");
@@ -184,7 +171,7 @@ export function dealMatchesNonDateFilters(d: any, filter: FilterState): boolean 
 }
 
 /** Closed deals whose closeDate falls in the same dashboard window as reports (اليوم / الأسبوع / الشهر / الإجمالي). */
-export function filterDealsByDashboardDate(deals: any[], filter: FilterState): any[] {
+export function filterDealsByDashboardDate(deals: Deal[], filter: FilterState): Deal[] {
   return deals.filter((d) => {
     if (!dealMatchesNonDateFilters(d, filter)) return false;
     // Source `closeDate` only — matches `getDealsByDateRange`'s server query

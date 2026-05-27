@@ -57,9 +57,23 @@ export function RecentActivity({ reports, deals }: { reports: any[]; deals?: any
     return db.localeCompare(da);
   });
 
+  const rows = sorted.slice(0, 10).map((r) => {
+    const pd = r.parsedData;
+    const msgs = pd?.totalMessages ?? pd?.summary?.totalMessages ?? 0;
+    const dealCount = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
+    const intr = calcInteractionsFromParsedData(pd, dealCount);
+    const cr = calcConversionRate(intr, msgs);
+    const dateKey = typeof r.date === "string" ? r.date : "";
+    const dateLabel =
+      dateKey && /^\d{4}-\d{2}-\d{2}$/.test(dateKey)
+        ? formatReportDateArabicLong(dateKey)
+        : String(r.date || "—");
+    return { r, msgs, intr, cr, dateLabel };
+  });
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] overflow-hidden">
-      <div className="p-6 flex items-center justify-between border-b border-[#E2E8F0]">
+      <div className="p-5 sm:p-6 flex items-center justify-between border-b border-[#E2E8F0]">
         <h4 className="text-base font-bold text-[#0F172A]">
           آخر التقارير المرفوعة
         </h4>
@@ -67,7 +81,48 @@ export function RecentActivity({ reports, deals }: { reports: any[]; deals?: any
           عرض الكل
         </Link>
       </div>
-      <div className="overflow-x-auto overflow-y-hidden">
+
+      {/* Mobile: stacked cards — every metric stays readable without sideways scrolling. */}
+      <div className="md:hidden divide-y divide-[#E2E8F0]">
+        {rows.map(({ r, msgs, intr, cr, dateLabel }) => (
+          <Link
+            key={r.id}
+            to={`/reports?id=${r.id}`}
+            className="block p-4 active:bg-[#EFF6FF]/40 transition-colors"
+          >
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-full bg-[#2563EB]/10 text-[#2563EB] flex items-center justify-center font-bold text-sm shrink-0">
+                  {r.salesRepName?.charAt(0) || "م"}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[13px] font-black text-[#0F172A] truncate">
+                    {r.salesRepName || "غير محدد"}
+                  </div>
+                  <div className="text-[11px] font-bold text-[#64748B] truncate">{dateLabel}</div>
+                </div>
+              </div>
+              <span className={`text-[11px] font-black px-2.5 py-1 rounded-full whitespace-nowrap shrink-0 ${rowConversionStyle(cr)}`}>
+                {cr}%
+              </span>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {platformBadge(r.platform)}
+              <span className="text-[11px] font-bold text-[#475569] bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-2 py-1">
+                <span className="text-[#94A3B8]">رسائل:</span>{" "}
+                <span className="text-[#0F172A] font-black">{msgs}</span>
+              </span>
+              <span className="text-[11px] font-bold text-[#475569] bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg px-2 py-1">
+                <span className="text-[#94A3B8]">صفقات:</span>{" "}
+                <span className="text-[#0F172A] font-black">{intr}</span>
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Desktop / tablet: full table */}
+      <div className="hidden md:block overflow-x-auto overflow-y-hidden">
         <table className="w-full text-right" dir="rtl">
           <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
             <tr>
@@ -81,20 +136,8 @@ export function RecentActivity({ reports, deals }: { reports: any[]; deals?: any
             </tr>
           </thead>
           <tbody>
-            {sorted.slice(0, 10).map((r, idx) => {
-              const pd = r.parsedData;
-              const msgs = pd?.totalMessages ?? pd?.summary?.totalMessages ?? 0;
-              const dealCount = dealsByKey ? getDealCountForReport(r, dealsByKey) : undefined;
-              const intr = calcInteractionsFromParsedData(pd, dealCount);
-              const cr = calcConversionRate(intr, msgs);
-              const dateKey = typeof r.date === "string" ? r.date : "";
-              const dateLabel =
-                dateKey && /^\d{4}-\d{2}-\d{2}$/.test(dateKey)
-                  ? formatReportDateArabicLong(dateKey)
-                  : String(r.date || "—");
-
+            {rows.map(({ r, msgs, intr, cr, dateLabel }, idx) => {
               const isEven = idx % 2 === 0;
-
               return (
                 <tr
                   key={r.id}

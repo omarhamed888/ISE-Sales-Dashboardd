@@ -60,10 +60,21 @@ export default function DashboardPage() {
     };
 
     fetchReports();
-    const timer = setInterval(fetchReports, 30_000);
+    // Poll every 60s instead of 30s, and skip polls while the tab is hidden —
+    // halves the baseline read load and stops it entirely when the admin is
+    // looking at a different tab. A focus-refresh below catches them up when
+    // they come back.
+    const timer = setInterval(() => {
+      if (!document.hidden) void fetchReports();
+    }, 60_000);
+    const onVisible = () => {
+      if (!document.hidden) void fetchReports();
+    };
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       cancelled = true;
       clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [user?.uid]);
 

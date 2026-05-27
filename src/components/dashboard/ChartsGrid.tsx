@@ -166,7 +166,12 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
                     fontWeight: 600,
                   }}
                 />
-                <Legend verticalAlign="bottom" height={40} iconType="circle" />
+                <Legend
+                  verticalAlign="bottom"
+                  height={52}
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: 11, fontWeight: 600, lineHeight: 1.6, paddingTop: 8 }}
+                />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -280,7 +285,12 @@ export function ChartsGrid({ reports, deals }: { reports: any[]; deals?: any[] }
                     border: "1px solid #e1e8ed",
                   }}
                 />
-                <Legend verticalAlign="top" height={32} iconType="circle" />
+                <Legend
+                  verticalAlign="top"
+                  height={40}
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: 11, fontWeight: 600, lineHeight: 1.6 }}
+                />
                 <Bar yAxisId="left" dataKey="بعد التحية" stackId="a" fill="#f8b4b4" radius={[0, 0, 0, 0]} />
                 <Bar yAxisId="left" dataKey="بعد التفاصيل" stackId="a" fill="#f9d99d" />
                 <Bar yAxisId="left" dataKey="بعد السعر" stackId="a" fill="#a3daf7" />

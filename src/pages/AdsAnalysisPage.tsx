@@ -9,6 +9,7 @@ import { AdsSummaryRow } from "@/components/ads/AdsSummaryRow";
 import { AdMatrixChart } from "@/components/ads/AdMatrixChart";
 import { AdCardsList } from "@/components/ads/AdCardsList";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton, SkeletonChart } from "@/components/ui/Skeleton";
 
 export default function AdsAnalysisPage() {
   const [allReports, setAllReports] = useState<any[]>([]);
@@ -45,9 +46,16 @@ export default function AdsAnalysisPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#2563EB]"></div>
-        <p className="text-[#64748B] font-bold text-sm tracking-widest animate-pulse">جاري سحب تحليلات الإعلانات العميقة...</p>
+      <div className="max-w-[1500px] w-full mx-auto space-y-6 pb-20" dir="rtl">
+        <Skeleton className="h-[72px] w-full rounded-2xl" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((k) => <Skeleton key={k} className="h-[110px] rounded-2xl" />)}
+        </div>
+        <SkeletonChart />
+        <div className="grid md:grid-cols-2 gap-4">
+          <SkeletonChart />
+          <SkeletonChart />
+        </div>
       </div>
     );
   }

@@ -1,3 +1,42 @@
+import type { Deal, ParsedReportData, SalesReport } from "@/lib/types";
+
+/**
+ * Aggregation utilities accept loose "report-like" objects because we ingest
+ * data from a few different sources:
+ *   - Firestore `reports` docs (full SalesReport)
+ *   - The AI insights service (ReportDocument — partial)
+ *   - Legacy parses where the funnel uses old key names (`noReplyGreeting`)
+ * So the public signatures take ReportLike instead of SalesReport.
+ */
+type FunnelStage = ParsedReportData["funnel"]["noReplyAfterGreeting"];
+
+export type LooseFunnel = Partial<ParsedReportData["funnel"]> & {
+  noReplyGreeting?: FunnelStage;
+  noReplyDetails?: FunnelStage;
+  noReplyPrice?: FunnelStage;
+};
+
+/**
+ * Structurally subtypes `ParsedReportData` — we only read a handful of fields
+ * and tolerate legacy/parser variants (e.g. `summary.*`, `funnels` plural).
+ * Kept structural (not `Partial<ParsedReportData>`) because the AI-insights
+ * service has its own `detectedJobs` shape that's stricter than the dashboard's.
+ */
+export type LooseParsedData = {
+  totalMessages?: number;
+  interactions?: number;
+  conversionRate?: number;
+  jobConfusionCount?: number;
+  funnel?: LooseFunnel;
+  funnels?: LooseFunnel;
+  closedDeals?: Array<{ products?: string[] }>;
+  summary?: { totalMessages?: number; interactions?: number };
+};
+
+export type ReportLike = Partial<Omit<SalesReport, "parsedData">> & {
+  parsedData?: LooseParsedData;
+};
+
 /** Placeholder / known-bad ad labels from legacy Gemini parses — excluded from ad-level charts. */
 export const DASHBOARD_IGNORED_AD_NAMES = new Set(["عام", "طموح"]);
 
@@ -10,13 +49,13 @@ export const DASHBOARD_IGNORED_AD_NAMES = new Set(["عام", "طموح"]);
  * - When `dealCount` is provided → return it (the authoritative source).
  * - Otherwise → fallback to `repliedAfterPrice` from the report's funnel.
  */
-export function calcInteractionsFromParsedData(pd: any, dealCount?: number): number {
+export function calcInteractionsFromParsedData(pd: LooseParsedData | null | undefined, dealCount?: number): number {
   if (typeof dealCount === "number") return dealCount;
   if (!pd) return 0;
   const f = pd.funnel ?? pd.funnels;
   if (f && Array.isArray(f.repliedAfterPrice)) {
     return f.repliedAfterPrice.reduce(
-      (sum: number, e: { count?: number }) => sum + (Number(e?.count) || 0),
+      (sum, e) => sum + (Number(e?.count) || 0),
       0
     );
   }
@@ -28,7 +67,7 @@ export function calcInteractionsFromParsedData(pd: any, dealCount?: number): num
 }
 
 /** Build map of deal counts keyed by `${salesRepId}|${date}`. */
-export function buildDealsCountByReportKey(deals: any[]): Map<string, number> {
+export function buildDealsCountByReportKey(deals: Deal[]): Map<string, number> {
   const map = new Map<string, number>();
   for (const d of deals || []) {
     const repId = d?.salesRepId;
@@ -42,7 +81,7 @@ export function buildDealsCountByReportKey(deals: any[]): Map<string, number> {
 }
 
 /** Look up deal count for a single report from a pre-built map. */
-export function getDealCountForReport(report: any, dealsByKey?: Map<string, number>): number {
+export function getDealCountForReport(report: ReportLike, dealsByKey?: Map<string, number>): number {
   if (!dealsByKey) return 0;
   const repId = report?.salesRepId;
   const rawDate = typeof report?.date === "string" ? report.date : "";
@@ -62,7 +101,15 @@ function shouldIncludeAdRow(adName: string | undefined): boolean {
   return !DASHBOARD_IGNORED_AD_NAMES.has(n);
 }
 
-export function calculateAggregates(reports: any[], deals?: any[]) {
+interface AdStageCounts {
+  greeting: number;
+  details: number;
+  price: number;
+  success: number;
+  confusion: number;
+}
+
+export function calculateAggregates(reports: ReportLike[], deals?: Deal[]) {
   // When deals are provided we trust them as the single source of truth for
   // "interactions" — every uploaded deal counts, even if there is no report
   // on the same salesRepId|date. The old per-report join undercounted because
@@ -72,7 +119,7 @@ export function calculateAggregates(reports: any[], deals?: any[]) {
   let interactions = 0;
   const funnel = { greeting: 0, details: 0, price: 0, success: 0 };
   let jobConfusionCount = 0;
-  const adsData: Record<string, any> = {};
+  const adsData: Record<string, AdStageCounts> = {};
 
   reports.forEach((r) => {
     const pd = r.parsedData;
@@ -95,7 +142,10 @@ export function calculateAggregates(reports: any[], deals?: any[]) {
     const f = pd.funnel || pd.funnels;
     if (!f) return;
 
-    const processStage = (arr: any[], stageName: string) => {
+    const processStage = (
+      arr: Array<{ count?: number; adName?: string }> | undefined,
+      stageName: keyof AdStageCounts
+    ): number => {
       if (!Array.isArray(arr)) return 0;
       let sum = 0;
       arr.forEach((item) => {
@@ -105,13 +155,7 @@ export function calculateAggregates(reports: any[], deals?: any[]) {
         if (!shouldIncludeAdRow(rawName)) return;
         const ad = String(rawName).trim();
         if (!adsData[ad]) {
-          adsData[ad] = {
-            greeting: 0,
-            details: 0,
-            price: 0,
-            success: 0,
-            confusion: 0,
-          };
+          adsData[ad] = { greeting: 0, details: 0, price: 0, success: 0, confusion: 0 };
         }
         adsData[ad][stageName] += count;
       });

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getAllAdSpend } from "@/lib/services/ad-spend-service";
-import { getAllDeals } from "@/lib/services/deals-service";
+import { getDealsByDateRange } from "@/lib/services/deals-service";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { AdSpendEntry } from "@/lib/types";
@@ -57,9 +57,15 @@ export default function MarketingInsightsPage() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    // Window the deals query to the active period instead of loading the whole
+    // collection — keeps memory bounded as the deals collection grows. Without
+    // a window (e.g. "مخصص" before dates set) we skip the deals fetch.
+    const dealsPromise = dateWindow
+      ? getDealsByDateRange(dateWindow.from, dateWindow.to)
+      : Promise.resolve([] as any[]);
     Promise.all([
       getAllAdSpend(),
-      getAllDeals(),
+      dealsPromise,
       getDocs(query(collection(db, "reports"), orderBy("createdAt", "desc"))).then((snap) =>
         snap.docs.map((d) => ({ id: d.id, ...d.data() } as any))
       ),
@@ -73,7 +79,7 @@ export default function MarketingInsightsPage() {
       .catch(() => { if (!cancelled) { setSpend([]); setDeals([]); setReports([]); }})
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, []);
+  }, [dateWindow]);
 
   // Scope all three sources to the selected period before aggregating. When the
   // window is unresolved (e.g. مخصص without dates) we fall back to everything.

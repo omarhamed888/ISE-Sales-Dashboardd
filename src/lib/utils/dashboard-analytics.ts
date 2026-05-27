@@ -4,8 +4,9 @@ import {
   calcConversionRate,
   buildDealsCountByReportKey,
   getDealCountForReport,
+  type ReportLike,
 } from "@/lib/utils/dashboard-aggregations";
-import type { PlatformStats, DailyBucket, SalesRepBucket } from "@/lib/types";
+import type { Deal, PlatformStats, DailyBucket, SalesRepBucket } from "@/lib/types";
 export type { DailyBucket, SalesRepBucket, PlatformStats };
 import {
   normalizeReportDateKey,
@@ -17,7 +18,7 @@ import {
  *  `filterDealsByDashboardDate` and the `getDealsByDateRange` server query —
  *  all three only consider closeDate so the dashboard and /deals-analytics
  *  bucket the same rows on the same days. */
-function dealDateKey(d: any): string | null {
+function dealDateKey(d: Deal): string | null {
   const raw = typeof d?.closeDate === "string" && d.closeDate.trim() ? d.closeDate.trim() : "";
   if (!raw) return null;
   const key = raw.split("T")[0];
@@ -52,7 +53,7 @@ export function classifyPlatform(platformRaw: string | undefined): PlatformKey {
  * (since `Deal` doesn't carry a platform field). The donut now hides deal counts so this
  * shortfall is no longer visible to the user.
  */
-export function getPlatformStats(reports: any[], deals?: any[]): PlatformStats {
+export function getPlatformStats(reports: ReportLike[], deals?: Deal[]): PlatformStats {
   const dealsByKey = deals ? buildDealsCountByReportKey(deals) : undefined;
   const out: PlatformStats = {
     whatsapp: { messages: 0, interactions: 0 },
@@ -150,7 +151,7 @@ export function buildConversionFunnelBars(cur: ReturnType<typeof calculateAggreg
  * This matches the KPI aggregate (which counts deals directly) — deals without a matching report
  * on the same `salesRepId|date` still contribute to the daily interactions total.
  */
-export function buildDailyBuckets(reports: any[], deals?: any[]): DailyBucket[] {
+export function buildDailyBuckets(reports: ReportLike[], deals?: Deal[]): DailyBucket[] {
   const map = new Map<string, DailyBucket>();
 
   const ensure = (k: string): DailyBucket => {
@@ -203,7 +204,7 @@ function shortRepName(name: string): string {
  * Per-rep buckets. Messages come from reports; interactions are summed from closed deals
  * directly so the per-rep numbers match the dashboard KPI and /deals-analytics.
  */
-export function buildSalesRepBuckets(reports: any[], deals?: any[]): SalesRepBucket[] {
+export function buildSalesRepBuckets(reports: ReportLike[], deals?: Deal[]): SalesRepBucket[] {
   const map = new Map<string, { salesRepId?: string; name: string; messages: number; interactions: number }>();
   const ensure = (key: string, salesRepId: string | undefined, name: string) => {
     let e = map.get(key);
@@ -223,14 +224,14 @@ export function buildSalesRepBuckets(reports: any[], deals?: any[]): SalesRepBuc
     const msgs = pd.totalMessages ?? pd.summary?.totalMessages ?? 0;
     if (msgs === 0) return;
     const salesRepId = typeof r?.salesRepId === "string" && r.salesRepId.trim() ? r.salesRepId.trim() : undefined;
-    const name = (r?.salesRepName as string)?.trim() || "غير مسجل";
+    const name = r?.salesRepName?.trim() || "غير مسجل";
     const key = salesRepId ? `id:${salesRepId}` : `name:${name}`;
     ensure(key, salesRepId, name).messages += msgs;
   });
 
   (deals ?? []).forEach((d) => {
     const salesRepId = typeof d?.salesRepId === "string" && d.salesRepId.trim() ? d.salesRepId.trim() : undefined;
-    const name = (d?.salesRepName as string)?.trim() || "غير مسجل";
+    const name = d?.salesRepName?.trim() || "غير مسجل";
     const key = salesRepId ? `id:${salesRepId}` : `name:${name}`;
     ensure(key, salesRepId, name).interactions += 1;
   });

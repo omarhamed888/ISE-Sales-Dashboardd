@@ -6,6 +6,7 @@ import { filterDealsByDashboardDate } from '@/lib/utils/dashboard-filters';
 import { getDashboardDateWindow } from '@/lib/utils/report-dates';
 import { exportRowsToExcel } from '@/lib/utils/excel-export';
 import { useToast } from '@/components/ui/Toast';
+import { Skeleton, SkeletonChart } from '@/components/ui/Skeleton';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { inferProductIdsFromProgramName, buildProgramNameFromProducts, classifyDealCategory } from '@/lib/utils/normalize-course-names';
 
@@ -112,7 +113,7 @@ export default function DealsAnalyticsPage() {
   const totalRevenue = coreRevenue + sideRevenue;
   const dealsWithCycle = filtered.filter(d => typeof d.closingCycleDays === 'number');
   const avgCycle = dealsWithCycle.length > 0
-    ? Math.round(dealsWithCycle.reduce((s,d) => s + d.closingCycleDays, 0) / dealsWithCycle.length) : 0;
+    ? Math.round(dealsWithCycle.reduce((s,d) => s + (d.closingCycleDays ?? 0), 0) / dealsWithCycle.length) : 0;
   const totalPrograms = filtered.reduce((s,d) => s + (d.programCount||1), 0);
   const dealsWithAtt  = filtered.filter(d => Number.isFinite(Number(d.contactAttempts)) && Number(d.contactAttempts) >= 1);
   const totalAttempts = dealsWithAtt.reduce((s,d) => s + Math.round(Number(d.contactAttempts)), 0);
@@ -172,9 +173,18 @@ export default function DealsAnalyticsPage() {
   const visibleDeals = useMemo(() => filtered.slice(0, visibleDealsCount), [filtered, visibleDealsCount]);
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center h-64 gap-3">
-      <span className="material-symbols-outlined animate-spin text-[#2563EB] text-[40px]">progress_activity</span>
-      <p className="text-[13px] font-bold text-[#64748B]">جاري تحميل البيانات...</p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6" dir="rtl">
+      <Skeleton className="h-12 w-1/2 rounded-xl" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((k) => <Skeleton key={k} className="h-[110px] rounded-2xl" />)}
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((k) => <Skeleton key={k} className="h-[110px] rounded-2xl" />)}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SkeletonChart />
+        <SkeletonChart />
+      </div>
     </div>
   );
 
