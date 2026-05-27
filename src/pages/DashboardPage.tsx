@@ -17,16 +17,22 @@ import { MarketingKPICards } from "@/components/dashboard/MarketingKPICards";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton, SkeletonChart } from "@/components/ui/Skeleton";
 import { getDealsByDateRange, buildProfitPctMap } from "@/lib/services/deals-service";
+import { getAllAdSpend } from "@/lib/services/ad-spend-service";
+import { createNotification } from "@/lib/services/notification-trigger-service";
+import { calculateAggregates } from "@/lib/utils/dashboard-aggregations";
 import { useCourses } from "@/lib/hooks/useCourses";
 const ChartsGrid = lazy(() => import("@/components/dashboard/ChartsGrid").then((m) => ({ default: m.ChartsGrid })));
 const RejectionAnalyticsSection = lazy(() => import("@/components/dashboard/RejectionAnalyticsSection").then((m) => ({ default: m.RejectionAnalyticsSection })));
 const DealCycleSection = lazy(() => import("@/components/dashboard/DealCycleSection").then((m) => ({ default: m.DealCycleSection })));
+
+const ALERT_DEBOUNCE_PREFIX = "dashboard-anomaly-alert";
 
 export default function DashboardPage() {
   const [allReports, setAllReports] = useState<any[]>([]);
   const [windowedDeals, setWindowedDeals] = useState<any[]>([]);
   const [prevWindowedDeals, setPrevWindowedDeals] = useState<any[]>([]);
   const [yesterdayDeals, setYesterdayDeals] = useState<any[]>([]);
+  const [allAdSpend, setAllAdSpend] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { filter } = useFilter();
@@ -86,6 +92,26 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, [user?.uid, dealWindow]);
 
+  // Needed for anomaly alerts (spend-without-deals). Loaded once per admin session.
+  useEffect(() => {
+    if (!user?.uid || (user.role !== "admin" && user.role !== "superadmin")) {
+      setAllAdSpend([]);
+      return;
+    }
+    let cancelled = false;
+    getAllAdSpend()
+      .then((rows) => {
+        if (!cancelled) setAllAdSpend(rows as any[]);
+      })
+      .catch((err) => {
+        console.error("dashboard ad spend fetch:", err);
+        if (!cancelled) setAllAdSpend([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid, user?.role]);
+
   // Previous-period deals, needed so KPICards can compute a meaningful
   // conversion delta. Skipped for "مخصص" / "شهر محدد" since the comparison
   // helper returns null for those (no fixed previous window).
@@ -144,6 +170,84 @@ export default function DashboardPage() {
     () => filterReports(allReports, filter, courseDealKeys),
     [allReports, filter, courseDealKeys]
   );
+
+  const alertWindowKey = useMemo(() => {
+    if (!dealWindow) return "none";
+    return `${dealWindow.from}:${dealWindow.to}`;
+  }, [dealWindow]);
+
+  useEffect(() => {
+    if (!user?.uid || (user.role !== "admin" && user.role !== "superadmin") || !dealWindow) return;
+
+    const nowHour = new Date().toISOString().slice(0, 13);
+    const markAlert = (slug: string) => {
+      try {
+        localStorage.setItem(
+          `${ALERT_DEBOUNCE_PREFIX}:${user.uid}:${slug}:${alertWindowKey}:${nowHour}`,
+          "1"
+        );
+      } catch {
+        // ignore localStorage errors
+      }
+    };
+    const hasAlert = (slug: string) => {
+      try {
+        return (
+          localStorage.getItem(
+            `${ALERT_DEBOUNCE_PREFIX}:${user.uid}:${slug}:${alertWindowKey}:${nowHour}`
+          ) === "1"
+        );
+      } catch {
+        return false;
+      }
+    };
+
+    const run = async () => {
+      // Alert #1: low closing rate on meaningful message volume.
+      const agg = calculateAggregates(currentReports, filteredDeals);
+      if (
+        agg.totalMessages >= 30 &&
+        agg.conversionRate < 5 &&
+        !hasAlert("low-close-rate")
+      ) {
+        await createNotification({
+          uid: user.uid,
+          type: "anomaly_alert",
+          message: `تنبيه أداء: معدل الإغلاق منخفض (${agg.conversionRate.toFixed(1)}%) في الفترة الحالية.`,
+          link: "/dashboard",
+        });
+        markAlert("low-close-rate");
+      }
+
+      // Alert #2: high spend with no closed deals in the same window.
+      const spendInWindow = allAdSpend
+        .filter((s) => typeof s?.date === "string" && s.date >= dealWindow.from && s.date <= dealWindow.to)
+        .reduce((sum, s) => sum + (Number(s?.spend) || 0), 0);
+      if (
+        spendInWindow > 1000 &&
+        filteredDeals.length === 0 &&
+        !hasAlert("high-spend-no-deals")
+      ) {
+        await createNotification({
+          uid: user.uid,
+          type: "anomaly_alert",
+          message: `تنبيه تسويقي: صرف ${Math.round(spendInWindow).toLocaleString("en-US")} ج بدون أي صفقات مغلقة في نفس الفترة.`,
+          link: "/marketing-insights",
+        });
+        markAlert("high-spend-no-deals");
+      }
+    };
+
+    void run().catch((err) => console.error("dashboard anomaly alerts:", err));
+  }, [
+    user?.uid,
+    user?.role,
+    dealWindow,
+    alertWindowKey,
+    currentReports,
+    filteredDeals,
+    allAdSpend,
+  ]);
 
   if (loading) {
     return (
